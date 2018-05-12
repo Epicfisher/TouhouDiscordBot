@@ -436,7 +436,7 @@ async def on_message(message):
     #if message.content == prefix + 'sleep':
         #await asyncio.sleep(5)
         #await client.send_message(message.channel, 'Done sleeping')
-    if message.author.id == client.user.id
+    if message.author.id == client.user.id:
         return
     
     lowercaseMessage = message.content.lower()
