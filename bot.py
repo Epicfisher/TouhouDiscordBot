@@ -507,7 +507,7 @@ async def handle_command(message, lowercaseMessage):
             await get_search(message, True, True)
             return
 
-        await client.send_message(message.channel, "Sorry, but I'm not quite sure what you're asking me to do.")
+        #await client.send_message(message.channel, "Sorry, but I'm not quite sure what you're asking me to do.")
     except:
         await client.send_message(message.channel, "Whoops! Something went wrong in my head while trying to figure that one out...")
         
