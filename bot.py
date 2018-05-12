@@ -1,12 +1,14 @@
 import os
 import time
-import discord
 import aiohttp
 import asyncio
-import random
 import socket
+import discord
+import random
 from urllib.request import urlopen
 from random import randint
+
+startTime = time.time()
 
 class ScriptMessage:
     Actor = ""
@@ -30,8 +32,6 @@ def GetArgumentsFromCommand(command):
             commandUsed = commandUsed[1:]
     
     return commandArray
-
-startTime = time.time()
 
 try:
     with open('token.txt', 'r') as myfile:
@@ -417,7 +417,8 @@ async def fix_quote(givenMessage):
 ##################################################START############################################################
 @client.event
 async def on_ready():
-    await client.change_status(game=discord.Game(name = prefix + "help for Help!"))
+    #await client.change_status(game=discord.Game(name = prefix + "help for Help!"))
+    await client.change_presence(status=discord.Status.online, game=discord.Game(name = prefix + "help for Help!"))
     
     print('Logged in as')
     print(client.user.name)
