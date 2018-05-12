@@ -446,46 +446,49 @@ async def on_message(message):
     print("Received Message '" + message.content + "'")
 
     if lowercaseMessage.startswith(prefix):
-        if lowercaseMessage == prefix + 'help':
-            await client.send_message(message.author, helpMessage)
-            return
-        if lowercaseMessage == prefix + 'about':
-            await client.send_message(message.author, aboutMessage % (round((time.time() - startTime) / 60, 1), str(len(client.servers))))
-            return
-            #(round(round(time.time() - startTime, 1) / 60, 1))))        
-        if lowercaseMessage == prefix + 'ping':
-            await client.send_message(message.channel, "Pong!")
-            return
-        if lowercaseMessage.startswith(prefix + 'image'):
-            await PostImage(message.channel, "rating:safe%20touhou", "https://gelbooru.com/index.php")
-            return
-        if lowercaseMessage == prefix + 'nsfwimage':
-            if message.channel.is_private:
-                await PostImage(message.channel, "rating:explicit%20touhou", "https://gelbooru.com/index.php")
+        try:
+            if lowercaseMessage == prefix + 'help':
+                await client.send_message(message.author, helpMessage)
                 return
-            elif message.channel.is_nsfw:
-                await PostImage(message.channel, "rating:explicit%20touhou", "https://gelbooru.com/index.php")
+            if lowercaseMessage == prefix + 'about':
+                await client.send_message(message.author, aboutMessage % (round((time.time() - startTime) / 60, 1), str(len(client.servers))))
                 return
-            else:
-                if random.randint(0,1) == 0:
-                    await client.send_message(message.channel, "I-I don't think this is the kind of channel for THAT.")
+                #(round(round(time.time() - startTime, 1) / 60, 1))))        
+            if lowercaseMessage == prefix + 'ping':
+                await client.send_message(message.channel, "Pong!")
+                return
+            if lowercaseMessage.startswith(prefix + 'image'):
+                await PostImage(message.channel, "rating:safe%20touhou", "https://gelbooru.com/index.php")
+                return
+            if lowercaseMessage == prefix + 'nsfwimage':
+                if message.channel.is_private:
+                    await PostImage(message.channel, "rating:explicit%20touhou", "https://gelbooru.com/index.php")
+                    return
+                elif message.channel.is_nsfw:
+                    await PostImage(message.channel, "rating:explicit%20touhou", "https://gelbooru.com/index.php")
                     return
                 else:
-                    await client.send_message(message.channel, "S-Shouldn't we do that kind of l-lewd stuff s-somewhere else?")
-                    return
-        if lowercaseMessage.startswith(prefix + 'quote'):
-            await get_quote(message, 0)
-            return
-        if lowercaseMessage.startswith(prefix + 'search'):
-            await get_search(message, True, False)
-            return
-        if lowercaseMessage.startswith(prefix + 'portrait'):
-            await get_search(message, False, True)
-            return
-        if lowercaseMessage.startswith(prefix + 'lookup'):
-            await get_search(message, True, True)
-            return
+                    if random.randint(0,1) == 0:
+                        await client.send_message(message.channel, "I-I don't think this is the kind of channel for THAT.")
+                        return
+                    else:
+                        await client.send_message(message.channel, "S-Shouldn't we do that kind of l-lewd stuff s-somewhere else?")
+                        return
+            if lowercaseMessage.startswith(prefix + 'quote'):
+                await get_quote(message, 0)
+                return
+            if lowercaseMessage.startswith(prefix + 'search'):
+                await get_search(message, True, False)
+                return
+            if lowercaseMessage.startswith(prefix + 'portrait'):
+                await get_search(message, False, True)
+                return
+            if lowercaseMessage.startswith(prefix + 'lookup'):
+                await get_search(message, True, True)
+                return
 
-        await client.send_message(message.channel, "Sorry, but, I'm not quite sure what you're asking me to do...")
+            await client.send_message(message.channel, "Sorry, but,I'm not quite sure what you're asking me to do.")
+        except:
+            await client.send_message(message.channel, "Whoops! Something didn't quite add up in my head while trying to figure that one out...")
         
 client.run(token) # Start the bot with the Token
