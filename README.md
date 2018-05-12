@@ -18,7 +18,12 @@ To install requirements, you can install directly from the requirements.txt file
 pip3 install -r requirements.txt
 ```
 
-### System Environment Config Variables
+### Config Variables
+#### Config File
+You can store your Discord app token (https://discordapp.com/developers/applications/me/) in a file called ```token.txt```, and the bot will read your token from there
+
+#### System Environment Variables
+Or, as an alternative, you can choose to store your Discord app token in a System Environment Variable with a key of 'TOKEN'
 ```
 'TOKEN' = Token from your Discord app (https://discordapp.com/developers/applications/me/)
 ```
