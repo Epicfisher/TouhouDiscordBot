@@ -21,7 +21,7 @@ pip3 install -r requirements.txt
 
 ### Config Variables
 #### Config File
-You can store your Discord app token (https://discordapp.com/developers/applications/me/) in a file called ```token.txt```, and the bot will read your token from there
+You can store your Discord app token (https://discordapp.com/developers/applications/me/) in a file called ```token.txt``` in the same folder as your ```bot.py``` file, and the bot will read your token from there
 
 #### System Environment Variables
 Or, as an alternative, you can choose to store your Discord app token in a System Environment Variable
