@@ -1,6 +1,8 @@
 # Touhou Discord Bot
 A Work-In-Progress Discord bot based on the largely popular Touhou series by ZUN.
 
+*Official Bot Invite Link: https://discordapp.com/oauth2/authorize?client_id=408736647480475648&scope=bot*
+
 ## Features
 ### Commands
 The bot comes with plenty of fun Touhou-based commands
