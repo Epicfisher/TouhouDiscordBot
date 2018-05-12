@@ -1,3 +1,3 @@
-discord
+https://github.com/KakolIsSomewhatGay/discord.py
 asyncio
 aiohttp
