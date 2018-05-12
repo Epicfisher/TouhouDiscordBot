@@ -80,7 +80,7 @@ aboutMessage = """```
 - Runs entirely in Python 3, with the use of discord.py.
 - So far I have stayed up reading for %s minutes.
 - I'm currently loaning my books to %s servers.
-- I'm open source! [https://github.com/Epicfisher/TouhouDiscordBot]
+- I'm open source! [https://git.io/vpSEv]
 - Made by @Epicfisher#6763.
 
 ```"""
