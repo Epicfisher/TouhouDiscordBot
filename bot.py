@@ -83,7 +83,7 @@ aboutMessage = """```
 - So far I have stayed up reading for %s minutes.
 - I'm currently loaning my books to %s servers.
 - I'm open source! https://git.io/vpSEv
-- Made by @Epicfisher#6763.
+- Made by @Epicfisher#6763
 
 ```"""
 
