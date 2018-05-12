@@ -431,37 +431,45 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    #if message.content == prefix + 'test':
-        #counter = 0
-        #tmp = await client.send_message(message.channel, 'Calculating messages...')
-        #async for log in client.logs_from(message.channel, limit=100):
-            #if log.author == message.author:
-                #counter += 1
-
-        #await client.edit_message(tmp, 'You have {} messages.'.format(counter))
-    #if message.content == prefix + 'sleep':
-        #await asyncio.sleep(5)
-        #await client.send_message(message.channel, 'Done sleeping')
     if message.author.id == client.user.id:
         return
     
     lowercaseMessage = message.content.lower()
 
     if lowercaseMessage.startswith(prefix):
-        if runningCommandsArray.count(message.author.id) > 1:
-            await client.send_message(message.channel, "Hey, slow down! I can only work so fast on my own you know!")
+        if len(lowercaseMessage) > len(prefix):
+            if lowercaseMessage[len(prefix)] != " ":
+                if runningCommandsArray.count(message.author.id) > 1:
+                    await client.send_message(message.channel, "Hey, slow down! I can only work so fast on my own you know!")
 
-            return
-        else:
-            runningCommandsArray.append(message.author.id)
-            await handle_command(message, lowercaseMessage)
-            runningCommandsArray.remove(message.author.id)
-            print("Handled Command '" + message.content + "'")
+                    return
+                else:
+                    runningCommandsArray.append(message.author.id)
+                    await handle_command(message, lowercaseMessage)
+                    runningCommandsArray.remove(message.author.id)
+                    print("Handled Command '" + message.content + "'")
 
 async def handle_command(message, lowercaseMessage):
     print("Handling Command '" + message.content + "'")
     
     try:
+        if lowercaseMessage == prefix + 'ping':
+            await client.send_message(message.channel, "Pong!")
+            return
+        #if lowercaseMessage == prefix + 'exception':
+            #raise ValueError('Manual test exception thrown.')
+            #return
+        #if message.content == prefix + 'test':
+            #counter = 0
+            #tmp = await client.send_message(message.channel, 'Calculating messages...')
+            #async for log in client.logs_from(message.channel, limit=100):
+                #if log.author == message.author:
+                    #counter += 1
+
+            #await client.edit_message(tmp, 'You have {} messages.'.format(counter))
+        #if message.content == prefix + 'sleep':
+            #await asyncio.sleep(5)
+            #await client.send_message(message.channel, 'Done sleeping')
         if lowercaseMessage == prefix + 'help':
             await client.send_message(message.author, helpMessage)
             return
@@ -469,9 +477,6 @@ async def handle_command(message, lowercaseMessage):
             await client.send_message(message.author, aboutMessage % (round((time.time() - startTime) / 60, 1), str(len(client.servers))))
             return
             #(round(round(time.time() - startTime, 1) / 60, 1))))        
-        if lowercaseMessage == prefix + 'ping':
-            await client.send_message(message.channel, "Pong!")
-            return
         if lowercaseMessage.startswith(prefix + 'image'):
             await PostImage(message.channel, "rating:safe%20touhou", "https://gelbooru.com/index.php")
             return
@@ -502,8 +507,8 @@ async def handle_command(message, lowercaseMessage):
             await get_search(message, True, True)
             return
 
-        await client.send_message(message.channel, "Sorry, but,I'm not quite sure what you're asking me to do.")
+        await client.send_message(message.channel, "Sorry, but I'm not quite sure what you're asking me to do.")
     except:
-        await client.send_message(message.channel, "Whoops! Something didn't quite add up in my head while trying to figure that one out...")
+        await client.send_message(message.channel, "Whoops! Something went wrong in my head while trying to figure that one out...")
         
 client.run(token) # Start the bot with the Token
