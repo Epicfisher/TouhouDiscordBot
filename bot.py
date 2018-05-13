@@ -138,17 +138,17 @@ class DiscordBotsOrgAPI:
 
                 return
         self.token = dbltoken
-        print(self.token)
         
         self.dblpy = dbl.Client(self.bot, self.token)
         self.bot.loop.create_task(self.update_stats())
 
     async def update_stats(self):
         while True:
-            print('attempting to post server count')
+            print('Attempting to post server count')
             try:
                 await self.dblpy.post_server_count()
-                print('posted server count ({})'.format(len(self.bot.guilds)))
+                #print('Posted server count (' + str(len(self.bot.guilds)) + ")")
+                print('Did it')
             except Exception as e:
                 print('Failed to post server count\n{}: {}'.format(type(e).__name__, e))
             
