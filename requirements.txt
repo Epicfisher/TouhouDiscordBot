@@ -1,5 +1,5 @@
 asyncio
 aiohttp
-https://github.com/Rapptz/discord.py/archive/rewrite.zip
+git+https://github.com/Rapptz/discord.py/archive/rewrite.zip
 dblpy
 "yarl<1.2"
