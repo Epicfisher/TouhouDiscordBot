@@ -147,8 +147,7 @@ class DiscordBotsOrgAPI:
             print('Attempting to post server count')
             try:
                 await self.dblpy.post_server_count()
-                #print('Posted server count (' + str(len(self.bot.guilds)) + ")")
-                print('Did it')
+                print('Posted server count (' + str(len(self.bot.guilds)) + ")")
             except Exception as e:
                 print('Failed to post server count\n{}: {}'.format(type(e).__name__, e))
             
