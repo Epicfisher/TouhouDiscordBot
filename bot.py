@@ -495,10 +495,10 @@ async def on_message(message):
                     runningCommandsArray.append(message.author.id)
                     await handle_command(message, lowercaseMessage)
                     runningCommandsArray.remove(message.author.id)
-                    print("Handled Command '" + message.content + "' Sent By '" + message.author + "'")
+                    print("Handled Command '" + message.content + "'")
 
 async def handle_command(message, lowercaseMessage):
-    print("Handling Command '" + message.content + "' Send By '" + message.author + "'")
+    print("Handling Command '" + message.content + "'")
     
     try:
         if lowercaseMessage == prefix + 'ping':
