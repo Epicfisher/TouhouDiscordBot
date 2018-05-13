@@ -120,10 +120,9 @@ async def get(url): # Asyncronously download a web-page's HTML.
 
 ##################################################IMAGES############################################################
 async def PostImage(postChannel, tags, APILink):
-    html = await get(APILink + "?page=dapi&s=post&q=index&limit=1&json=1&pid=" + str(randint(0, 20000)) + "&tags=" + tags)
-
     client.send_typing(postChannel)
-    await asyncio.sleep(10)
+    
+    html = await get(APILink + "?page=dapi&s=post&q=index&limit=1&json=1&pid=" + str(randint(0, 20000)) + "&tags=" + tags)
 
     try:
         fileUrl = html[html.index('file_url":"') + 11 : - 3]
