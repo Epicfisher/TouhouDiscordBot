@@ -24,12 +24,26 @@ pip3 install -r requirements.txt
 ### Config Variables
 #### Config Files
 You can store your Config Variables locally within files. Just ensure they are in the same directory as your ```bot.py``` file
+
+Mandatory:
 ```
 'token.txt' = Token from your Discord App (https://discordapp.com/developers/applications/me/)
 ```
+Optional:
+```
+'dbl-token.txt' = Allows for discordbots.org API functionality (Disabled by Default)
+'prefix.txt' = Customize the Command Prefix ('k.' by Default)
+```
 
 #### System Environment Variables
-Or, as an alternative, you can choose to store your Config Variables within  System Environment Variables
+Or, as an alternative, you can choose to store your Config Variables within System Environment Variables
+
+Mandatory:
 ```
 'TOKEN' = Token from your Discord app (https://discordapp.com/developers/applications/me/)
+```
+Optional:
+```
+'DBLTOKEN' = Allows for discordbots.org API functionality (Disabled by Default)
+'PREFIX' = Customize the Command Prefix ('k.' by Default)
 ```
