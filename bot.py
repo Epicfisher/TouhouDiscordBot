@@ -126,7 +126,6 @@ class DiscordBotsOrgAPI:
         
         self.bot = bot
 
-        dbltoken = ''
         try:
             with open('dbl-token.txt', 'r') as myfile:
                 dbltoken = myfile.read().replace('\n', '')
@@ -139,6 +138,7 @@ class DiscordBotsOrgAPI:
 
                 return
         self.token = dbltoken
+        print(self.token)
         
         self.dblpy = dbl.Client(self.bot, self.token)
         self.bot.loop.create_task(self.update_stats())
