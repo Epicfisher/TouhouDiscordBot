@@ -320,6 +320,11 @@ async def get_quote(message, quotesToGet):
                 #print(html)
                 currentMessage.Message = html[0:html.index('}}')]
 
+                # Convert all misc. renamed action blocks into one unified ACTIONQUOTE block
+                if currentMessage.Actor == "Danmaku.":
+                    currentMessage.Actor = "ACTIONQUOTE"
+                    currentMessage.Message = ""
+
                 #if currentMessage.Message.startswith('"'):
                     #currentMessage.Message = currentMessage.Message[1:]
                     #pass
@@ -329,7 +334,7 @@ async def get_quote(message, quotesToGet):
                 #if currentMessage.Message.startswith('"') and currentMessage.Message.endswith('"'):
                     #currentMessage.Message = currentMessage.Message[1:-1]
                 
-                if (len(currentMessage.Actor) > 0 and len(currentMessage.Message) > 0) or currentMessage.Actor == "Danmaku.":
+                if (len(currentMessage.Actor) > 0 and len(currentMessage.Message) > 0) or currentMessage.Actor == "ACTIONQUOTE": # Make sure Actor and Message is valid. Or, with an exception of it being an action block
                     messageList.append(currentMessage)
                     #print (currentMessage.Actor)
                     #print(currentMessage.Message)
@@ -345,7 +350,7 @@ async def get_quote(message, quotesToGet):
         else:
             randomQuote = 0
             
-            while messageList[randomQuote].Actor == "Danmaku.":
+            while messageList[randomQuote].Actor == "ACTIONQUOTE": # Did we land on an action block? If so, find another starting block
                 randomQuote = random.randint(0, len(messageList) - 1)
 
             messageList[randomQuote] = await fix_quote(messageList[randomQuote])                
@@ -354,19 +359,19 @@ async def get_quote(message, quotesToGet):
             if quotesToGet > 1:
                 for i in range(0, quotesToGet - 1): 
                     try:
-                        if messageList[randomQuote + 1 + i].Actor == "Danmaku.": # If we detect a Danmaku block, then the conversation is over, as thery're obviously fighting
+                        if messageList[randomQuote + 1 + i].Actor == "ACTIONQUOTE": # If we detect an action block, then the conversation is over
                             i = quotesToGet + 1
-                        
+                            
                         if messageList[randomQuote + 1 + i].Message.endswith("...") and i >= quotesToGet - 1:
                             pass
                         elif messageList[randomQuote + 1 + i].Message.endswith("...") and i < quotesToGet - 1 and i >= quotesToGet - 2:
                             quotesToGet = quotesToGet + 1
-                        elif messageList[randomQuote + 1 + i].Message.endswith(",") and i>= quotesToGet - 1:
+                        elif messageList[randomQuote + 1 + i].Message.endswith(",") and i >= quotesToGet - 1:
                             quotesToGet = quotesToGet + 1
                         else: # It's all good
                             messageList[randomQuote + 1 + i] = await fix_quote(messageList[randomQuote + 1 + i])
                 
-                            fullQuote = fullQuote + "\n" + messageList[randomQuote + 1 + i].Actor + ": " + messageList[randomQuote + 1 + i].Message
+                            fullQuote = fullQuote + "\n" + messageList[randomQuote + 1 + i].Actor + ": " + messageList[randomQuote + 1 + i].Message # Build the quote as 'Actor: Message'
                     except:
                         pass
             if fullQuote.endswith(" "):
@@ -413,7 +418,8 @@ async def fix_quote(givenMessage):
 
     givenMessage.Actor = givenMessage.Actor.replace("TH16", "")
 
-    givenMessage.Message = givenMessage.Message.replace("*", "\*")
+    #givenMessage.Message = givenMessage.Message.replace("*", "\*")
+    givenMessage.Message = givenMessage.Message.replace("*", "")
 
     return givenMessage
 
