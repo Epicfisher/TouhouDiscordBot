@@ -41,7 +41,7 @@ except:
     try:
         token = os.environ['TOKEN']
     except:
-        print ("APPLICATION HALTED DUE TO CRITICAL ERROR:\n\nNo Bot Token specified in either a 'token.txt' file or 'TOKEN' System Environment Variable.")
+        print ("CRITICAL ERROR:\n\nNo Bot Token specified in either a 'token.txt' file or 'TOKEN' System Environment Variable.")
         
         while True:
             pass
@@ -49,6 +49,15 @@ except:
 runningCommandsArray = []
 
 prefix = 'k.'
+
+try:
+    with open('prefix.txt', 'r') as myfile:
+        prefix = myfile.read().replace('\n', '')
+except:
+    try:
+        prefix = os.environ['PREFIX']
+    except:
+        print("INFO:\n\nNo custom Prefix specified in either a 'prefix.txt' file or 'PREFIX' System Environment Variable.\nUsing default Prefix of '" + prefix + "'")
 
 argumentChar = ' '
 argumentKillChar = ''
@@ -133,12 +142,11 @@ class DiscordBotsOrgAPI:
             try:
                 dbltoken = os.environ['DBLTOKEN']
             except:
-                print ("WARNING:\n\nNo DBL Token specified in either a 'dbl-token.txt' file or 'DBLTOKEN' System Environment Variable.")
-                print("Disabling discordbots.org API support...")
+                print ("WARNING:\n\nNo DBL Token specified in either a 'dbl-token.txt' file or 'DBLTOKEN' System Environment Variable.\nDisabling discordbots.org API support...")
 
                 return
         self.token = dbltoken
-        
+
         self.dblpy = dbl.Client(self.bot, self.token)
         self.bot.loop.create_task(self.update_stats())
 
@@ -495,10 +503,10 @@ async def on_message(message):
                     runningCommandsArray.append(message.author.id)
                     await handle_command(message, lowercaseMessage)
                     runningCommandsArray.remove(message.author.id)
-                    print("Handled Command '" + message.content + "'")
+                    print("Handled Command '" + message.content + "' Sent By '" + str(message.author) + "'")
 
 async def handle_command(message, lowercaseMessage):
-    print("Handling Command '" + message.content + "'")
+    print("Handling Command '" + message.content + "' Send By '" + str(message.author) + "'")
     
     try:
         if lowercaseMessage == prefix + 'ping':
