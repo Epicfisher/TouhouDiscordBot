@@ -125,7 +125,8 @@ class DiscordBotsOrgAPI:
         print("Initialising discordbots.org API support...")
         
         self.bot = bot
-        
+
+        dbltoken = ''
         try:
             with open('dbl-token.txt', 'r') as myfile:
                 dbltoken = myfile.read().replace('\n', '')
@@ -155,7 +156,7 @@ class DiscordBotsOrgAPI:
 
 def setup_discord_bots_org_api(bot):
     #bot.add_cog(DiscordBotsOrgAPI(bot))
-    a = DiscordBotsOrgAPI(bot)
+    DiscordBotsOrgAPI(bot)
     #pass
 
 ##################################################IMAGES############################################################
