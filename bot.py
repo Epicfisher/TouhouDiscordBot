@@ -4,6 +4,7 @@ import aiohttp
 import asyncio
 import socket
 import discord
+import dbl
 import random
 from urllib.request import urlopen
 from random import randint
@@ -58,7 +59,7 @@ helpMessage = """```
 
 ~~~General Commands~~~
 """ + prefix + """help - You're currently reading this!
-""" + prefix + """about - Information about me. Wow. Very interesting.
+""" + prefix + """info - Information about me. Wow. Very interesting.
 """ + prefix + """ping - Test command. Responds "Pong!"
 
 ~~~Image Commands~~~
@@ -117,6 +118,45 @@ async def get(url): # Asyncronously download a web-page's HTML.
             return await resp.text()
 
     return await r.text()
+
+##################################################DISCORD BOTS API############################################################
+class DiscordBotsOrgAPI:
+    def __init__(self, bot):
+        print("Initialising discordbots.org API support...")
+        
+        self.bot = bot
+        
+        try:
+            with open('dbl-token.txt', 'r') as myfile:
+                dbltoken = myfile.read().replace('\n', '')
+        except:
+            try:
+                dbltoken = os.environ['DBLTOKEN']
+            except:
+                print ("WARNING:\n\nNo DBL Token specified in either a 'dbl-token.txt' file or 'DBLTOKEN' System Environment Variable.")
+                print("Disabling discordbots.org API support...")
+
+                return
+        self.token = dbltoken
+        
+        self.dblpy = dbl.Client(self.bot, self.token)
+        self.bot.loop.create_task(self.update_stats())
+
+    async def update_stats(self):
+        while True:
+            print('attempting to post server count')
+            try:
+                await self.dblpy.post_server_count()
+                print('posted server count ({})'.format(len(self.bot.guilds)))
+            except Exception as e:
+                print('Failed to post server count\n{}: {}'.format(type(e).__name__, e))
+            
+            await asyncio.sleep(1800) # Wait 30 minutes in seconds
+
+def setup_discord_bots_org_api(bot):
+    #bot.add_cog(DiscordBotsOrgAPI(bot))
+    a = DiscordBotsOrgAPI(bot)
+    #pass
 
 ##################################################IMAGES############################################################
 async def PostImage(postChannel, tags, APILink):
@@ -177,7 +217,7 @@ async def get_search(message, getUrls, getImage):
         except:
             keepParsing = False
 
-    searchResults.sort(key=len) # Sort results by length, smallest first. This is going to be tricky, as it could mess stuff up, but all in all it works better for the smaller queries people run,  like 'ZUN', maybe not so much for longer or more complicated vague queries. Oh well, this is just the kind of sacrifice tthat must be made though, I don't see any other way around this issue.
+    searchResults.sort(key=len) # Sort results by length, smallest first. This is tricky, as it could mess stuff up, but all in all it works better for the smaller queries people run,  like 'ZUN', but not really so for more longer and vague queries. Oh well, this is just the kind of sacrifice that has to be made I guess, I don't see any other way around this issue, except we do something like sort by popularity or 'clicks', which the Wikimedia API doesn't even have support for.
 
     if len(searchResults) < 1:
             await client.send_message(message.channel, "I couldn't find anything in my library for '" + query + "'.")
@@ -436,8 +476,11 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    if message.author.id == client.user.id:
+    if message.author.bot:
         return
+    
+    #if message.author.id == client.user.id:
+        #return
     
     lowercaseMessage = message.content.lower()
 
@@ -452,10 +495,10 @@ async def on_message(message):
                     runningCommandsArray.append(message.author.id)
                     await handle_command(message, lowercaseMessage)
                     runningCommandsArray.remove(message.author.id)
-                    print("Handled Command '" + message.content + "'")
+                    print("Handled Command '" + message.content + "' Sent By '" + message.author + "'")
 
 async def handle_command(message, lowercaseMessage):
-    print("Handling Command '" + message.content + "'")
+    print("Handling Command '" + message.content + "' Send By '" + message.author + "'")
     
     try:
         if lowercaseMessage == prefix + 'ping':
@@ -476,10 +519,10 @@ async def handle_command(message, lowercaseMessage):
             #await asyncio.sleep(5)
             #await client.send_message(message.channel, 'Done sleeping')
         if lowercaseMessage == prefix + 'help':
-            await client.send_message(message.author, helpMessage)
+            await client.send_message(message.channel, helpMessage)
             return
-        if lowercaseMessage == prefix + 'about':
-            await client.send_message(message.author, aboutMessage % (round((time.time() - startTime) / 60, 1), str(len(client.servers))))
+        if lowercaseMessage == prefix + 'info':
+            await client.send_message(message.channel, aboutMessage % (round((time.time() - startTime) / 60, 1), str(len(client.servers))))
             return
             #(round(round(time.time() - startTime, 1) / 60, 1))))        
         if lowercaseMessage.startswith(prefix + 'image'):
@@ -515,5 +558,6 @@ async def handle_command(message, lowercaseMessage):
         #await client.send_message(message.channel, "Sorry, but I'm not quite sure what you're asking me to do.")
     except:
         await client.send_message(message.channel, "Whoops! Something went wrong in my head while trying to figure that one out...")
-        
+
+setup_discord_bots_org_api(client) # Setup Discord Bots Org API
 client.run(token) # Start the bot with the Token
