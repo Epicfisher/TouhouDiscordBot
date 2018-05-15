@@ -517,7 +517,6 @@ async def on_message(message):
             if lowercaseMessage[len(prefix)] != " ":
                 if runningCommandsArray.count(message.author.id) > 1:
                     await message.channel.send("Hey, slow down! I can only work so fast on my own you know!")
-
                     return
                 else:
                     runningCommandsArray.append(message.author.id)
@@ -548,6 +547,7 @@ async def handle_command(message, lowercaseMessage):
             #await client.send_message(message.channel, 'Done sleeping')
         if lowercaseMessage == prefix + 'help':
             await message.channel.send(helpMessage)
+            return
         if lowercaseMessage == prefix + 'info':
             await message.channel.send(aboutMessage % (str(discord.__version__), round((time.time() - startTime) / 60, 1), str(len(client.guilds))))
             return
