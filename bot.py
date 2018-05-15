@@ -15,6 +15,10 @@ class ScriptMessage:
     Actor = ""
     Message = ""
 
+class ImageSearchResult:
+    Url = ""
+    Name = ""
+
 def GetArgumentsFromCommand(command):
     command = command[len(prefix):]
 
@@ -43,8 +47,7 @@ except:
     except:
         print ("CRITICAL ERROR:\n\nNo Bot Token specified in either a 'token.txt' file or 'TOKEN' System Environment Variable.\n")
         
-        while True:
-            pass
+        raise SystemExit(0)
 
 runningCommandsArray = []
 
@@ -214,6 +217,59 @@ async def PostImage(channel, tags, APILink):
         
         await channel.send(embed=messageEmbed)
 
+##################################################SEARCH API HANDLERS############################################################
+async def get_search_results(query, quantity):
+    json = await get("https://en.touhouwiki.net/api.php?action=query&list=search&srprop=redirecttitle&srwhat=title&format=json&srsearch=" + query + "&utf8=")
+
+    json = json[json.index('"search":'):len(json)]
+
+    searchResults = []
+
+    keepParsing = True
+    while keepParsing:
+        try:
+            json = json[json.index('"title"') + 9:]
+            searchResults.append(json[:json.index('"')].replace(" ", "_"))
+            #print (json + "\n" + title + "\n")
+        except:
+            keepParsing = False
+
+    searchResults.sort(key=len) # Sort results by length, smallest first. This is tricky, as it could mess stuff up, but all in all it works better for the smaller queries people run,  like 'ZUN', but not really so for more longer and vague queries. Oh well, this is just the kind of sacrifice that has to be made I guess, I don't see any other way around this issue, except we do something like sort by popularity or 'clicks', which the Wikimedia API doesn't even have support for.
+
+    return searchResults[:quantity]
+
+async def get_image(search_results, quantity):
+    if not isinstance(search_results, list):
+        search_results = [search_results]
+        quantity = 1
+
+    results = ImageSearchResult()
+
+    for i in range(0, quantity):
+        json = await get("https://en.touhouwiki.net/wiki/" + search_results[i])
+
+        try:
+            json = json[json.index('infobox'):]
+            json = json[json.index('<a href="/wiki/File:') + 9:]
+            json = json[:json.index("</a>")]
+            file = json[json.index('File:'):json.index('"')]
+
+            json = await get("https://en.touhouwiki.net/api.php?action=query&titles=" + file + "&prop=imageinfo&iiprop=url&format=json")
+
+            json = json[json.index('"url":"') + 7:]
+            file = json[:json.index('"')]
+
+            results.Url = file
+            results.Name = search_results[i]
+            return results # At this point, we should have our working image. Ensure the for loop is killed.
+        except:
+            if i >= quantity:
+                return False
+            else:
+                print("No Photo for '" + search_results[i].replace("_", " ") + "'. Moving on...")
+
+    return False
+    
 ##################################################SEARCH############################################################
 async def get_search(message, getUrls, getImage):
     async with message.channel.typing():
@@ -226,80 +282,49 @@ async def get_search(message, getUrls, getImage):
         else:
             query = arguments[0]
 
-        json = await get("https://en.touhouwiki.net/api.php?action=query&list=search&srprop=redirecttitle&srwhat=title&format=json&srsearch=" + query + "&utf8=")
-        
-        json = json[json.index('"search":'):len(json)]
+    searchResults = await get_search_results(query, 5)
 
-        searchResults = []
-
-        keepParsing = True
-        while keepParsing:
-            try:
-                json = json[json.index('"title"') + 9:]
-                searchResults.append(json[:json.index('"')].replace(" ", "_"))
-                #print (json + "\n" + title + "\n")
-            except:
-                keepParsing = False
-
-        searchResults.sort(key=len) # Sort results by length, smallest first. This is tricky, as it could mess stuff up, but all in all it works better for the smaller queries people run,  like 'ZUN', but not really so for more longer and vague queries. Oh well, this is just the kind of sacrifice that has to be made I guess, I don't see any other way around this issue, except we do something like sort by popularity or 'clicks', which the Wikimedia API doesn't even have support for.
-
-        if len(searchResults) < 1:
-                await message.channel.send("I couldn't find anything in my library for '" + query + "'.")
-            
-                return
-        if getUrls:
-            if getUrls and getImage:
-                messageEmbed = discord.Embed(title="Lookup Result For '" + query + "'")
-                
-                messageEmbed.add_field(name="Page URL", value="https://en.touhouwiki.net/wiki/" + searchResults[0], inline=True)
-            else:
-                messageEmbed = discord.Embed(title="Search Results For '" + query + "'")
-                
-                for i in range(0, 5):
-                    try:
-                        messageEmbed.add_field(name="Result " + str(i + 1), value="https://en.touhouwiki.net/wiki/" + searchResults[i], inline=True)
-                    except:
-                        print("Skipping Search Result...")
-                        pass
-            
-        if getImage:
-            searchImages = 1
-            if getImage and getUrls == False:
-                searchImages = len(searchResults)
-            
-            for i in range(0, searchImages):
-                json = await get("https://en.touhouwiki.net/wiki/" + searchResults[i])
-
-                try:
-                    json = json[json.index('infobox'):]
-                    json = json[json.index('<a href="/wiki/File:') + 9:]
-                    json = json[:json.index("</a>")]
-                    file = json[json.index('File:'):json.index('"')]
-
-                    json = await get("https://en.touhouwiki.net/api.php?action=query&titles=" + file + "&prop=imageinfo&iiprop=url&format=json")
-
-                    json = json[json.index('"url":"') + 7:]
-                    file = json[:json.index('"')]
-
-                    if getUrls == False and getImage:
-                        messageEmbed = discord.Embed(title=searchResults[i].replace("_", " ") + "'s Portrait")
-
-                    messageEmbed.set_image(url=file)
-
-                    break #At this point, we should have our working image. Ensure the for loop is killed.
-                except:
-                    if getImage and getUrls == False:
-                        if i >= searchImages:
-                            await message.channel.send("I wasn't able to find any photos in my library on '" + query + "'.")
-                            
-                            return
-                        else:
-                            print("No Photo for '" + searchResults[i].replace("_", " ") + "'. Moving on...")
-
-        try:
-            await message.channel.send(embed=messageEmbed)
-        except:
+    if len(searchResults) < 1:
             await message.channel.send("I couldn't find anything in my library for '" + query + "'.")
+        
+            return
+        
+    if getUrls:
+        if getUrls and getImage: # Lookup
+            messageEmbed = discord.Embed(title="Lookup Result For '" + query + "'")
+            
+            messageEmbed.add_field(name="Page URL", value="https://en.touhouwiki.net/wiki/" + searchResults[0], inline=True)
+        else: # Regular Search
+            messageEmbed = discord.Embed(title="Search Results For '" + query + "'")
+            
+            for i in range(0, len(searchResults)):
+                try:
+                    messageEmbed.add_field(name="Result " + str(i + 1), value="https://en.touhouwiki.net/wiki/" + searchResults[i], inline=True)
+                except:
+                    print("Skipping Search Result...")
+                    pass
+        
+    if getImage:
+        searchImages = 1
+        if getUrls == False:
+            searchImages = len(searchResults)
+
+        image_info = await get_image(searchResults, searchImages)
+
+        if getUrls == False:
+            if image_info == False:
+                await message.channel.send("I wasn't able to find any photos in my library on '" + query + "'.")
+                return
+                
+            messageEmbed = discord.Embed(title=image_info.Name.replace("_", " ") + "'s Portrait")
+
+        if image_info:
+            messageEmbed.set_image(url=image_info.Url)
+
+    try:
+        await message.channel.send(embed=messageEmbed)
+    except:
+        await message.channel.send("I couldn't find anything in my library for '" + query + "'.")
 
 ##################################################QUOTES############################################################
 async def get_quote(message, quotesToGet):
