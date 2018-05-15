@@ -69,7 +69,6 @@ helpMessage = """```
 ~~~General Commands~~~
 """ + prefix + """help - You're currently reading this!
 """ + prefix + """info - Information about me. Wow. Very interesting.
-""" + prefix + """ping - Test command. Responds "Pong!"
 
 ~~~Image Commands~~~
 """ + prefix + """image - Gets a Touhou image from Gelbooru.
@@ -102,30 +101,46 @@ postFullConversations = False
 
 client = discord.Client()
 
-conn = aiohttp.TCPConnector( # Initialise async web downloading connector
-    family=socket.AF_INET,
-    verify_ssl=False,
-)
+#conn = aiohttp.TCPConnector( # Initialise async web downloading connector
+#    family=socket.AF_INET,
+#    verify_ssl=False,
+#)
 
-#async def oldget(url):    
-    #async with aiohttp.ClientSession() as session:
-        #async with session.get(url) as resp:
-            #return await resp.text()
+##################################################AIOHTTP CONNECTOR############################################################
 
-    #return await r.text()
+use_ssl = True
 
-#html = urlopen(APILink + "?page=dapi&s=post&q=index&limit=1&json=1&pid=" + str(randint(0, 20000)) + "&tags=" + tags).read().decode('utf-8')
-
-async def get(url): # Asyncronously download a web-page's HTML.
-    conn = aiohttp.TCPConnector( # Reset our connector incase of shutdown
+async def get_aio_connector():
+    conn = aiohttp.TCPConnector(
         family=socket.AF_INET,
-        verify_ssl=False,
+        verify_ssl=use_ssl,
     )
     
-    async with aiohttp.ClientSession(connector=conn) as session:
-        async with session.get(url) as resp:
-            return await resp.text()
+    return conn
 
+##################################################ASYNC HTML DOWNLOADER############################################################
+
+#html = urlopen(APILink + "?page=dapi&s=post&q=index&limit=1&json=1&pid=" + str(randint(0, 20000)) + "&tags=" + tags).read().decode('utf-8') # Non-async Alternative
+
+async def get(url):
+    retry = True
+    
+    while retry:
+        retry = False
+        
+        try:
+            async with aiohttp.ClientSession(connector=await get_aio_connector()) as session:
+                async with session.get(url) as resp:
+                    return await resp.text()
+        except:
+            if use_ssl:
+                print("ERROR:\n\nFailed to download HTML with SSL enabled. Attempting to retry without SSL support...\n")
+                use_ssl = False
+                retry = True
+            else:
+                print ("ERROR:\n\nFailed to download HTML with SSL disabled.\n")
+                return
+            
     return await r.text()
 
 ##################################################DISCORD BOTS API############################################################
@@ -288,26 +303,27 @@ async def get_search(message, getUrls, getImage):
 
 ##################################################QUOTES############################################################
 async def get_quote(message, quotesToGet):
-    async with message.channel.typing():
     
-        arguments = GetArgumentsFromCommand(message.content)
+    arguments = GetArgumentsFromCommand(message.content)
 
-        gameNumberToUse = ""
+    gameNumberToUse = ""
 
-        if arguments == False:
-            gameNumberToUse = str(randint(6, 16))
-        else:
-            if int(arguments[0]) < 6 or int(arguments[0]) > 16:
-                await message.channel.send("Sorry, I don't think my library has any quotes from that incident!\nPlease enter a game number from 6 to 16!")
-                return
-            
-            gameNumberToUse = arguments[0]
-            
-        if len(gameNumberToUse) == 1:
-            gameNumberToUse = "0" + gameNumberToUse
+    if arguments == False:
+        gameNumberToUse = str(randint(6, 16))
+    else:
+        if int(arguments[0]) < 6 or int(arguments[0]) > 16:
+            await message.channel.send("Sorry, I don't think my library has any quotes from that incident!\nPlease enter a game number from 6 to 16!")
+            return
+        
+        gameNumberToUse = arguments[0]
+        
+    if len(gameNumberToUse) == 1:
+        gameNumberToUse = "0" + gameNumberToUse
 
-        if quotesToGet == 0:
-            quotesToGet = random.randint(1, 3)
+    if quotesToGet == 0:
+        quotesToGet = random.randint(1, 3)
+
+    async with message.channel.typing():
 
         print("Quote requested from game: " + gameNumberToUse)
 
@@ -513,9 +529,9 @@ async def handle_command(message, lowercaseMessage):
     print("Handling Command '" + message.content + "' Sent By '" + str(message.author) + "'")
     
     try:
-        if lowercaseMessage == prefix + 'ping':
-            await message.channel.send("Pong!")
-            return
+        #if lowercaseMessage == prefix + 'ping':
+            #await message.channel.send("Pong!")
+            #return
         #if lowercaseMessage == prefix + 'exception':
             #raise ValueError('Manual test exception thrown.')
             #return
@@ -532,7 +548,6 @@ async def handle_command(message, lowercaseMessage):
             #await client.send_message(message.channel, 'Done sleeping')
         if lowercaseMessage == prefix + 'help':
             await message.channel.send(helpMessage)
-            return
         if lowercaseMessage == prefix + 'info':
             await message.channel.send(aboutMessage % (str(discord.__version__), round((time.time() - startTime) / 60, 1), str(len(client.guilds))))
             return
