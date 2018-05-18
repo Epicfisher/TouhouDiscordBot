@@ -86,7 +86,12 @@ helpMessage = """```
 """ + prefix + """portrait""" + argumentChar + """Reimu""" + argumentKillChar + """ - Searches for a 'Reimu' portrait.
 """ + prefix + """lookup""" + argumentChar + """Reimu""" + argumentKillChar + """ - Searches for a 'Reimu' page and portrait.
 
+~~~Card Commands~~~
+[BETA] """ + prefix + """card - Gets a Trading Card. (No progress is saved)
+
 ```"""
+
+# [BETA] """ + prefix + """card -  Receive your daily Card. Resets every 24 hours.
 
 aboutMessage = """```
 ~About Patchouli Knowledge~
@@ -102,12 +107,34 @@ aboutMessage = """```
 allowLargeQuotes = False
 postFullConversations = False
 
+allow_commands = False
+
 client = discord.Client()
 
-#conn = aiohttp.TCPConnector( # Initialise async web downloading connector
-#    family=socket.AF_INET,
-#    verify_ssl=False,
-#)
+data_guild = None
+data_channel = None
+
+data_guild_id = None
+data_channel_id = None
+
+try:
+    with open('data-guild-id.txt', 'r') as myfile:
+        data_guild_id = myfile.read().replace('\n', '')
+except:
+    try:
+        data_guild_id = os.environ['DATAGUILDID']
+    except:
+        print ("WARNING:\n\nNo Data Guild ID specified in either a 'data-guild-id.txt' file or 'DATAGUILDID' System Environment Variable.\nDisabling Data Storage Support...\n")
+
+if not data_guild_id == None:
+    try:
+        with open('data-channel-id.txt', 'r') as myfile:
+            data_channel_id = myfile.read().replace('\n', '')
+    except:
+        try:
+            data_channel_id = os.environ['DATACHANNELID']
+        except:
+            print ("WARNING:\n\nNo Data Channel ID specified in either a 'data-channel-id.txt' file or 'DATACHANNELID' System Environment Variable.\nDisabling Data Storage Support...\n")
 
 ##################################################AIOHTTP CONNECTOR############################################################
 
@@ -122,9 +149,6 @@ async def get_aio_connector():
     return conn
 
 ##################################################ASYNC HTML DOWNLOADER############################################################
-
-#html = urlopen(APILink + "?page=dapi&s=post&q=index&limit=1&json=1&pid=" + str(randint(0, 20000)) + "&tags=" + tags).read().decode('utf-8') # Non-async Alternative
-
 async def get(url):
     retry = True
     
@@ -137,7 +161,7 @@ async def get(url):
                     return await resp.text()
         except:
             if use_ssl:
-                print("ERROR:\n\nFailed to download HTML with SSL enabled. Attempting to retry without SSL support...\n")
+                print("ERROR:\n\nFailed to download HTML with SSL enabled. Disabling SSL...\n")
                 use_ssl = False
                 retry = True
             else:
@@ -149,8 +173,6 @@ async def get(url):
 ##################################################DISCORD BOTS API############################################################
 class DiscordBotsOrgAPI:
     def __init__(self, bot):
-        print("Initialising discordbots.org API support...")
-        
         self.bot = bot
 
         try:
@@ -200,7 +222,8 @@ async def PostImage(channel, tags, APILink):
             source = source.replace("\/", "/")
             
             print("Posting Image: " + fileUrl)
-            print("Image Source: " + source)
+            if len(source) > 0:
+                print("Image Source: " + source)
         except:
             await channel.send("I couldn't find an image!")
 
@@ -234,7 +257,7 @@ async def get_search_results(query, quantity):
         except:
             keepParsing = False
 
-    searchResults.sort(key=len) # Sort results by length, smallest first. This is tricky, as it could mess stuff up, but all in all it works better for the smaller queries people run,  like 'ZUN', but not really so for more longer and vague queries. Oh well, this is just the kind of sacrifice that has to be made I guess, I don't see any other way around this issue, except we do something like sort by popularity or 'clicks', which the Wikimedia API doesn't even have support for.
+    searchResults.sort(key=len) # Sort total results by length, smallest first. This is tricky, as it could mess stuff up, but all in all it works better for the smaller queries people run,  like 'ZUN', but not really so for more longer and vague queries. Oh well, this is just the kind of sacrifice that has to be made I guess, I don't see any other way around this issue, unless we do something like sort by popularity or 'clicks', which the Wikimedia API doesn't even have support for.
 
     return searchResults[:quantity]
 
@@ -243,7 +266,7 @@ async def get_image(search_results, quantity):
         search_results = [search_results]
         quantity = 1
 
-    results = ImageSearchResult()
+    results = ImageSearchResult() # Create Image Result class
 
     for i in range(0, quantity):
         json = await get("https://en.touhouwiki.net/wiki/" + search_results[i])
@@ -261,7 +284,7 @@ async def get_image(search_results, quantity):
 
             results.Url = file
             results.Name = search_results[i]
-            return results # At this point, we should have our working image. Ensure the for loop is killed.
+            return results # At this point, we should have our working image. Quit out of the for loop.
         except:
             if i >= quantity:
                 return False
@@ -277,7 +300,6 @@ async def get_search(message, getUrls, getImage):
 
         if arguments == False:
             await message.channel.send("You're going to have to give me something for me to look for.")
-
             return
         else:
             query = arguments[0]
@@ -286,7 +308,6 @@ async def get_search(message, getUrls, getImage):
 
     if len(searchResults) < 1:
             await message.channel.send("I couldn't find anything in my library for '" + query + "'.")
-        
             return
         
     if getUrls:
@@ -326,6 +347,157 @@ async def get_search(message, getUrls, getImage):
     except:
         await message.channel.send("I couldn't find anything in my library for '" + query + "'.")
 
+##################################################TRADING CARDS############################################################
+async def get_card(message):
+    async with message.channel.typing():
+        html = await get("https://en.touhouwiki.net/api.php?action=parse&prop=wikitext&format=json&page=Touhoudex_2/Touhoudex_2")
+
+        raw_names = []
+
+        keep_parsing = True
+        while keep_parsing:
+            try:
+                #html = html[html.index('}}') + 28:]
+                html = html[html.index('}}') + 4:]
+                html = html[html.index('{{Touhoudex 2/DexEntry') + 22:]
+                for i in range(0, 2):
+                    html = html[html.index('|') + 1:]
+                name = html[:html.index('|')]
+
+                if not name == "None":
+                    raw_names.append(name)
+            except:
+                keep_parsing = False
+
+        raw_names = raw_names[:-19] # Cut off misc. characters
+
+        # Okay but add a few more back in though because they're pretty cool
+        raw_names.append("Kasen")
+        raw_names.append("Satsuki")
+        raw_names.append("EMarisa")
+        raw_names.append("JKSanae")
+        raw_names.append("MPSuika")
+        raw_names.append("Ayakashi")        
+
+        #rarity_to_discover = 0
+        #for i in range(0, 10):
+            #if random.randint(0, 10) >= i:
+                #rarity_to_discover += 1
+            #else:
+                #break
+
+        worked = False
+        while not worked:
+            random_card = randint(0, len(raw_names) - 1)
+            #random_card = 6                                    # 1 STAR CHARACTER
+            #random_card = 2                                    # 2 STAR CHARACTER
+            #random_card = 102                               # 5 STAR CHARACTER
+            #random_card = 1                                    # 6 STAR CHARACTER
+            #random_card = len(raw_names) - 5 # 7 STAR CHARACTER
+            #random_card = len(raw_names) - 6 # 8 STAR CHARACTER
+            #random_card = len(raw_names) - 2 # 9 STAR CHARACTER
+            #random_card = len(raw_names) - 1 # 10 STAR CHARACTER
+            character_html = await get("https://en.touhouwiki.net/wiki/Touhoudex_2/" + raw_names[random_card])
+
+            try: # New Template Parser
+                character_name = character_html[character_html.index("vcard") + 4:]
+                character_html = character_name
+                character_name = character_name[character_name.index("<b>") + 3:character_name.index("</b>")]
+                if character_name.endswith("</a>"):
+                    character_name = character_name[:-4]                
+
+                try:
+                    link = character_name[character_name.index("href=") + 6:]
+                    link = link[1:link.index('"')]
+                    link = link[link.index("/") + 1:]
+                except:
+                    link = ""
+
+                try:
+                    name = character_name[character_name.index("<"):character_name.index(">") + 1]
+                    name = character_name.replace(name, "")
+                except:
+                    name = character_name
+                
+                character_image = "Touhoudex 2/" + raw_names[random_card]
+                character_image = await get_image(character_image, 1)
+
+                power = character_html[character_html.index("Base Stats"):]
+                power = power[power.index("</tr>") + 5:power.index("</table>")]
+                power = power[power.rfind("<td>") + 5:]
+                power = power[:power.index("<") - 1]
+
+                #Lowest: 330
+                #Highest: 720
+
+                rarity_remaining = float(power) - 330
+                if rarity_remaining >= 390:
+                    rarity = 10
+                    rarity_symbol = ":white_circle:"
+                else:
+                    rarity = 0
+                    rarity_symbol = ":large_blue_circle:"
+                    while rarity_remaining >= 39:
+                        rarity_remaining = rarity_remaining - 39
+                        rarity = rarity + 1
+
+                    if rarity >= 4:
+                        rarity_symbol = ":red_circle:"
+
+                #rarity = rarity - 1
+                        
+                #if rarity == 10:
+                    #if random.randint(0, 1) == 0:
+                        #Code below this line just to make the rarest cards even RARER
+
+                rarity_message = ""
+                print("Posting a card with a rarity of "+ str(rarity))
+                for i in range(0, 10):
+                    if i <= rarity:
+                        rarity_message = rarity_message + rarity_symbol
+                    else:
+                        rarity_message = rarity_message + ":black_circle:"
+
+                #price = int((int(power)*int(power)*int(power)*int(power)/2)/100000000) * (rarity + 1)
+                #price = int((int(power)*int(power)*int(power)*2)/1000000) * (rarity + 1)
+                price = int((int(power)*int(power)*int(power)*2)/1000000)
+
+                if rarity >= 7:
+                    price = price * 2
+                if rarity >= 8: 
+                    price = price * 2
+                if rarity >= 9:
+                    price = price * 2
+                if rarity == 10:
+                    price = price * 2
+                
+                embed = discord.Embed(title="You found [ " + name + " ]")
+                embed.set_image(url=character_image.Url)
+                embed.add_field(name="Power:", value=rarity_message, inline=False)
+                #embed.add_field(name="Power:", value=power, inline=False)
+                embed.add_field(name="Price:", value="$" + str(price), inline=False)
+                if len(link) > 0:
+                    embed.add_field(name="Page URL:", value="https://en.touhouwiki.net/wiki/" + link, inline=False)
+                
+                await message.channel.send(embed=embed)
+                worked = True
+            except: # Outdated Template Parser
+                try:
+                    print("Outdated template parser not yet implemented!")
+                except:
+                    print("Error parsing character page")
+
+## Substring for [index('}}') + 28:]
+## Substring for [index('|') + 1:]
+## Substring for [:index('|')] ( get raw_name )
+## https://en.touhouwiki.net/wiki/Touhoudex_2/ + raw_name ( get character_page )
+## Get 'Total' value from 'Base Stats' table in character_page ( get price )
+## Get 'Types' value(s) from character_page ( tokens required(?) )
+
+## Pricing Formula (Rounded Up):
+## (total stats * total stats) / 10,000 (?)
+## Divided across all tokens needed (?)
+
 ##################################################QUOTES############################################################
 async def get_quote(message, quotesToGet):
     
@@ -337,7 +509,7 @@ async def get_quote(message, quotesToGet):
         gameNumberToUse = str(randint(6, 16))
     else:
         if int(arguments[0]) < 6 or int(arguments[0]) > 16:
-            await message.channel.send("Sorry, I don't think my library has any quotes from that incident!\nPlease enter a game number from 6 to 16!")
+            await message.channel.send("Sorry, I don't think my library has any quotes from that incident!\nPlease give me a game number from 6 to 16.")
             return
         
         gameNumberToUse = arguments[0]
@@ -416,21 +588,14 @@ async def get_quote(message, quotesToGet):
                     if currentMessage.Actor == "Danmaku.":
                         currentMessage.Actor = "ACTIONQUOTE"
                         currentMessage.Message = ""
-
-                    #if currentMessage.Message.startswith('"'):
-                        #currentMessage.Message = currentMessage.Message[1:]
-                        #pass
-                    #if currentMessage.Message.endswith('"'):
-                        #currentMessage.Message = currentMessage.Message[:-1]
-                        #pass
-                    #if currentMessage.Message.startswith('"') and currentMessage.Message.endswith('"'):
-                        #currentMessage.Message = currentMessage.Message[1:-1]
                     
                     if (len(currentMessage.Actor) > 0 and len(currentMessage.Message) > 0) or currentMessage.Actor == "ACTIONQUOTE": # Make sure Actor and Message is valid. Or, with an exception of it being an action block
                         messageList.append(currentMessage)
                         #print (currentMessage.Actor)
                         #print(currentMessage.Message)
                         #print("##########")
+                    else:
+                        print("Could not add '" + currentMessage.Actor + ": " + currentMessage.Message + "'")
                 except:
                     keepParsingConversation = False
 
@@ -440,37 +605,43 @@ async def get_quote(message, quotesToGet):
                 for messageItem in messageList:
                     fullQuote = fullQuote + messageItem.Actor + ": " + messageItem.Message + "\n"
             else:
-                randomQuote = 0
+                randomQuote = -1
                 
-                while messageList[randomQuote].Actor == "ACTIONQUOTE": # Did we land on an action block? If so, find another starting block
+                while messageList[randomQuote].Actor == "ACTIONQUOTE" or randomQuote == -1: # Did we land on an action block while looking for a starting block? If so, find another starting block
+                    if messageList[randomQuote].Actor == "ACTIONQUOTE":
+                        print("Randomly landed on an Action Block while trying to find a starting point. Finding another starting point...")
                     randomQuote = random.randint(0, len(messageList) - 1)
-
-                messageList[randomQuote] = await fix_quote(messageList[randomQuote])                
-                fullQuote = fullQuote + messageList[randomQuote].Actor + ": " + messageList[randomQuote].Message
                 
-                if quotesToGet > 1:
-                    for i in range(0, quotesToGet - 1): 
-                        try:
-                            if messageList[randomQuote + 1 + i].Actor == "ACTIONQUOTE": # If we detect an action block, then the conversation is over
-                                i = quotesToGet + 1
-                                
-                            if messageList[randomQuote + 1 + i].Message.endswith("...") and i >= quotesToGet - 1:
-                                pass
-                            elif messageList[randomQuote + 1 + i].Message.endswith("...") and i < quotesToGet - 1 and i >= quotesToGet - 2:
-                                quotesToGet = quotesToGet + 1
-                            elif messageList[randomQuote + 1 + i].Message.endswith(",") and i >= quotesToGet - 1:
-                                quotesToGet = quotesToGet + 1
-                            else: # It's all good
-                                messageList[randomQuote + 1 + i] = await fix_quote(messageList[randomQuote + 1 + i])
-                    
-                                fullQuote = fullQuote + "\n" + messageList[randomQuote + 1 + i].Actor + ": " + messageList[randomQuote + 1 + i].Message # Build the quote as 'Actor: Message'
-                        except:
-                            pass
-                if fullQuote.endswith(" "):
-                    fullQuote = fullQuote[0:-1]
-                fullQuote = "*" + fullQuote + "*"
+                i = 0
+                while i < quotesToGet:
+                    try:
+                        if messageList[randomQuote + i].Actor == "ACTIONQUOTE": # If we detect an action block, then the conversation is over
+                            print("Landed on an Action Block while creating Message. Ending conversation...")
+                            i = quotesToGet + 1
+                            break
 
-            print("Posting from URL: " + htmlUrl)
+                        if messageList[randomQuote + i].Message.endswith("...") and i >= quotesToGet - 1: # If the message ends with "..." and we're at the last Quote...
+                            quotesToGet = quotesToGet + 1 # Greedily shove one more line in there. You need to resolve the tension, r-right?
+                        if messageList[randomQuote + i].Message.endswith(",") and i >= quotesToGet - 1: # If the message ends with "," and we're at the last Quote...
+                            quotesToGet = quotesToGet + 1 # Greedily shove one more line in there. You need to resolve the tension, r-right?
+                        if messageList[randomQuote + i].Message.endswith("?") and i >= quotesToGet - 1: # If the message ends with "?", and we're at the last Quote...
+                            quotesToGet = quotesToGet + 1 # Greedily shove one more line in there. You need to resolve the tension, r-right?
+                        
+                        messageList[randomQuote + i] = await fix_quote(messageList[randomQuote + i]) # Fix the quote
+
+                        if not i == 0:
+                            fullQuote = fullQuote + "\n" # If this isn't the first quote line, post a new line seperator to continue from the last quote line, so this next one will be on a new line.
+
+                        fullQuote = fullQuote + messageList[randomQuote + i].Actor + ": " + messageList[randomQuote + i].Message # Build the quote as 'Actor: Message'
+                    except:
+                        pass
+
+                    i += 1
+                if fullQuote.endswith(" "): # If it ends with a space...
+                    fullQuote = fullQuote[0:-1] # What? Why? Get that space out of my sight
+                fullQuote = "*" + fullQuote + "*" # Make the message all italic. Ooh, shiny.
+
+            print("Posting from URL: " + htmlUrl) # Print the quote API HTML page we parsed in order to get the conversation. This is mainly for debug purposes so we can check afterwards if need be.
 
             if allowLargeQuotes == False:
                 if len(fullQuote) > 1999:
@@ -505,22 +676,100 @@ async def get_quote(message, quotesToGet):
 async def fix_quote(givenMessage):
     if givenMessage.Message.startswith('"') and givenMessage.Message.endswith('"'):
         givenMessage.Message = givenMessage.Message[1:-1]
-    if not givenMessage.Message.count('"') % 2 == 0:
-        givenMessage.Message = givenMessage.Message.replace('"', '')
+    if not givenMessage.Message.count('"') % 2 == 0: # If there is an odd number of quotes, as in, one of them was opened and never closed...
+        givenMessage.Message = givenMessage.Message.replace('"', '') # Take no chances. Nuke the whole thing, get rid of every quote. I could probably do this better (somehow) and only remove the latest unfinished troublemaking quotation mark, but alas, too much processing time for something that the end-user might not even appreciate, or care about.
 
-    givenMessage.Actor = givenMessage.Actor.replace("TH16", "")
+    givenMessage.Actor = givenMessage.Actor.replace("TH16", "") # Touhou 16 has quote Actor references that say "TH16Mai", probably to avoid confusion between the other Mai from Touhou 5. Oh well, this is just a pain for us anyway, so let's get rid of "TH16" so it only says "Mai" and displays properly.
 
-    #givenMessage.Message = givenMessage.Message.replace("*", "\*")
-    givenMessage.Message = givenMessage.Message.replace("*", "")
+    #givenMessage.Message = givenMessage.Message.replace("*", "\*") # lol I tried to escape the asterisks that already existed in the quote here because I thought discord was well-written and would handle it hahahaha what was I thinking
+    givenMessage.Message = givenMessage.Message.replace("*", "") # Since we're going to be using italics in our Discord message, having any other asterisks in our quote would break the message. Unfortunately, as a result, we're going to have to get rid of every other asterisk.
 
     return givenMessage
+
+##################################################STORED DATA HANDLERS############################################################
+async def write_data_unsafe(key, data):
+    try:
+        await data_channel.send("[k]" + key + "[d]" + data)
+        return True
+    except:
+        return False
+
+async def get_data():    
+    try:
+        return await data_channel.history().flatten()
+    except:
+        return False
+
+async def search_data(key):
+    data = await get_data()
+    for data_piece in data:
+        if data_piece.content.startswith("[k]" + key + "[d]"):
+            return data_piece.content[data_piece.content.index("[d]") + 3:]
+
+    return False
+
+async def write_data(key, data):
+    all_data = await get_data()
+    for data_piece in all_data:
+        if data_piece.content.startswith("[k]" + key + "[d]"):
+            print("Data key already exists!")
+            return False
+
+    await write_data_unsafe(key, data)
+    return True
+
+async def edit_data(key, data):
+    all_data = await get_data()
+    for data_piece in all_data:
+        if data_piece.content.startswith("[k]" + key + "[d]"):
+            await data_piece.edit(content="[k]" + key + "[d]" + data)
+            return True
+
+    print("Could not find data to edit!")
+    return False
+
+async def overwrite_data(key, data):
+    all_data = await get_data()
+    for data_piece in all_data:
+        if data_piece.content.startswith("[k]" + key + "[d]"):
+            await data_piece.edit(content="[k]" + key + "[d]" + data)
+            return True
+
+    await write_data_unsafe(key, data)
+    return False
+
+async def delete_data(key):
+    all_data = await get_data()
+    for data_piece in all_data:
+        if data_piece.content.startswith("[k]" + key + "[d]"):
+            await data_piece.delete()
+            return True
+
+    print("Could not find data to delete!")
+    return False
 
 ##################################################START############################################################
 @client.event
 async def on_ready():
-    #await client.change_status(game=discord.Game(name = prefix + "help for Help!"))
-    #await client.change_presence(status=discord.Status.online, game=discord.Game(name = prefix + "help for Help!"))
     await client.change_presence(status=discord.Status.online, activity=discord.Game(prefix + "help for Help!"))
+
+    global allow_commands
+
+    global data_guild
+    global data_channel
+
+    #for data_guild in client.guilds:
+        #if data_guild.id == data_guild_id:
+            #break
+        
+    #for data_channel in data_guild.channels:
+        #if data_channel.id == data_channel_id:
+            #break
+
+    data_guild = client.get_guild(int(data_guild_id))
+    data_channel = data_guild.get_channel(int(data_channel_id))
+                
+    allow_commands = True # Now we're truly ready to begin taking commands
     
     print('Logged in as')
     print(client.user.name)
@@ -529,11 +778,11 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    if message.author.bot:
+    if not allow_commands:
         return
     
-    #if message.author.id == client.user.id:
-        #return
+    if message.author.bot:
+        return
     
     lowercaseMessage = message.content.lower()
 
@@ -611,7 +860,20 @@ async def handle_command(message, lowercaseMessage):
         if lowercaseMessage.startswith(prefix + 'lookup'):
             await get_search(message, True, True)
             return
+        if lowercaseMessage == prefix + 'card':
+            #if await write_data("daily_pack_cooldown-" + str(message.author), str(time.time())) == False:
+                #if (((time.time() - float(await search_data("daily_pack_cooldown-" + str(message.author)))) / 60) / 60) >= 24:
+                    #await edit_data("daily_pack_cooldown-" + str(message.author), str(time.time()))
+                #else:
+                    #await message.channel.send("You've already received your daily card!")
+                    #return
 
+            #await get_card(message)
+            #return
+
+            await get_card(message)
+            return
+        
         #await message.channel.send("Sorry, but I'm not quite sure what you're asking me to do.")
     except Exception as e:
         print(e)
