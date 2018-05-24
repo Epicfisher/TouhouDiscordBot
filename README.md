@@ -32,7 +32,14 @@ You can store your Config Variables locally within files. Just ensure they are i
 ##### Optional:
 ```
 'dbl-token.txt' = Allows for discordbots.org API functionality (Disabled by Default)
+
 'prefix.txt' = Customize the Command Prefix ('k.' by Default)
+
+'data-guild-id.txt' = The Guild ID the Bot will use for it's Data Storage (Disabled by Default)
+'data-channel-id.txt' = The Channel ID the Bot will use for it's Data Storage (Disabled by Default)
+
+'suggestions-guild-id.txt' = The Guild ID the Bot will output Suggestions to (Disabled by Default)
+'suggestions-channel-id.txt' = The Channel ID the Bot will output Suggestions to (Disabled by Default)
 ```
 
 #### System Environment Variables
@@ -40,10 +47,17 @@ Or, as an alternative, you can choose to store your Config Variables within Syst
 
 ##### Mandatory:
 ```
-'TOKEN' = Token from your Discord app (https://discordapp.com/developers/applications/me/)
+'PATCHYBOT-TOKEN' = Token from your Discord app (https://discordapp.com/developers/applications/me/)
 ```
 ##### Optional:
 ```
-'DBLTOKEN' = Allows for discordbots.org API functionality (Disabled by Default)
-'PREFIX' = Customize the Command Prefix ('k.' by Default)
+'PATCHYBOT-DBLTOKEN' = Allows for discordbots.org API functionality (Disabled by Default)
+
+'PATCHYBOT-PREFIX' = Customize the Command Prefix ('k.' by Default)
+
+'PATCHYBOT-DATAGUILDID' = The Guild ID the Bot will use for it's Data Storage (Disabled by Default)
+'PATCHYBOT-DATACHANNELID' = The Channel ID the Bot will use for it's Data Storage (Disabled by Default)
+
+'PATCHYBOT-SUGGESTIONSGUILDID' = The Guild ID the Bot will output Suggestions to (Disabled by Default)
+'PATCHYBOT-SUGGESTIONSCHANNELID' = The Channel ID the Bot will output Suggestions to (Disabled by Default)
 ```
