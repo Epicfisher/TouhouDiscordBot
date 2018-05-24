@@ -43,7 +43,7 @@ try:
         token = myfile.read().replace('\n', '')
 except:
     try:
-        token = os.environ['TOKEN']
+        token = os.environ['PATCHYBOT-TOKEN']
     except:
         print ("CRITICAL ERROR:\n\nNo Bot Token specified in either a 'token.txt' file or 'TOKEN' System Environment Variable.\n")
         
@@ -58,7 +58,7 @@ try:
         prefix = myfile.read().replace('\n', '')
 except:
     try:
-        prefix = os.environ['PREFIX']
+        prefix = os.environ['PATCHYBOT-PREFIX']
     except:
         print("INFO:\n\nNo custom Prefix specified in either a 'prefix.txt' file or 'PREFIX' System Environment Variable.\nUsing default Prefix of '" + prefix + "'.\n")
 
@@ -129,7 +129,7 @@ try:
         data_guild_id = myfile.read().replace('\n', '')
 except:
     try:
-        data_guild_id = os.environ['DATAGUILDID']
+        data_guild_id = os.environ['PATCHYBOT-DATAGUILDID']
     except:
         print ("WARNING:\n\nNo Data Guild ID specified in either a 'data-guild-id.txt' file or 'DATAGUILDID' System Environment Variable.\nDisabling Data Storage Support...\n")
 
@@ -139,7 +139,7 @@ if not data_guild_id == None:
             data_channel_id = myfile.read().replace('\n', '')
     except:
         try:
-            data_channel_id = os.environ['DATACHANNELID']
+            data_channel_id = os.environ['PATCHYBOT-DATACHANNELID']
         except:
             print ("WARNING:\n\nNo Data Channel ID specified in either a 'data-channel-id.txt' file or 'DATACHANNELID' System Environment Variable.\nDisabling Data Storage Support...\n")
 
@@ -148,7 +148,7 @@ try:
         suggestions_guild_id = myfile.read().replace('\n', '')
 except:
     try:
-        suggestions_guild_id = os.environ['SUGGESTIONSGUILDID']
+        suggestions_guild_id = os.environ['PATCHYBOT-SUGGESTIONSGUILDID']
     except:
         print ("WARNING:\n\nNo Suggestions Guild ID specified in either a 'suggestions-guild-id.txt' file or 'SUGGESTIONSGUILDID' System Environment Variable.\nDisabling Suggestions...\n")
 
@@ -158,7 +158,7 @@ if not suggestions_guild_id == None:
             suggestions_channel_id = myfile.read().replace('\n', '')
     except:
         try:
-            suggestions_channel_id = os.environ['SUGGESTIONSCHANNELID']
+            suggestions_channel_id = os.environ['PATCHYBOT-SUGGESTIONSCHANNELID']
         except:
             print ("WARNING:\n\nNo Suggestions Channel ID specified in either a 'suggestions-channel-id.txt' file or 'SUGGESTIONSCHANNELID' System Environment Variable.\nDisabling Suggestions...\n")
 
@@ -206,7 +206,7 @@ class DiscordBotsOrgAPI:
                 dbltoken = myfile.read().replace('\n', '')
         except:
             try:
-                dbltoken = os.environ['DBLTOKEN']
+                dbltoken = os.environ['PATCHYBOT-DBLTOKEN']
             except:
                 print ("WARNING:\n\nNo DBL Token specified in either a 'dbl-token.txt' file or 'DBLTOKEN' System Environment Variable.\nDisabling discordbots.org API support...\n")
 
@@ -235,25 +235,32 @@ def setup_discord_bots_org_api(bot):
 ##################################################IMAGES############################################################
 async def PostImage(channel, tags, APILink):
     async with channel.typing():
-    
-        html = await get(APILink + "?page=dapi&s=post&q=index&limit=1&json=1&pid=" + str(randint(0, 20000)) + "&tags=" + tags)
+        page_scope = 20000
+        
+        worked = False
+        while not worked:
+            html = await get(APILink + "?page=dapi&s=post&q=index&limit=1&json=1&pid=" + str(randint(0, page_scope)) + "&tags=" + tags)
 
-        try:
-            fileUrl = html[html.index('file_url":"') + 11 : - 3]
-            fileUrl = fileUrl.replace("\/", "/")
-            fileUrl = fileUrl[0:fileUrl.index('"')]
-            
-            source = html[html.index('source":"') + 9:]
-            source = source[:source.index('"')]
-            source = source.replace("\/", "/")
-            
-            print("Posting Image: " + fileUrl)
-            if len(source) > 0:
-                print("Image Source: " + source)
-        except:
-            await channel.send("I couldn't find an image!")
-
-            return
+            try:
+                fileUrl = html[html.index('file_url":"') + 11 : - 3]
+                fileUrl = fileUrl.replace("\/", "/")
+                fileUrl = fileUrl[0:fileUrl.index('"')]
+                
+                source = html[html.index('source":"') + 9:]
+                source = source[:source.index('"')]
+                source = source.replace("\/", "/")
+                
+                print("Posting Image: " + fileUrl)
+                if len(source) > 0:
+                    print("Image Source: " + source)
+                
+                worked = True
+            except:
+                print("Couldn't find an image! Halving our search scope...")
+                page_scope = page_scope / 2
+                if page_scope <= 1:
+                    await channel.send("I couldn't find an image!")
+                    return
         
         messageEmbed = discord.Embed()
         messageEmbed.set_image(url=fileUrl)
