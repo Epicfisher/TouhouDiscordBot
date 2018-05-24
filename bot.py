@@ -72,6 +72,7 @@ helpMessage = """```
 ~~~General Commands~~~
 """ + prefix + """help - You're currently reading this!
 """ + prefix + """info - Information about me. Wow. Very interesting.
+""" + prefix + """suggest""" + argumentChar + """Idea""" + argumentKillChar + """ - Suggests an 'Idea' to the Bot developers.
 
 ~~~Image Commands~~~
 """ + prefix + """image - Gets a Touhou image from Gelbooru.
@@ -117,6 +118,12 @@ data_channel = None
 data_guild_id = None
 data_channel_id = None
 
+suggestions_guild = None
+suggestions_channel = None
+
+suggestions_guild_id = None
+suggestions_channel_id = None
+
 try:
     with open('data-guild-id.txt', 'r') as myfile:
         data_guild_id = myfile.read().replace('\n', '')
@@ -135,6 +142,25 @@ if not data_guild_id == None:
             data_channel_id = os.environ['DATACHANNELID']
         except:
             print ("WARNING:\n\nNo Data Channel ID specified in either a 'data-channel-id.txt' file or 'DATACHANNELID' System Environment Variable.\nDisabling Data Storage Support...\n")
+
+try:
+    with open('suggestions-guild-id.txt', 'r') as myfile:
+        suggestions_guild_id = myfile.read().replace('\n', '')
+except:
+    try:
+        suggestions_guild_id = os.environ['SUGGESTIONSGUILDID']
+    except:
+        print ("WARNING:\n\nNo Suggestions Guild ID specified in either a 'suggestions-guild-id.txt' file or 'SUGGESTIONSGUILDID' System Environment Variable.\nDisabling Suggestions...\n")
+
+if not suggestions_guild_id == None:
+    try:
+        with open('suggestions-channel-id.txt', 'r') as myfile:
+            suggestions_channel_id = myfile.read().replace('\n', '')
+    except:
+        try:
+            suggestions_channel_id = os.environ['SUGGESTIONSCHANNELID']
+        except:
+            print ("WARNING:\n\nNo Suggestions Channel ID specified in either a 'suggestions-channel-id.txt' file or 'SUGGESTIONSCHANNELID' System Environment Variable.\nDisabling Suggestions...\n")
 
 ##################################################AIOHTTP CONNECTOR############################################################
 
@@ -372,12 +398,13 @@ async def get_card(message):
         raw_names = raw_names[:-19] # Cut off misc. characters
 
         # Okay but add a few more back in though because they're pretty cool
+        raw_names.append("TensokuG")
         raw_names.append("Kasen")
         raw_names.append("Satsuki")
         raw_names.append("EMarisa")
         raw_names.append("JKSanae")
         raw_names.append("MPSuika")
-        raw_names.append("Ayakashi")        
+        raw_names.append("Ayakashi")
 
         #rarity_to_discover = 0
         #for i in range(0, 10):
@@ -487,11 +514,6 @@ async def get_card(message):
                 except:
                     print("Error parsing character page")
 
-## Substring for [index('}}') + 28:]
-## Substring for [index('|') + 1:]
-## Substring for [:index('|')] ( get raw_name )
-## https://en.touhouwiki.net/wiki/Touhoudex_2/ + raw_name ( get character_page )
-## Get 'Total' value from 'Base Stats' table in character_page ( get price )
 ## Get 'Types' value(s) from character_page ( tokens required(?) )
 
 ## Pricing Formula (Rounded Up):
@@ -758,16 +780,14 @@ async def on_ready():
     global data_guild
     global data_channel
 
-    #for data_guild in client.guilds:
-        #if data_guild.id == data_guild_id:
-            #break
-        
-    #for data_channel in data_guild.channels:
-        #if data_channel.id == data_channel_id:
-            #break
+    global suggestions_guild
+    global suggestions_channel
 
     data_guild = client.get_guild(int(data_guild_id))
     data_channel = data_guild.get_channel(int(data_channel_id))
+
+    suggestions_guild = client.get_guild(int(suggestions_guild_id))
+    suggestions_channel = suggestions_guild.get_channel(int(suggestions_channel_id))
                 
     allow_commands = True # Now we're truly ready to begin taking commands
     
@@ -861,17 +881,28 @@ async def handle_command(message, lowercaseMessage):
             await get_search(message, True, True)
             return
         if lowercaseMessage == prefix + 'card':
-            #if await write_data("daily_pack_cooldown-" + str(message.author), str(time.time())) == False:
-                #if (((time.time() - float(await search_data("daily_pack_cooldown-" + str(message.author)))) / 60) / 60) >= 24:
-                    #await edit_data("daily_pack_cooldown-" + str(message.author), str(time.time()))
-                #else:
-                    #await message.channel.send("You've already received your daily card!")
-                    #return
-
-            #await get_card(message)
-            #return
+            #if runningCommandsArray.contains(message.author.id):
+                #await message.channel.send("Hey, slow down! I can only work so fast on my own you know!")
+                #return
+            #else:
+                #if await write_data("daily_pack_cooldown-" + str(message.author), str(time.time())) == False:
+                    #if (((time.time() - float(await search_data("daily_pack_cooldown-" + str(message.author)))) / 60) / 60) >= 24:
+                        #await edit_data("daily_pack_cooldown-" + str(message.author), str(time.time()))
+                    #else:
+                        #await message.channel.send("You've already received your daily card!")
+                        #return
 
             await get_card(message)
+            return
+        if lowercaseMessage.startswith(prefix + 'suggest'):
+            arguments = GetArgumentsFromCommand(message.content)
+
+            if arguments == False:
+                await message.channel.send("Either I'm perfect, or you forgot to type in a suggestion.")
+                return
+
+            await suggestions_channel.send("Suggestion Received from '" + str(message.author) + "':\n'" + arguments[0] + "'")
+            await message.channel.send("Thank you! I'll try my best to improve the library's services!")
             return
         
         #await message.channel.send("Sorry, but I'm not quite sure what you're asking me to do.")
