@@ -66,33 +66,37 @@ argumentChar = ' '
 argumentKillChar = ''
 argumentSeperator = ','
 
+cooldown_message = "Hey, slow down! I can only work so fast on my own you know!"
+
 helpMessage = """```
 ~Patchouli Knowledge Help~
 
-~~~General Commands~~~
+~~~~~General Commands~~~~~
 """ + prefix + """help - You're currently reading this!
 """ + prefix + """info - Information about me. Wow. Very interesting.
 """ + prefix + """suggest""" + argumentChar + """Idea""" + argumentKillChar + """ - Suggests an 'Idea' to the Bot developers.
 
-~~~Image Commands~~~
+~~~~~Image Commands~~~~~
 """ + prefix + """image - Gets a Touhou image from Gelbooru.
+""" + prefix + """image""" + argumentChar + """Cirno+Frog""" + argumentKillChar + """ - Gets an image of 'Cirno' with a 'Frog'.
 """ + prefix + """nsfwimage - Gets a NSFW Touhou image. NSFW Channel required.
+""" + prefix + """nsfwimage""" + argumentChar + """Reimu+Solo""" + argumentKillChar + """ - Gets an NSFW image of just Reimu.
 
-~~~Quote Commands~~~
+~~~~~Quote Commands~~~~~
 """ + prefix + """quote - Gets a quote from a random Touhou game.
 """ + prefix + """quote""" + argumentChar + """6""" + argumentKillChar + """ - Gets a quote from Touhou 6.
 
-~~~Search Commands~~~
+~~~~~Search Commands~~~~~
 """ + prefix + """search""" + argumentChar + """Reimu""" + argumentKillChar + """ - Searches for 'Reimu' pages on touhouwiki.net.
 """ + prefix + """portrait""" + argumentChar + """Reimu""" + argumentKillChar + """ - Searches for a 'Reimu' portrait.
 """ + prefix + """lookup""" + argumentChar + """Reimu""" + argumentKillChar + """ - Searches for a 'Reimu' page and portrait.
 
-~~~Card Commands~~~
+~~~~~Card Commands~~~~~
 [BETA] """ + prefix + """card - Gets a Trading Card. (No progress is saved)
 
 ```"""
 
-# [BETA] """ + prefix + """card -  Receive your daily Card. Resets every 24 hours.
+# [BETA] """ + prefix + """daily -  Receive your daily Card. Resets every 24 hours.
 
 aboutMessage = """```
 ~About Patchouli Knowledge~
@@ -117,13 +121,13 @@ closed_access_users = None
 try:
     with open('closed-access-users.txt', 'r') as myfile:
         closed_access_users = myfile.read().split('\n')
-        print("INFO:\n\nClosed Access Users were specified in a 'closed-access-users.txt; file.\nStarted bot in Closed Access Mode...\n")
+        print("INFO:\n\nClosed Access Users were specified in a 'closed-access-users.txt' file.\nStarted bot in Closed Access Mode...\n")
 except:
     try:
         closed_access_users = [os.environ['PATCHYBOT-CLOSEDACCESSUSER']]
         print("INFO:\n\nA Closed Access User was specified in a 'PATCHYBOT-CLOSEDACCESSUSER' System Environment Variable.\nStarted bot in Closed Access Mode...\n")
     except:
-        print("INFO:\n\nNo Closed Access Users specified in either a 'closed-access-users.txt; file or 'PATCHYBOT-CLOSEDACCESSUSER' System Environment Variable.\nOpening Bot to the public...\n")
+        print("INFO:\n\nNo Closed Access Users specified in either a 'closed-access-users.txt' file or 'PATCHYBOT-CLOSEDACCESSUSER' System Environment Variable.\nOpening Bot to the public...\n")
         pass
 
 data_guild = None
@@ -247,35 +251,146 @@ def setup_discord_bots_org_api(bot):
     #pass
     
 ##################################################IMAGES############################################################
-async def PostImage(channel, tags, APILink):
-    async with channel.typing():
-        page_scope = 20000
-        
-        worked = False
-        while not worked:
-            html = await get(APILink + "?page=dapi&s=post&q=index&limit=1&json=1&pid=" + str(randint(0, page_scope)) + "&tags=" + tags)
+async def PostImage(message, rating, tags, APILink):
+    async with message.channel.typing():
+        tags = "rating:" + rating + "+" + tags # Format and add the Rating into the total Tags
 
-            try:
-                fileUrl = html[html.index('file_url":"') + 11 : - 3]
-                fileUrl = fileUrl.replace("\/", "/")
-                fileUrl = fileUrl[0:fileUrl.index('"')]
-                
-                source = html[html.index('source":"') + 9:]
-                source = source[:source.index('"')]
-                source = source.replace("\/", "/")
-                
-                print("Posting Image: " + fileUrl)
-                if len(source) > 0:
-                    print("Image Source: " + source)
-                
-                worked = True
-            except:
-                print("Couldn't find an image! Dividing our search scope...")
-                page_scope = page_scope / 3
-                if page_scope <= 1:
-                    await channel.send("I couldn't find an image!")
-                    return
-        
+        bad_sfw_tags = ['nude', 'ass', 'anus', 'no_panties', 'removing_panties', 'pussy_juice', 'breasts', 'nipples', 'topless', 'thighs', 'upskirt', 'rape', 'sex', 'masturbation', 'yuri', 'vore', 'tentacles', 'guro', 'blood']
+
+        arguments = GetArgumentsFromCommand(message.content)
+
+        additional_tags = ""
+
+        if not arguments == False:
+            character_names = []
+            character_positions = []
+
+            going_twice = False
+            
+            raw_characters_html = await get("http://touhou.wikia.com/wiki/Character_List") # API is too confusing for a simpleton like me so I guess I'll just parse the webpage HTML don't mind me
+            raw_characters_html = raw_characters_html[raw_characters_html.index('id="Character_List"'):raw_characters_html.index('id="Unnamed_Characters"')]
+            
+            parsing = True
+            while parsing:
+                try:
+                    raw_characters_html = raw_characters_html[raw_characters_html.index('title="') + 7:]
+                    character_names.append(raw_characters_html[:raw_characters_html.index('"')])
+                except:
+                    parsing = False
+
+            additional_tags = arguments[0]
+            
+            tags_array = additional_tags.split("+")
+            additional_tags = ""
+            i = 0
+            for tag in tags_array:
+                while tag.startswith(' '):
+                    tag = tag[1:]
+                while tag.endswith(' '):
+                    tag = tag[0:len(tag) - 1]
+
+                found_character = False
+                for character in character_names:
+                    if found_character:
+                        break
+                    character_array = character.split(" ")
+                    if len(character_array) == 2:
+                        for character_word in character_array:
+                            if tag.lower() == character_word.lower():
+                                character = character_array[1] + " " + character_array[0]
+                                character_positions.append(i + 2)
+                                going_twice = True
+
+                                tag = character
+                                found_character = True
+                                break
+
+                raw_tag = tag
+                if tag.startswith('-'):
+                    raw_tag = raw_tag[1:]
+
+                is_good_tag = True
+
+                if raw_tag.startswith("rating"): # Disallow modification to the Rating tag
+                    is_good_tag = False
+
+                if rating == "safe": # Disallow certain tags if we're supposed to be SFW
+                    for bad_tag in bad_sfw_tags:
+                        if raw_tag == bad_tag:
+                            is_good_tag = False
+                            break
+
+                if is_good_tag:
+                    additional_tags = additional_tags + tag + "+"
+
+                i = i + 1
+
+        if rating == "safe":
+            for bad_tag in bad_sfw_tags: # Add a filter for all bad tags if we're SFW so they aren't shown
+                additional_tags = additional_tags + '-' + bad_tag + "+"
+
+        if not additional_tags == None:
+            tags = tags + "+" + additional_tags.replace(" ", "_")
+
+        while tags.endswith("+"):
+            tags = tags[0:len(tags) - 1]  # Cut off the last '+'s
+
+        print("Using tags: '" + tags + "'")
+
+        going = True
+        while going:
+            page_scope = 20000
+            i = 1
+
+            worked = False
+            while not worked:
+                html = await get(APILink + "?page=dapi&s=post&q=index&limit=1&json=1&pid=" + str(randint(0, page_scope)) + "&tags=" + tags)
+
+                try:
+                    fileUrl = html[html.index('file_url":"') + 11 : - 3]
+                    fileUrl = fileUrl.replace("\/", "/")
+                    fileUrl = fileUrl[0:fileUrl.index('"')]
+
+                    source = html[html.index('source":"') + 9:]
+                    source = source[:source.index('"')]
+                    source = source.replace("\/", "/")
+
+                    print("Posting Image: " + fileUrl)
+                    if len(source) > 0:
+                        print("Image Source: " + source)
+
+                    going_twice = False
+                    worked = True
+                except:
+                    i = i + 1
+                    if i <= 2:
+                        page_scope = int(page_scope / 2)
+                    else:
+                        page_scope = int(page_scope / 3)
+
+                    if page_scope < 1:
+                        if not going_twice:
+                            await message.channel.send("I couldn't find an image!")
+                            return
+                        else:
+                            worked = True # Escape the downloading images while loop
+
+                            for i in range(0, len(character_positions)):
+                                tags_list = tags.split('+')
+                                character_words = tags_list[character_positions[i]].split("_")
+                                if len(character_words) == 2:
+                                    character_words_new = character_words[1] + "_" + character_words[0]
+                                    tags = tags.replace("+" + character_words[0] + "_" + character_words[1], "+" + character_words_new)
+
+                            print("Trying new tags: '" + tags + "'")
+                    else:
+                        print("Dividing our search scope to '" + str(page_scope) + "'... [Attempt " + str(i) + "]")
+
+            if not going_twice:
+                going = False # If we're not going twice we're going out
+            if going_twice:
+                going_twice = False
+
         messageEmbed = discord.Embed()
         messageEmbed.set_image(url=fileUrl)
         messageEmbed.add_field(name="Image URL", value=fileUrl, inline=False)
@@ -285,7 +400,7 @@ async def PostImage(channel, tags, APILink):
             #messageEmbed.add_file(name="Image Source",value="None", inline=False)
             #pass
         
-        await channel.send(embed=messageEmbed)
+        await message.channel.send(embed=messageEmbed)
 
 ##################################################SEARCH API HANDLERS############################################################
 async def get_search_results(query, quantity):
@@ -342,90 +457,95 @@ async def get_image(search_results, quantity):
     
 ##################################################SEARCH############################################################
 async def get_search(message, getUrls, getImage):
+    arguments = GetArgumentsFromCommand(message.content)
+
+    if arguments == False:
+        await message.channel.send("You're going to have to give me something to look for.")
+        return
+    else:
+        query = arguments[0]
+
     async with message.channel.typing():
-        arguments = GetArgumentsFromCommand(message.content)
+        searchResults = await get_search_results(query, 5)
 
-        if arguments == False:
-            await message.channel.send("You're going to have to give me something for me to look for.")
-            return
-        else:
-            query = arguments[0]
-
-    searchResults = await get_search_results(query, 5)
-
-    if len(searchResults) < 1:
+        if len(searchResults) < 1:
             await message.channel.send("I couldn't find anything in my library for '" + query + "'.")
             return
-        
-    if getUrls:
-        if getUrls and getImage: # Lookup
-            messageEmbed = discord.Embed(title="Lookup Result For '" + query + "'")
-            
-            messageEmbed.add_field(name="Page URL", value="https://en.touhouwiki.net/wiki/" + searchResults[0], inline=True)
-        else: # Regular Search
-            messageEmbed = discord.Embed(title="Search Results For '" + query + "'")
-            
-            for i in range(0, len(searchResults)):
-                try:
-                    messageEmbed.add_field(name="Result " + str(i + 1), value="https://en.touhouwiki.net/wiki/" + searchResults[i], inline=True)
-                except:
-                    print("Skipping Search Result...")
-                    pass
-        
-    if getImage:
-        searchImages = 1
-        if getUrls == False:
-            searchImages = len(searchResults)
 
-        image_info = await get_image(searchResults, searchImages)
-
-        if getUrls == False:
-            if image_info == False:
-                await message.channel.send("I wasn't able to find any photos in my library on '" + query + "'.")
-                return
+        if getUrls:
+            if getUrls and getImage: # Lookup
+                messageEmbed = discord.Embed(title="Lookup Result For '" + query + "'")
                 
-            messageEmbed = discord.Embed(title=image_info.Name.replace("_", " ") + "'s Portrait")
+                messageEmbed.add_field(name="Page URL", value="https://en.touhouwiki.net/wiki/" + searchResults[0], inline=True)
+            else: # Regular Search
+                messageEmbed = discord.Embed(title="Search Results For '" + query + "'")
+                
+                for i in range(0, len(searchResults)):
+                    try:
+                        messageEmbed.add_field(name="Result " + str(i + 1), value="https://en.touhouwiki.net/wiki/" + searchResults[i], inline=True)
+                    except:
+                        print("Skipping Search Result...")
+                        pass
+            
+        if getImage:
+            searchImages = 1
+            if getUrls == False:
+                searchImages = len(searchResults)
 
-        if image_info:
-            messageEmbed.set_image(url=image_info.Url)
+            image_info = await get_image(searchResults, searchImages)
 
-    try:
-        await message.channel.send(embed=messageEmbed)
-    except:
-        await message.channel.send("I couldn't find anything in my library for '" + query + "'.")
+            if getUrls == False:
+                if image_info == False:
+                    await message.channel.send("I wasn't able to find any photos in my library on '" + query + "'.")
+                    return
+                    
+                messageEmbed = discord.Embed(title=image_info.Name.replace("_", " ") + "'s Portrait")
+
+            if image_info:
+                messageEmbed.set_image(url=image_info.Url)
+
+        try:
+            await message.channel.send(embed=messageEmbed)
+        except:
+            await message.channel.send("I couldn't find anything in my library for '" + query + "'.")
+
+##################################################TRADING CARDS API############################################################
+async def get_all_cards():
+    html = await get("https://en.touhouwiki.net/api.php?action=parse&prop=wikitext&format=json&page=Touhoudex_2/Touhoudex_2")
+
+    raw_names = []
+
+    keep_parsing = True
+    while keep_parsing:
+        try:
+            html = html[html.index('}}') + 4:]
+            html = html[html.index('{{Touhoudex 2/DexEntry') + 22:]
+            for i in range(0, 2):
+                html = html[html.index('|') + 1:]
+            name = html[:html.index('|')]
+
+            if not name == "None":
+                raw_names.append(name)
+        except:
+            keep_parsing = False
+
+    raw_names = raw_names[:-19] # Cut off misc. characters
+
+    # Okay but add a few more back in though because they're pretty cool
+    raw_names.append("TensokuG")
+    raw_names.append("Kasen")
+    raw_names.append("Satsuki")
+    raw_names.append("EMarisa")
+    raw_names.append("JKSanae")
+    raw_names.append("MPSuika")
+    raw_names.append("Ayakashi")
+
+    return raw_names
 
 ##################################################TRADING CARDS############################################################
 async def get_card(message):
     async with message.channel.typing():
-        html = await get("https://en.touhouwiki.net/api.php?action=parse&prop=wikitext&format=json&page=Touhoudex_2/Touhoudex_2")
-
-        raw_names = []
-
-        keep_parsing = True
-        while keep_parsing:
-            try:
-                #html = html[html.index('}}') + 28:]
-                html = html[html.index('}}') + 4:]
-                html = html[html.index('{{Touhoudex 2/DexEntry') + 22:]
-                for i in range(0, 2):
-                    html = html[html.index('|') + 1:]
-                name = html[:html.index('|')]
-
-                if not name == "None":
-                    raw_names.append(name)
-            except:
-                keep_parsing = False
-
-        raw_names = raw_names[:-19] # Cut off misc. characters
-
-        # Okay but add a few more back in though because they're pretty cool
-        raw_names.append("TensokuG")
-        raw_names.append("Kasen")
-        raw_names.append("Satsuki")
-        raw_names.append("EMarisa")
-        raw_names.append("JKSanae")
-        raw_names.append("MPSuika")
-        raw_names.append("Ayakashi")
+        raw_names = await get_all_cards()
 
         #rarity_to_discover = 0
         #for i in range(0, 10):
@@ -836,7 +956,7 @@ async def on_message(message):
         if len(lowercaseMessage) > len(prefix):
             if lowercaseMessage[len(prefix)] != " ":
                 if runningCommandsArray.count(message.author.id) > 1:
-                    await message.channel.send("Hey, slow down! I can only work so fast on my own you know!")
+                    await message.channel.send(cooldown_message)
                     return
                 else:
                     runningCommandsArray.append(message.author.id)
@@ -871,11 +991,21 @@ async def handle_command(message, lowercaseMessage):
         if lowercaseMessage == prefix + 'info':
             await message.channel.send(aboutMessage % (str(discord.__version__), round((time.time() - startTime) / 60, 1), str(len(client.guilds))))
             return
-            #(round(round(time.time() - startTime, 1) / 60, 1))))        
-        if lowercaseMessage.startswith(prefix + 'image'):
-            await PostImage(message.channel, "rating:safe%20touhou", "https://gelbooru.com/index.php")
+            #(round(round(time.time() - startTime, 1) / 60, 1))))
+        if lowercaseMessage.startswith(prefix + 'suggest'):
+            arguments = GetArgumentsFromCommand(message.content)
+
+            if arguments == False:
+                await message.channel.send("Either I'm perfect, or you forgot to type in a suggestion.")
+                return
+
+            await suggestions_channel.send("Suggestion Received from '" + str(message.author) + "':\n'" + arguments[0] + "'")
+            await message.channel.send("Thank you! I'll try my best to improve the library's services!")
             return
-        if lowercaseMessage == prefix + 'nsfwimage':
+        if lowercaseMessage.startswith(prefix + 'image'):
+            await PostImage(message, "safe", "touhou", "https://gelbooru.com/index.php")
+            return
+        if lowercaseMessage.startswith(prefix + 'nsfwimage'):
             isok = True
 
             try:
@@ -885,7 +1015,7 @@ async def handle_command(message, lowercaseMessage):
                 pass
 
             if isok:
-                await PostImage(message.channel, "rating:explicit%20touhou", "https://gelbooru.com/index.php")
+                await PostImage(message, "explicit", "touhou", "https://gelbooru.com/index.php")
                 return
             else:
                 if random.randint(0,1) == 0:
@@ -907,28 +1037,22 @@ async def handle_command(message, lowercaseMessage):
             await get_search(message, True, True)
             return
         if lowercaseMessage == prefix + 'card':
-            #if runningCommandsArray.contains(message.author.id):
-                #await message.channel.send("Hey, slow down! I can only work so fast on my own you know!")
-                #return
-            #else:
-                #if await write_data("daily_pack_cooldown-" + str(message.author), str(time.time())) == False:
-                    #if (((time.time() - float(await search_data("daily_pack_cooldown-" + str(message.author)))) / 60) / 60) >= 24:
-                        #await edit_data("daily_pack_cooldown-" + str(message.author), str(time.time()))
-                    #else:
-                        #await message.channel.send("You've already received your daily card!")
-                        #return
+            i = 0
+            for command in runningCommandsArray:
+                if message.author.id == command:
+                    i = i + 1
+                if i >= 2:
+                    await message.channel.send(cooldown_message)
+                    return
+
+            #if await write_data("daily_pack_cooldown-" + str(message.author.id), str(time.time())) == False:
+                #if (((time.time() - float(await search_data("daily_pack_cooldown-" + str(message.author.id)))) / 60) / 60) >= 24:
+                    #await edit_data("daily_pack_cooldown-" + str(message.author.id), str(time.time()))
+                #else:
+                    #await message.channel.send("You've already received your daily card!")
+                    #return
 
             await get_card(message)
-            return
-        if lowercaseMessage.startswith(prefix + 'suggest'):
-            arguments = GetArgumentsFromCommand(message.content)
-
-            if arguments == False:
-                await message.channel.send("Either I'm perfect, or you forgot to type in a suggestion.")
-                return
-
-            await suggestions_channel.send("Suggestion Received from '" + str(message.author) + "':\n'" + arguments[0] + "'")
-            await message.channel.send("Thank you! I'll try my best to improve the library's services!")
             return
         
         #await message.channel.send("Sorry, but I'm not quite sure what you're asking me to do.")
