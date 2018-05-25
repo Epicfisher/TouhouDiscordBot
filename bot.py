@@ -45,7 +45,7 @@ except:
     try:
         token = os.environ['PATCHYBOT-TOKEN']
     except:
-        print ("CRITICAL ERROR:\n\nNo Bot Token specified in either a 'token.txt' file or 'TOKEN' System Environment Variable.\n")
+        print ("CRITICAL ERROR:\n\nNo Bot Token specified in either a 'token.txt' file or 'PATCHYBOT-TOKEN' System Environment Variable.\nBot cannot start.\n")
         
         raise SystemExit(0)
 
@@ -60,7 +60,7 @@ except:
     try:
         prefix = os.environ['PATCHYBOT-PREFIX']
     except:
-        print("INFO:\n\nNo custom Prefix specified in either a 'prefix.txt' file or 'PREFIX' System Environment Variable.\nUsing default Prefix of '" + prefix + "'.\n")
+        print("INFO:\n\nNo custom Prefix specified in either a 'prefix.txt' file or 'PATCHYBOT-PREFIX' System Environment Variable.\nUsing default Prefix of '" + prefix + "'.\n")
 
 argumentChar = ' '
 argumentKillChar = ''
@@ -112,6 +112,20 @@ allow_commands = False
 
 client = discord.Client()
 
+closed_access_users = None
+
+try:
+    with open('closed-access-users.txt', 'r') as myfile:
+        closed_access_users = myfile.read().split('\n')
+        print("INFO:\n\nClosed Access Users were specified in a 'closed-access-users.txt; file.\nStarted bot in Closed Access Mode...\n")
+except:
+    try:
+        closed_access_users = [os.environ['PATCHYBOT-CLOSEDACCESSUSER']]
+        print("INFO:\n\nA Closed Access User was specified in a 'PATCHYBOT-CLOSEDACCESSUSER' System Environment Variable.\nStarted bot in Closed Access Mode...\n")
+    except:
+        print("INFO:\n\nNo Closed Access Users specified in either a 'closed-access-users.txt; file or 'PATCHYBOT-CLOSEDACCESSUSER' System Environment Variable.\nOpening Bot to the public...\n")
+        pass
+
 data_guild = None
 data_channel = None
 
@@ -131,7 +145,7 @@ except:
     try:
         data_guild_id = os.environ['PATCHYBOT-DATAGUILDID']
     except:
-        print ("WARNING:\n\nNo Data Guild ID specified in either a 'data-guild-id.txt' file or 'DATAGUILDID' System Environment Variable.\nDisabling Data Storage Support...\n")
+        print ("WARNING:\n\nNo Data Guild ID specified in either a 'data-guild-id.txt' file or 'PATCHYBOT-DATAGUILDID' System Environment Variable.\nDisabling Data Storage Support...\n")
 
 if not data_guild_id == None:
     try:
@@ -141,7 +155,7 @@ if not data_guild_id == None:
         try:
             data_channel_id = os.environ['PATCHYBOT-DATACHANNELID']
         except:
-            print ("WARNING:\n\nNo Data Channel ID specified in either a 'data-channel-id.txt' file or 'DATACHANNELID' System Environment Variable.\nDisabling Data Storage Support...\n")
+            print ("WARNING:\n\nNo Data Channel ID specified in either a 'data-channel-id.txt' file or 'PATCHYBOT-DATACHANNELID' System Environment Variable.\nDisabling Data Storage Support...\n")
 
 try:
     with open('suggestions-guild-id.txt', 'r') as myfile:
@@ -150,7 +164,7 @@ except:
     try:
         suggestions_guild_id = os.environ['PATCHYBOT-SUGGESTIONSGUILDID']
     except:
-        print ("WARNING:\n\nNo Suggestions Guild ID specified in either a 'suggestions-guild-id.txt' file or 'SUGGESTIONSGUILDID' System Environment Variable.\nDisabling Suggestions...\n")
+        print ("WARNING:\n\nNo Suggestions Guild ID specified in either a 'suggestions-guild-id.txt' file or 'PATCHYBOT-SUGGESTIONSGUILDID' System Environment Variable.\nDisabling Suggestions...\n")
 
 if not suggestions_guild_id == None:
     try:
@@ -160,7 +174,7 @@ if not suggestions_guild_id == None:
         try:
             suggestions_channel_id = os.environ['PATCHYBOT-SUGGESTIONSCHANNELID']
         except:
-            print ("WARNING:\n\nNo Suggestions Channel ID specified in either a 'suggestions-channel-id.txt' file or 'SUGGESTIONSCHANNELID' System Environment Variable.\nDisabling Suggestions...\n")
+            print ("WARNING:\n\nNo Suggestions Channel ID specified in either a 'suggestions-channel-id.txt' file or 'PATCHYBOT-SUGGESTIONSCHANNELID' System Environment Variable.\nDisabling Suggestions...\n")
 
 ##################################################AIOHTTP CONNECTOR############################################################
 
@@ -208,7 +222,7 @@ class DiscordBotsOrgAPI:
             try:
                 dbltoken = os.environ['PATCHYBOT-DBLTOKEN']
             except:
-                print ("WARNING:\n\nNo DBL Token specified in either a 'dbl-token.txt' file or 'DBLTOKEN' System Environment Variable.\nDisabling discordbots.org API support...\n")
+                print ("WARNING:\n\nNo DBL Token specified in either a 'dbl-token.txt' file or 'PATCHYBOT-DBLTOKEN' System Environment Variable.\nDisabling discordbots.org API support...\n")
 
                 return
         self.token = dbltoken
@@ -256,8 +270,8 @@ async def PostImage(channel, tags, APILink):
                 
                 worked = True
             except:
-                print("Couldn't find an image! Halving our search scope...")
-                page_scope = page_scope / 2
+                print("Couldn't find an image! Dividing our search scope...")
+                page_scope = page_scope / 3
                 if page_scope <= 1:
                     await channel.send("I couldn't find an image!")
                     return
@@ -810,6 +824,11 @@ async def on_message(message):
     
     if message.author.bot:
         return
+
+    if not closed_access_users == None:
+        if not str(message.author.id) in closed_access_users:
+            print("Blocked access from non closed-access user")
+            return
     
     lowercaseMessage = message.content.lower()
 
