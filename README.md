@@ -31,9 +31,10 @@ You can store your Config Variables locally within files. Just ensure they are i
 ```
 ##### Optional:
 ```
-'dbl-token.txt' = Allows for discordbots.org API functionality (Disabled by Default)
-
 'prefix.txt' = Customize the Command Prefix ('k.' by Default)
+'closed-access-users.txt' = Allows for ONLY a list of User IDs to access the bot (Disabled by Default)
+
+'dbl-token.txt' = Allows for discordbots.org API functionality (Disabled by Default)
 
 'data-guild-id.txt' = The Guild ID the Bot will use for it's Data Storage (Disabled by Default)
 'data-channel-id.txt' = The Channel ID the Bot will use for it's Data Storage (Disabled by Default)
@@ -51,9 +52,10 @@ Or, as an alternative, you can choose to store your Config Variables within Syst
 ```
 ##### Optional:
 ```
-'PATCHYBOT-DBLTOKEN' = Allows for discordbots.org API functionality (Disabled by Default)
-
 'PATCHYBOT-PREFIX' = Customize the Command Prefix ('k.' by Default)
+'PATCHYBOT-CLOSEDACCESSUSER' = Allows for only a single UserID to access the bot (Disabled by Default)
+
+'PATCHYBOT-DBLTOKEN' = Allows for discordbots.org API functionality (Disabled by Default)
 
 'PATCHYBOT-DATAGUILDID' = The Guild ID the Bot will use for it's Data Storage (Disabled by Default)
 'PATCHYBOT-DATACHANNELID' = The Channel ID the Bot will use for it's Data Storage (Disabled by Default)
