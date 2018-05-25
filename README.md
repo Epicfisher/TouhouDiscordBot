@@ -53,7 +53,7 @@ Or, as an alternative, you can choose to store your Config Variables within Syst
 ##### Optional:
 ```
 'PATCHYBOT-PREFIX' = Customize the Command Prefix ('k.' by Default)
-'PATCHYBOT-CLOSEDACCESSUSER' = Allows for only a single UserID to access the bot (Disabled by Default)
+'PATCHYBOT-CLOSEDACCESSUSER' = Allows for only a single User ID to access the bot (Disabled by Default)
 
 'PATCHYBOT-DBLTOKEN' = Allows for discordbots.org API functionality (Disabled by Default)
 
