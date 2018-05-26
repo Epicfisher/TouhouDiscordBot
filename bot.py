@@ -78,9 +78,9 @@ helpMessage = """```
 
 ~~~~~Image Commands~~~~~
 """ + prefix + """image - Gets a Touhou image from Gelbooru.
-""" + prefix + """image""" + argumentChar + """Cirno+Frog""" + argumentKillChar + """ - Gets an image with 'Cirno' and a 'Frog'.
+""" + prefix + """image""" + argumentChar + """Cirno Frog""" + argumentKillChar + """ - Gets an image with 'Cirno' and a 'Frog'.
 """ + prefix + """nsfwimage - Gets a NSFW Touhou image. NSFW Channel required.
-""" + prefix + """nsfwimage""" + argumentChar + """Reimu+Solo""" + argumentKillChar + """ - Gets an NSFW image of just Reimu.
+""" + prefix + """nsfwimage""" + argumentChar + """Reimu Solo""" + argumentKillChar + """ - Gets an NSFW image of just Reimu.
 
 ~~~~~Quote Commands~~~~~
 """ + prefix + """quote - Gets a quote from a random Touhou game.
@@ -252,8 +252,8 @@ def setup_discord_bots_org_api(bot):
     
 ##################################################IMAGES############################################################
 async def PostImage(message, rating, tags, APILink):
-    image_seperator_char = '+'
-    image_space_char = ' '
+    image_seperator_char = ' '
+    image_space_char = '_'
 
     async with message.channel.typing():
         tags = "rating:" + rating + "+" + tags # Format and add the Rating into the total Tags
@@ -289,43 +289,92 @@ async def PostImage(message, rating, tags, APILink):
                 while tag.endswith(' '):
                     tag = tag[0:len(tag) - 1]
 
-                found_character = False
-                for character in character_names:
-                    if found_character:
-                        break
-                    character_array = character.split(" ")
-                    if len(character_array) == 2:
-                        for character_word in character_array:
-                            if tag.lower() == character_word.lower():
-                                character = character_array[1] + "_" + character_array[0]
+                character = ''
+                if tag.startswith("$") and tag.endswith("$"): # Disable Character Recognition
+                    tag = tag[1:-1] # Hide the symbols
+                else: # We don't want to disable Character Recognition
+                    swap_names_back = False
+                    found_character = False
+                    for character_name in character_names:
+                        if found_character:
+                            break
+                        character_array = character_name.split(" ")
+                        if len(character_array) >= 2:
+                            for character_word in character_array:
+                                tag_words = tag.lower().split(image_space_char)
+                                for tag_word in tag_words:
+                                    if tag_word == character_word.lower() and not character_word.lower() == 'no' and not character_word.lower() == 'giant' and not character_word.lower() == 'three' and not character_word.lower() == 'mischievous':
+                                        if len(character_array) > 2:
+                                            character = character_name.replace(" ", "_")
+                                        else:
+                                            character = character_array[1] + "_" + character_array[0]
+                                            swap_names_back = True
 
-                                html = await get(APILink + "?page=dapi&s=post&q=index&limit=1&json=1&pid=10&tags=" + tags + "+" + character) # We're going to check if our reversed name has 10 results
-                                if not "file_url" in html: # If it doesn't...
-                                    character = character_array[0] + "_" + character_array[1] # Swap the names around again back to it's original positions
-
-                                tag = character
+                                        found_character = True
+                                        break
+                        else:
+                            if tag.lower() == character_name.lower():
+                                character = character_name
+                                
                                 found_character = True
                                 break
 
-                raw_tag = tag
-                if tag.startswith('-'):
-                    raw_tag = raw_tag[1:]
+                if len(character) > 0:
+                    keep_testing = True
+                    try_end_touhou_tag = True
+                    got_character = False
+                    while keep_testing:
+                        keep_testing = False
 
-                is_good_tag = True
+                        html = await get(APILink + "?page=dapi&s=post&q=index&limit=1&json=1&pid=10&tags=" + tags + "+" + character) # We're going to check if our new name has atleast 10 results
+                        if not "file_url" in html: # If it doesn't...
+                            #print("Trying " + character)
+                            if swap_names_back:
+                                if character.startswith(character_array[1]):
+                                    character = character_array[0] + "_" + character_array[1] # Swap the names around again back to it's original positions
+                                else:
+                                    character = character_array[1] + "_" + character_array[0] # Swap the names around again back to it's reversed positions
+                                swap_names_back = False
+                                keep_testing = True
+                                if not try_end_touhou_tag:
+                                    character = character + "_(touhou)"
+                            if not character.endswith("_(touhou)") and swap_names_back == False and keep_testing == False and try_end_touhou_tag:
+                                character = character + "_(touhou)"
+                                if len(character_array) == 2:
+                                    swap_names_back = True
+                                keep_testing = True
+                                try_end_touhou_tag = False
+                        else: # If we were able to find atleast 10 images of our character tag...
+                            #print("Working " + character)
+                            keep_testing = False
+                            got_character = True
+                            tag = character
 
-                if raw_tag.startswith("rating"): # Disallow modification to the Rating tag
-                    is_good_tag = False
+                    if not got_character:
+                        #await message.channel.send("I couldn't find an image of your character '" + tag + "'!\nPro Tip: Don't want me to treat a tag as a character? Simple! Just let me know by putting a '$' symbol at the start and end of your tag!")
+                        #return
+                        tag = ''
 
-                if rating == "safe": # Disallow certain tags if we're supposed to be SFW
-                    for bad_tag in bad_sfw_tags: # Cycle through all bad SFW tags
-                        if raw_tag == bad_tag: # Check for a match with the current tag
-                            is_good_tag = False
-                            break
+                if len(tag) > 0:
+                    raw_tag = tag
+                    if tag.startswith('-'):
+                        raw_tag = raw_tag[1:]
 
-                if is_good_tag:
-                    additional_tags = additional_tags + tag + '+'
+                    is_good_tag = True
 
-                i = i + 1
+                    if raw_tag.startswith("rating"): # Disallow modification to the Rating tag
+                        is_good_tag = False
+
+                    if rating == "safe": # Disallow certain tags if we're supposed to be SFW
+                        for bad_tag in bad_sfw_tags: # Cycle through all bad SFW tags
+                            if raw_tag == bad_tag: # Check for a match with the current tag
+                                is_good_tag = False
+                                break
+
+                    if is_good_tag:
+                        additional_tags = additional_tags + tag + '+'
+
+                    i = i + 1
 
         if len(additional_tags) > 0:
             print("Using additional tags: '" + additional_tags[0:-1].replace(image_space_char, '_') + "'")
@@ -339,6 +388,11 @@ async def PostImage(message, rating, tags, APILink):
 
         while tags.endswith('+'):
             tags = tags[0:-1]  # Cut off the last '+'s
+
+        html = await get(APILink + "?page=dapi&s=post&q=index&limit=1&json=1&pid=1&tags=" + tags)
+        if not "file_url" in html:
+            await message.channel.send("I couldn't find an image!")
+            return
 
         #print("Using tags: '" + tags + "'")
 
@@ -374,7 +428,7 @@ async def PostImage(message, rating, tags, APILink):
                     await message.channel.send("I couldn't find an image!")
                     return
                 #else:
-                    #print("Dividing our search scope to '" + str(page_scope) + "'... [Attempt " + str(i) + "]") # Mostly for debug purposes
+                    #print("Dividing our search scope to '" + str(page_scope) + "'... [Attempt " + str(i) + "]") # Mainly for debug purposes
 
         messageEmbed = discord.Embed()
         messageEmbed.set_image(url=fileUrl)
