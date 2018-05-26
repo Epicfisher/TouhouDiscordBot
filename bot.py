@@ -252,10 +252,13 @@ def setup_discord_bots_org_api(bot):
     
 ##################################################IMAGES############################################################
 async def PostImage(message, rating, tags, APILink):
+    image_seperator_char = '+'
+    image_space_char = ' '
+
     async with message.channel.typing():
         tags = "rating:" + rating + "+" + tags # Format and add the Rating into the total Tags
 
-        bad_sfw_tags = ['nude', 'ass', 'anus', 'no_panties', 'no_bra', 'removing_panties', 'pussy_juice', 'breasts', 'nipples', 'topless', 'thighs', 'upskirt', 'rape', 'sex', 'masturbation', 'yuri', 'vore', 'tentacles', 'guro', 'blood']
+        bad_sfw_tags = ['nude', 'ass', 'anus', 'no_panties', 'no_bra', 'removing_panties', 'pussy_juice', 'vibrator', 'breasts', 'nipples', 'topless', 'thighs', 'upskirt', 'rape', 'sex', 'masturbation', 'implied_masturbation', 'yuri', 'vore', 'tentacles', 'guro', 'blood']
 
         arguments = GetArgumentsFromCommand(message.content)
 
@@ -277,7 +280,7 @@ async def PostImage(message, rating, tags, APILink):
 
             additional_tags = arguments[0]
             
-            tags_array = additional_tags.split("+")
+            tags_array = additional_tags.split(image_seperator_char)
             additional_tags = ""
             i = 0
             for tag in tags_array:
@@ -294,11 +297,11 @@ async def PostImage(message, rating, tags, APILink):
                     if len(character_array) == 2:
                         for character_word in character_array:
                             if tag.lower() == character_word.lower():
-                                character = character_array[1] + " " + character_array[0]
+                                character = character_array[1] + "_" + character_array[0]
 
-                                html = await get(APILink + "?page=dapi&s=post&q=index&limit=1&json=1&pid=10&tags=" + tags + "+" + character.replace(' ', '_')) # Check if our reversed name has 10 results
+                                html = await get(APILink + "?page=dapi&s=post&q=index&limit=1&json=1&pid=10&tags=" + tags + "+" + character) # We're going to check if our reversed name has 10 results
                                 if not "file_url" in html: # If it doesn't...
-                                    character = character_array[0] + " " + character_array[1] # Swap the names around again back to it's original positions
+                                    character = character_array[0] + "_" + character_array[1] # Swap the names around again back to it's original positions
 
                                 tag = character
                                 found_character = True
@@ -320,21 +323,24 @@ async def PostImage(message, rating, tags, APILink):
                             break
 
                 if is_good_tag:
-                    additional_tags = additional_tags + tag + "+"
+                    additional_tags = additional_tags + tag + '+'
 
                 i = i + 1
 
+        if len(additional_tags) > 0:
+            print("Using additional tags: '" + additional_tags[0:-1].replace(image_space_char, '_') + "'")
+
         if rating == "safe":
             for bad_tag in bad_sfw_tags: # Add a filter for all bad tags if we're SFW so they aren't shown
-                additional_tags = additional_tags + '-' + bad_tag + "+"
+                additional_tags = additional_tags + '-' + bad_tag + '+'
 
         if not additional_tags == None:
-            tags = tags + "+" + additional_tags.replace(" ", "_")
+            tags = tags + '+' + additional_tags.replace(image_space_char, "_")
 
-        while tags.endswith("+"):
-            tags = tags[0:len(tags) - 1]  # Cut off the last '+'s
+        while tags.endswith('+'):
+            tags = tags[0:-1]  # Cut off the last '+'s
 
-        print("Using tags: '" + tags + "'")
+        #print("Using tags: '" + tags + "'")
 
         page_scope = 20000
         i = 1
