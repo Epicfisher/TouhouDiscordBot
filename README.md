@@ -3,6 +3,8 @@ A Work-In-Progress Discord bot based on the largely popular Touhou series by ZUN
 
 *Official Bot Invite Link: https://discordapp.com/oauth2/authorize?client_id=408736647480475648&scope=bot*
 
+[![Discord Bots](https://discordbots.org/api/widget/servers/408736647480475648.svg)](https://discordbots.org/bot/408736647480475648)
+
 ## Features
 ### Commands
 The bot comes with plenty of fun Touhou-based commands
@@ -17,8 +19,13 @@ The bot comes with plenty of fun Touhou-based commands
 ## Setup
 ### Install Requirements
 To install requirements, you can install directly from the requirements.txt file
+#### Linux
 ```
 pip3 install -r requirements.txt
+```
+#### Windows
+```
+python -m pip install -r requirements.txt
 ```
 
 ### Config Variables
