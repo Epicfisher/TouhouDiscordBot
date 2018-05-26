@@ -78,7 +78,7 @@ helpMessage = """```
 
 ~~~~~Image Commands~~~~~
 """ + prefix + """image - Gets a Touhou image from Gelbooru.
-""" + prefix + """image""" + argumentChar + """Cirno+Frog""" + argumentKillChar + """ - Gets an image of 'Cirno' with a 'Frog'.
+""" + prefix + """image""" + argumentChar + """Cirno+Frog""" + argumentKillChar + """ - Gets an image with 'Cirno' and a 'Frog'.
 """ + prefix + """nsfwimage - Gets a NSFW Touhou image. NSFW Channel required.
 """ + prefix + """nsfwimage""" + argumentChar + """Reimu+Solo""" + argumentKillChar + """ - Gets an NSFW image of just Reimu.
 
@@ -255,7 +255,7 @@ async def PostImage(message, rating, tags, APILink):
     async with message.channel.typing():
         tags = "rating:" + rating + "+" + tags # Format and add the Rating into the total Tags
 
-        bad_sfw_tags = ['nude', 'ass', 'anus', 'no_panties', 'removing_panties', 'pussy_juice', 'breasts', 'nipples', 'topless', 'thighs', 'upskirt', 'rape', 'sex', 'masturbation', 'yuri', 'vore', 'tentacles', 'guro', 'blood']
+        bad_sfw_tags = ['nude', 'ass', 'anus', 'no_panties', 'no_bra', 'removing_panties', 'pussy_juice', 'breasts', 'nipples', 'topless', 'thighs', 'upskirt', 'rape', 'sex', 'masturbation', 'yuri', 'vore', 'tentacles', 'guro', 'blood']
 
         arguments = GetArgumentsFromCommand(message.content)
 
@@ -263,9 +263,6 @@ async def PostImage(message, rating, tags, APILink):
 
         if not arguments == False:
             character_names = []
-            character_positions = []
-
-            going_twice = False
             
             raw_characters_html = await get("http://touhou.wikia.com/wiki/Character_List") # API is too confusing for a simpleton like me so I guess I'll just parse the webpage HTML don't mind me
             raw_characters_html = raw_characters_html[raw_characters_html.index('id="Character_List"'):raw_characters_html.index('id="Unnamed_Characters"')]
@@ -298,8 +295,10 @@ async def PostImage(message, rating, tags, APILink):
                         for character_word in character_array:
                             if tag.lower() == character_word.lower():
                                 character = character_array[1] + " " + character_array[0]
-                                character_positions.append(i + 2)
-                                going_twice = True
+
+                                html = await get(APILink + "?page=dapi&s=post&q=index&limit=1&json=1&pid=10&tags=" + tags + "+" + character.replace(' ', '_')) # Check if our reversed name has 10 results
+                                if not "file_url" in html: # If it doesn't...
+                                    character = character_array[0] + " " + character_array[1] # Swap the names around again back to it's original positions
 
                                 tag = character
                                 found_character = True
@@ -315,8 +314,8 @@ async def PostImage(message, rating, tags, APILink):
                     is_good_tag = False
 
                 if rating == "safe": # Disallow certain tags if we're supposed to be SFW
-                    for bad_tag in bad_sfw_tags:
-                        if raw_tag == bad_tag:
+                    for bad_tag in bad_sfw_tags: # Cycle through all bad SFW tags
+                        if raw_tag == bad_tag: # Check for a match with the current tag
                             is_good_tag = False
                             break
 
@@ -337,69 +336,46 @@ async def PostImage(message, rating, tags, APILink):
 
         print("Using tags: '" + tags + "'")
 
-        going = True
-        while going:
-            page_scope = 20000
-            i = 1
+        page_scope = 20000
+        i = 1
 
-            worked = False
-            while not worked:
-                html = await get(APILink + "?page=dapi&s=post&q=index&limit=1&json=1&pid=" + str(randint(0, page_scope)) + "&tags=" + tags)
+        worked = False
+        while not worked:
+            html = await get(APILink + "?page=dapi&s=post&q=index&limit=1&json=1&pid=" + str(randint(0, page_scope)) + "&tags=" + tags)
 
-                try:
-                    fileUrl = html[html.index('file_url":"') + 11 : - 3]
-                    fileUrl = fileUrl.replace("\/", "/")
-                    fileUrl = fileUrl[0:fileUrl.index('"')]
+            try:
+                fileUrl = html[html.index('file_url":"') + 11 : - 3]
+                fileUrl = fileUrl.replace("\/", "/")
+                fileUrl = fileUrl[0:fileUrl.index('"')]
 
-                    source = html[html.index('source":"') + 9:]
-                    source = source[:source.index('"')]
-                    source = source.replace("\/", "/")
+                source = html[html.index('source":"') + 9:]
+                source = source[:source.index('"')]
+                source = source.replace("\/", "/")
 
-                    print("Posting Image: " + fileUrl)
-                    if len(source) > 0:
-                        print("Image Source: " + source)
+                print("Posting Image: " + fileUrl)
+                if len(source) > 0:
+                    print("Image Source: " + source)
 
-                    going_twice = False
-                    worked = True
-                except:
-                    i = i + 1
-                    if i <= 2:
-                        page_scope = int(page_scope / 2)
-                    else:
-                        page_scope = int(page_scope / 3)
+                worked = True
+            except:
+                i = i + 1
+                if i <= 2:
+                    page_scope = int(page_scope / 2)
+                else:
+                    page_scope = int(page_scope / 3)
 
-                    if page_scope < 1:
-                        if not going_twice:
-                            await message.channel.send("I couldn't find an image!")
-                            return
-                        else:
-                            worked = True # Escape the downloading images while loop
-
-                            for i in range(0, len(character_positions)):
-                                tags_list = tags.split('+')
-                                character_words = tags_list[character_positions[i]].split("_")
-                                if len(character_words) == 2:
-                                    character_words_new = character_words[1] + "_" + character_words[0]
-                                    tags = tags.replace("+" + character_words[0] + "_" + character_words[1], "+" + character_words_new)
-
-                            print("Trying new tags: '" + tags + "'")
-                    else:
-                        print("Dividing our search scope to '" + str(page_scope) + "'... [Attempt " + str(i) + "]")
-
-            if not going_twice:
-                going = False # If we're not going twice we're going out
-            if going_twice:
-                going_twice = False
+                if page_scope < 1:
+                    await message.channel.send("I couldn't find an image!")
+                    return
+                #else:
+                    #print("Dividing our search scope to '" + str(page_scope) + "'... [Attempt " + str(i) + "]") # Mostly for debug purposes
 
         messageEmbed = discord.Embed()
         messageEmbed.set_image(url=fileUrl)
         messageEmbed.add_field(name="Image URL", value=fileUrl, inline=False)
         if len(source) > 0:
             messageEmbed.add_field(name="Image Source",value=source, inline=False)
-        #else:
-            #messageEmbed.add_file(name="Image Source",value="None", inline=False)
-            #pass
-        
+
         await message.channel.send(embed=messageEmbed)
 
 ##################################################SEARCH API HANDLERS############################################################
@@ -962,7 +938,7 @@ async def on_message(message):
                     runningCommandsArray.append(message.author.id)
                     await handle_command(message, lowercaseMessage)
                     runningCommandsArray.remove(message.author.id)
-                    print("Handled Command '" + message.content + "' Sent By '" + str(message.author) + "'")
+                    print("Handled Command '" + message.content + "' Sent By '" + str(message.author) + "'\n")
 
 async def handle_command(message, lowercaseMessage):
     print("Handling Command '" + message.content + "' Sent By '" + str(message.author) + "'")
@@ -991,7 +967,6 @@ async def handle_command(message, lowercaseMessage):
         if lowercaseMessage == prefix + 'info':
             await message.channel.send(aboutMessage % (str(discord.__version__), round((time.time() - startTime) / 60, 1), str(len(client.guilds))))
             return
-            #(round(round(time.time() - startTime, 1) / 60, 1))))
         if lowercaseMessage.startswith(prefix + 'suggest'):
             arguments = GetArgumentsFromCommand(message.content)
 
