@@ -4,6 +4,7 @@ A Work-In-Progress Discord bot based on the largely popular Touhou series by ZUN
 *Official Bot Invite Link: https://discordapp.com/oauth2/authorize?client_id=408736647480475648&scope=bot*
 
 [![Discord Bots](https://discordbots.org/api/widget/status/408736647480475648.svg?noavatar=true)](https://discordbots.org/bot/408736647480475648)
+[![Discord Bots](https://discordbots.org/api/widget/servers/408736647480475648.svg?noavatar=true)](https://discordbots.org/bot/408736647480475648)
 
 ## Features
 ### Commands
