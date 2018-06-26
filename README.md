@@ -13,6 +13,7 @@ The bot comes with plenty of fun Touhou-based commands
 * Post Touhou images (SFW and NSFW) using the Gelbooru API
 * Post Touhou quotes from the mainline PC Games (6-16)
 * Query touhouwiki.net for pages and portraits of characters, albums, people, etc.
+* Play Touhou Music from any of the PC Games, including doujin and arranges
 
 * ...And More! See all commands in-bot by executing the command 'k.help'
 ```
