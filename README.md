@@ -32,7 +32,7 @@ python -m pip install -r requirements.txt
 
 ### Config Variables
 #### Config Files
-You can store your Config Variables locally within files. Just ensure they are in the same directory as your ```bot.py``` file
+You can store your Config Variables locally within files. Just ensure they are in the same directory as your ```DiscordBot.py``` file
 
 ##### Mandatory:
 ```
