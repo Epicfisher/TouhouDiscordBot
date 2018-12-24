@@ -281,7 +281,10 @@ async def connect_voice(voice_channel):
         else:
             await voice_channel.disconnect()
             await bot.client.disconnect()
-            vc = await voice_channel.connect()
+            try:
+                vc = await voice_channel.connect()
+            except:
+                pass
 
     return vc
 
