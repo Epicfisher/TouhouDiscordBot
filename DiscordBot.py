@@ -151,11 +151,15 @@ async def on_ready():
     global suggestions_guild
     global suggestions_channel
 
-    bot.data_guild = bot.client.get_guild(int(bot.data_guild_id))
-    bot.data_channel = bot.data_guild.get_channel(int(bot.data_channel_id))
+    if not bot.data_guild_id == None:
+        bot.data_guild = bot.client.get_guild(int(bot.data_guild_id))
+    if not bot.data_channel_id == None:
+        bot.data_channel = bot.data_guild.get_channel(int(bot.data_channel_id))
 
-    bot.suggestions_guild = bot.client.get_guild(int(bot.suggestions_guild_id))
-    bot.suggestions_channel = bot.suggestions_guild.get_channel(int(bot.suggestions_channel_id))
+    if not bot.suggestions_guild_id == None:
+        bot.suggestions_guild = bot.client.get_guild(int(bot.suggestions_guild_id))
+    if not bot.suggestions_channel_id == None:
+        bot.suggestions_channel = bot.suggestions_guild.get_channel(int(bot.suggestions_channel_id))
 
     allow_commands = True # Now we're truly ready to begin taking commands
 
