@@ -223,10 +223,16 @@ class RadioPlayer:
 
     async def VoteSkip(self, message):
         if self.vc.is_playing():
-            if message.author.id in self.vote_skippers:
-                await message.channel.send("You've already Voted to Skip this Song!")
-                return
-            self.vote_skippers.append(message.author.id)
+            Voteskipping = False
+
+            if len(self.vote_skippers) >= math.ceil(float(len(self.voice_channel.members) - 1) / float(2)):
+                Voteskipping = True
+
+            if not Voteskipping:
+                if message.author.id in self.vote_skippers:
+                    await message.channel.send("You've already Voted to Skip this Song!")
+                    return
+                self.vote_skippers.append(message.author.id)
 
             #print(str(bot.music_cooldowntime - math.floor(time.time() - self.skip_cooldown)))
             print("Voted to Skip. " + str(len(self.vote_skippers)) + " / " +  str(len(self.voice_channel.members) - 1) + " Need " + str(math.ceil(float(len(self.voice_channel.members) - 1) / float(2))))
