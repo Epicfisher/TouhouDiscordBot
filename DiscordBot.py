@@ -136,9 +136,9 @@ def setup_discord_bots_org_api(bot):
 def run_discord_bot(token):
     print("Loading Opus...")
     if not discord.opus.is_loaded():
-        discord.opus.load_opus('libopus.so')
+        discord.opus.load_opus('opus')
     print("Success!\n")
-    
+
     print("Starting Bot...\n")
     bot.client.run(token)
 
