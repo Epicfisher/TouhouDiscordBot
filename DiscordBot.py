@@ -58,8 +58,8 @@ except:
 
 bot.startTime = time()
 
-if not os.path.exists(os.path.dirname(os.path.realpath(__file__)) + '\\temp_music\\'):
-    os.makedirs(os.path.dirname(os.path.realpath(__file__)) + '\\temp_music\\')
+#if not os.path.exists(os.path.dirname(os.path.realpath(__file__)) + '\\temp_music\\'):
+    #os.makedirs(os.path.dirname(os.path.realpath(__file__)) + '\\temp_music\\')
 
 bot.cooldown_message = "Hey, slow down! I can only work so fast on my own you know!"
 
