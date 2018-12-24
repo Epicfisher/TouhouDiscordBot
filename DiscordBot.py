@@ -134,7 +134,7 @@ def setup_discord_bots_org_api(bot):
     #pass
 
 def run_discord_bot(token):
-    OPUS_LIBS = ['libopus-0.x86.dll', 'libopus-0.x64.dll', 'libopus-0.dll', 'libopus.so.0', 'libopus.0.dylib', 'opus']
+    opus_libs = ['libopus-0.x86.dll', 'libopus-0.x64.dll', 'libopus-0.dll', 'libopus.so.0', 'libopus.0.dylib', 'opus']
 
     if not discord.opus.is_loaded():
         for opus_lib in opus_libs:
