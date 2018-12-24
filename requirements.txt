@@ -1,6 +1,7 @@
 asyncio
 aiohttp
 https://github.com/Rapptz/discord.py/archive/rewrite.zip#egg=discord.py[voice]
+opuslib
 dblpy
 yarl<1.2
 youtube-dl
