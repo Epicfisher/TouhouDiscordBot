@@ -84,6 +84,8 @@ musicHelpMessage = """```
 musicHelpMessage = """```asciidoc
 = Patchouli Knowledge Music Help =
 
+PLEASE NOTE MUSIC PLAYBACK IS NOT 24/7 AND COULD RESTART
+
 """ + createHelpHeader("Music Operator Commands ('Manage Channels' Required)") + """
 """ + bot.prefix + """skip :: Skips the currently playing Song.
 """ + bot.prefix + """togglequeue :: Enables or disables the Song Queue.
