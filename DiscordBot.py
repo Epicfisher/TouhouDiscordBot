@@ -134,10 +134,21 @@ def setup_discord_bots_org_api(bot):
     #pass
 
 def run_discord_bot(token):
-    #print("Loading Opus...")
-    #if not discord.opus.is_loaded():
-        #discord.opus.load_opus('opus')
-    #print("Success!\n")
+    OPUS_LIBS = ['libopus-0.x86.dll', 'libopus-0.x64.dll', 'libopus-0.dll', 'libopus.so.0', 'libopus.0.dylib', 'opus']
+
+    if not discord.opus.is_loaded():
+        for opus_lib in opus_libs:
+            try:
+                discord.opus.load_opus(opus_lib)
+                print("Loaded Opus Lib!")
+                break
+            except OSError:
+                pass
+    else:
+        print("Loaded Opus!")
+
+    if not discord.opus.is_loaded():
+        print("Failed to Load Opus!")
 
     print("Starting Bot...\n")
     bot.client.run(token)
