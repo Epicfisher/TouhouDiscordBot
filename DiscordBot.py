@@ -140,7 +140,7 @@ def run_discord_bot(token):
         for opus_lib in opus_libs:
             try:
                 discord.opus.load_opus(opus_lib)
-                print("Loaded Opus Lib!")
+                print("Loaded Opus Library!")
                 break
             except OSError:
                 pass
@@ -157,7 +157,7 @@ def run_discord_bot(token):
 @bot.client.event
 async def on_ready():
     #await bot.client.change_presence(status=discord.Status.online, activity=discord.Game(bot.prefix + "help for Help!"))
-    await bot.client.change_presence(status =discord.Status.online, activity=discord.Streaming(name=bot.prefix + "help for Help!", url="https://www.twitch.tv/patchouli_knowledge_bot", type=1))
+    await bot.client.change_presence(status=discord.Status.online, activity=discord.Streaming(name=bot.prefix + "help for Help!", url="https://www.twitch.tv/patchouli_knowledge_bot", type=1))
 
     global allow_commands
 
