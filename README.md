@@ -1,3 +1,6 @@
+# THIS BRANCH OF THE BOT USES 'FLAT FILE' AND IS NO LONGER BEING ACTIVELY DEVELOPED
+# IT IS HIGHLY RECOMMENDED TO SWITCH TO THE NEW 'MODULAR' VERSION IN THE MASTER BRANCH
+
 # Touhou Discord Bot
 A Work-In-Progress Discord bot based on the largely popular Touhou series by ZUN.
 
