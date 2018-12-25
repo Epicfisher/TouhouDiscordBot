@@ -38,7 +38,7 @@ aboutMessage = """```asciidoc
 - I'm currently playing music for %s servers.
 
 - I'm open source! git.io/vpSEv
-- I have a community server! discord.gg/jnKMSSE
+- I have a community/support server! discord.gg/jnKMSSE
 
 - Made by @Epicfisher#6763
 ```"""
