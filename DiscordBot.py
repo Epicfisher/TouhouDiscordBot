@@ -24,6 +24,7 @@ from time import time
 import contextlib
 from youtube_dl import version as youtube_dl # THIS ISN'T ACTUALLY YOUTUBE_DL IT'S THE VERSION OBJECT IDK I ONLY NEED THAT THOUGH SO IT'S FINE
 import discord
+import dbl
 
 #Bot#
 import bot
