@@ -113,8 +113,11 @@ class DiscordBotsOrgAPI:
                 return
         self.token = dbltoken
 
-        self.dblpy = dbl.Client(self.bot, self.token)
-        self.bot.loop.create_task(self.update_stats())
+        try:
+            self.dblpy = dbl.Client(self.bot, self.token)
+            self.bot.loop.create_task(self.update_stats())
+        except Exception as e:
+            print("Failed to Initialise Discord Bots API!\n" + str(e))
 
     async def update_stats(self):
         while True:
