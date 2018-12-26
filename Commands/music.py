@@ -385,7 +385,7 @@ async def play_music(message):
             await message.channel.send("Hey, I'm already playing music in '" + str(bot.radio_players[i].vc.channel) + "'!")
             return
 
-    if len(bot.radio_players) >= 5 and not message.author.id == 428574847300403202: # Beta Testing Thingy
+    if len(bot.radio_players) >= 5 and not message.author.id == bot.owner_id: # Beta Testing Thingy
         print("Prevented Too Many Music Servers!")
         await message.channel.send("<Hey! Sorry for the inconvenience, but this command is currently being tested in public closed-beta! Only the first *5 servers* who use this command are currently allowed to listen to Music. I'm currently in the process of testing whether or not my service provider would be able to handle multiple audio streams to dozens of servers at once, and so I'm starting small to benchmark it's performance. If you were dying to try this command, either try again later when (hopefully) a server stops playing music and a test slot opens (`k.info` can help you there), or wait for the full unrestricted release of this command. While you wait, why not try the new-and-improved `k.image` command? `k.help` for more! Sorry again, and thanks for being patient. -Epicfisher>")
         return
@@ -1432,12 +1432,12 @@ async def volume(message):
 commands.Add("playing", playing)
 commands.Add("play%", play)
 commands.Add("queue%", queue)
-commands.Add("request%", queue)
+commands.Add("request%", queue, count=False)
 commands.Add("stop", stop)
 commands.Add("stopafter", stopafter)
 commands.Add("pause", pause)
-commands.Add("unpause", pause)
-commands.Add("resume", pause)
+commands.Add("unpause", pause, count=False)
+commands.Add("resume", pause, count=False)
 commands.Add("skip", skip)
 commands.Add("voteskip", voteskip)
 commands.Add("togglequeue", togglequeue)
