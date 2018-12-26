@@ -72,3 +72,6 @@ Or, as an alternative, you can choose to store your Config Variables within Syst
 'PATCHYBOT-SUGGESTIONSGUILDID' = The Guild ID the Bot will output Suggestions to (Disabled by Default)
 'PATCHYBOT-SUGGESTIONSCHANNELID' = The Channel ID the Bot will output Suggestions to (Disabled by Default)
 ```
+
+## Usage
+The Bot can be started by running the ```DiscordBot.py``` file in your preferred version of Python 3
