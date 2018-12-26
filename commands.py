@@ -4,10 +4,15 @@ class Command:
     name = ""
     command = None
 
-def Add(name, command):
+    count = True
+
+def Add(name, command, count=True):
     _command = Command()
     _command.name = name
     _command.command = command
+
+    _command.count = count
+    
     commands.append(_command)
 
     #print("Loaded Command '" + bot.prefix + name + "'")
