@@ -1,22 +1,3 @@
-# Old global imports before MODULATION
-'''
-import sys, os
-from concurrent.futures import ThreadPoolExecutor
-from time import time
-from datetime import datetime
-import aiohttp, asyncio
-import socket
-import contextlib
-import discord
-import dbl
-from youtube_dl import YoutubeDL
-import urllib.parse, urllib.request
-import html
-from random import randint
-import math
-#from urllib.request import urlopen
-'''
-
 import sys, os
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
@@ -152,7 +133,7 @@ def run_discord_bot(token):
         print("Loaded Opus!")
 
     if not discord.opus.is_loaded():
-        print("Failed to Load Opus!")
+        print("Failed to Load Opus! Music playback will not work!")
 
     print("Starting Bot...\n")
     bot.client.run(token)
