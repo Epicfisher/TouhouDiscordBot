@@ -1179,7 +1179,7 @@ async def handle_music_queue(message):
         await message.channel.send(queue_string)
         return
     else:
-        if not check_valid_request(message, radio_player):
+        if not await check_valid_request(message, radio_player):
             return
 
         async with message.channel.typing():
@@ -1192,7 +1192,7 @@ async def handle_music_queue(message):
             if song == False:
                 return
 
-            if not check_valid_request(message, radio_player):
+            if not await check_valid_request(message, radio_player):
                 return
             radio_player.queue.append(song)
 
