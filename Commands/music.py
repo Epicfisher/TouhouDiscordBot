@@ -1116,6 +1116,24 @@ async def playing_song(message):
 
     return
 
+async def check_valid_request(message, radio_player):
+    if len(radio_player.queue) >= 10:
+        await message.channel.send("The Song Queue is full!")
+        return False
+    if not message.author in radio_player.voice_channel.members:
+        await message.channel.send("How are you ever going to listen to that request if you're not in the Voice Channel?")
+        return False
+    #if message.author in radio_player.voice_channel.members:
+    spam_request = False # For keeping track of if the User has two song instances in the queue, False for 0 and True for 1. If it finds another while it's True, the User has two Song Requests.
+    for i in range(0, len(radio_player.queue)):
+        if message.author.id == radio_player.queue[i].caller_id and not await check_music_manage_channel(message, False):
+            if spam_request:
+                await message.channel.send("You've already requested two songs to the Queue!")
+                return False
+            spam_request = True
+
+    return True
+
 async def handle_music_queue(message):
     if await check_music_direct_message(message) == False:
         return False
@@ -1161,20 +1179,9 @@ async def handle_music_queue(message):
         await message.channel.send(queue_string)
         return
     else:
-        if len(radio_player.queue) >= 10:
-            await message.channel.send("The Song Queue is full!")
+        if not check_valid_request(message, radio_player):
             return
-        if not message.author in radio_player.voice_channel.members:
-            await message.channel.send("How are you ever going to listen to that request if you're not in the Voice Channel?")
-            return
-        #if message.author in radio_player.voice_channel.members:
-        spam_request = False
-        for i in range(0, len(radio_player.queue)):
-            if message.author.id == radio_player.queue[i].caller_id and not await check_music_manage_channel(message, False):
-                if spam_request:
-                    await message.channel.send("You've already requested two songs to the Queue!")
-                    return
-                spam_request = True
+
         async with message.channel.typing():
             query = arguments[0]
 
@@ -1183,6 +1190,9 @@ async def handle_music_queue(message):
             else:
                 song = await get_song(message, message.author.id, False, query, False, False, radio_player.song.title)
             if song == False:
+                return
+
+            if not check_valid_request(message, radio_player):
                 return
             radio_player.queue.append(song)
 

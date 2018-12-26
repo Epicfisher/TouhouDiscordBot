@@ -1,22 +1,3 @@
-# Old global imports before MODULATION
-'''
-import sys, os
-from concurrent.futures import ThreadPoolExecutor
-from time import time
-from datetime import datetime
-import aiohttp, asyncio
-import socket
-import contextlib
-import discord
-import dbl
-from youtube_dl import YoutubeDL
-import urllib.parse, urllib.request
-import html
-from random import randint
-import math
-#from urllib.request import urlopen
-'''
-
 import sys, os
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
@@ -113,8 +94,11 @@ class DiscordBotsOrgAPI:
                 return
         self.token = dbltoken
 
-        self.dblpy = dbl.Client(self.bot, self.token)
-        self.bot.loop.create_task(self.update_stats())
+        try:
+            self.dblpy = dbl.Client(self.bot, self.token)
+            self.bot.loop.create_task(self.update_stats())
+        except Exception as e:
+            print("Failed to Initialise Discord Bots API!\n" + str(e))
 
     async def update_stats(self):
         while True:
@@ -149,7 +133,7 @@ def run_discord_bot(token):
         print("Loaded Opus!")
 
     if not discord.opus.is_loaded():
-        print("Failed to Load Opus!")
+        print("Failed to Load Opus! Music playback will not work!")
 
     print("Starting Bot...\n")
     bot.client.run(token)
@@ -284,6 +268,10 @@ async def handle_command(message, lowercaseMessage):
 
         #await message.channel.send("Sorry, but I'm not quite sure what you're asking me to do.")
     except Exception as e:
+        try:
+            bot.runningCommandsArray.remove(message.author.id)
+        except:
+            pass
         print("USER HAD AN ERROR! BIG BAD<\n'" + str(message.content) + "'\n" +  str(e) + "\n>")
         await message.channel.send("Whoops! Something went wrong in my head while trying to figure that one out... Sorry!")
 
