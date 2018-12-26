@@ -18,6 +18,8 @@ max_threads = None
 
 thread_pool = None
 
+owner_id = 428574847300403202 # Special ID of the Bot's Owner. This is for special commands, such as temporary debug and test commands. See test.py
+
 hex_color = 0x593695
 
 running_threads = 0
