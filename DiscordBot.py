@@ -268,6 +268,10 @@ async def handle_command(message, lowercaseMessage):
 
         #await message.channel.send("Sorry, but I'm not quite sure what you're asking me to do.")
     except Exception as e:
+        try:
+            bot.runningCommandsArray.remove(message.author.id)
+        except:
+            pass
         print("USER HAD AN ERROR! BIG BAD<\n'" + str(message.content) + "'\n" +  str(e) + "\n>")
         await message.channel.send("Whoops! Something went wrong in my head while trying to figure that one out... Sorry!")
 
