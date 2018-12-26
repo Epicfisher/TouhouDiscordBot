@@ -17,7 +17,7 @@ from commands import commands # Access to commands array
 
 import Commands.ping
 import Commands.invite
-#import(Commands.test
+import Commands.test
 import Commands.help
 import Commands.info
 import Commands.suggest
@@ -126,12 +126,12 @@ def run_discord_bot(token):
         for opus_lib in opus_libs:
             try:
                 discord.opus.load_opus(opus_lib)
-                print("Loaded Opus Library!")
+                print("Loaded External Opus Library!")
                 break
             except OSError:
                 pass
     else:
-        print("Loaded Opus!")
+        print("Loaded System Opus Library!")
 
     if not discord.opus.is_loaded():
         print("Failed to Load Opus! Music playback will not work!")
@@ -197,12 +197,12 @@ async def on_voice_state_update(member, before, after):
 ##################################################JOINING AND LEAVING LOGS############################################################
 @bot.client.event
 async def on_guild_join(guild):
-    print("I have been Invited to a Server!")
+    print("I have been Invited to a Server!\n")
     return
 
 @bot.client.event
 async def on_guild_remove(guild):
-    print("I have been Removed from a Server!")
+    print("I have been Removed from a Server!\n")
     return
 
 ##################################################COMMAND HANDLER############################################################

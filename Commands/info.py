@@ -89,7 +89,12 @@ def GetSpecialQuote():
         return "There have been lots of mice in the library recently."
 
 async def info(message):
-    await message.channel.send(aboutMessage % (GetSpecialQuote(), str(discord.__version__), round((time() - bot.startTime) / 60, 1), str(len(commands.commands)), str(len(bot.client.guilds)), str(len(bot.radio_players))))
+    true_commands = 0
+    for command in commands.commands:
+        if command.count:
+            true_commands = true_commands + 1
+    
+    await message.channel.send(aboutMessage % (GetSpecialQuote(), str(discord.__version__), round((time() - bot.startTime) / 60, 1), str(true_commands), str(len(bot.client.guilds)), str(len(bot.radio_players))))
     return
 
 ###
