@@ -108,7 +108,7 @@ class DiscordBotsOrgAPI:
                 print('Posted server count (' + str(len(self.bot.guilds)) + ")")
             except Exception as e:
                 #print('Failed to post server count\n{}: {}\n'.format(type(e).__name__, e))
-                print('Failed to post server count{\n' + e + '\n}')
+                print('Failed to post server count{\n' + str(e) + '\n}')
 
             await asyncio.sleep(1800) # Wait 30 minutes in seconds
 
