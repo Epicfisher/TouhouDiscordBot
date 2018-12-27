@@ -503,15 +503,17 @@ async def get_song(message, caller_user_id, download_song, query, doujin, pc98, 
         'quiet': True,
         'no_warnings': True,
         'usenetrc': True
+        #'skip_download': True,
+        #'''
+        #'postprocessors': [{
+            #'key': 'FFmpegExtractAudio',
+            #'preferredcodec': 'mp3',
+            #'preferredquality': '192',
+        #}],
+        #'''
     }
 
     #'ignoreerrors': True,
-
-    #'postprocessors': [{
-        #'key': 'FFmpegExtractAudio',
-        #'preferredcodec': 'mp3',
-        #'preferredquality': '192',
-    #}],
 
     doujin_title_tags = ['arrange', 'arrangement', 'instrumental', 'rock', 'metal', 'orchestral', 'piano', 'synthesia', 'midi', 'house', 'vocal', 'subs']
     bad_title_tags = ['demo', 'preview', 'intro', 'crossfade', 'speedpaint', 'osu']
@@ -1349,6 +1351,10 @@ async def change_volume(message):
         except:
             pass
 
+        if volume.endswith('force'):
+            force = True
+            volume = volume[:-5]
+
     string_volume = str(volume)
 
     if len(bot.radio_players) > 0:
@@ -1358,11 +1364,11 @@ async def change_volume(message):
                     try:
                         volume = float(volume)
                     except:
-                        await message.channel.send("You need to give me an actual volume number!\nMinimum value is 0.0, maximum value is 1.0, default is 0.5")
+                        await message.channel.send("You need to give me an actual volume number!\n(Minimum value is 0.0, maximum value is 1.0. Default is 0.5)")
                         return
 
                     if volume > 1.0 and not force:
-                        await message.channel.send("B-But if I did that, that would wake up the mistress!\n(Pro Tip: Force by adding ',force' to the end of your command. Might be loud. Don't say I didn't warn you)")
+                        await message.channel.send("But if I did that, that would wake up the mistress!\n(Force by adding 'force' to the end of your command. Might be loud. Don't say I didn't warn you)")
                         return
 
                     if volume > 10000:
