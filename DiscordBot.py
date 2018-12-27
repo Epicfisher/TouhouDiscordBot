@@ -106,7 +106,7 @@ class DiscordBotsOrgAPI:
             #print('Attempting to post server count')
             try:
                 await self.dblpy.post_server_count()
-                print('Posted server count (' + str(len(self.bot.guilds)) + ")")
+                print('Posted server count (' + str(len(self.bot.guilds)) + ")\n")
             except Exception as e:
                 #print('Failed to post server count\n{}: {}\n'.format(type(e).__name__, e))
                 print('Failed to post server count{\n' + str(e) + '\n}')
@@ -272,7 +272,12 @@ async def handle_command(message, lowercaseMessage):
         try:
             bot.runningCommandsArray.remove(message.author.id)
         except:
+            if message.author.id in bot.runningCommandsArray:
+                print("FAILED TO REMOVE RUNNING COMMAND INSTANCE FOR '" + str(message.author) + "'. THIS IS VERY VERY BIG BAD")
+            else:
+                print("User '" + str(message.author) + "' has no Running Command Instance. Please advise. Is this bad? Or ok?")
             pass
+
         print("USER HAD AN ERROR! BIG BAD<\n'" + str(message.content) + "'\n" +  str(e) + "\n>")
         await message.channel.send("Whoops! Something went wrong in my head while trying to figure that one out... Sorry!")
 

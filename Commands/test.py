@@ -29,18 +29,6 @@ async def exception(message):
     raise ValueError('Manual test exception thrown.')
     return
 
-async def test(message):
-    if not tester_check(message):
-        return
-
-    counter = 0
-    tmp = await message.channel.send('Calculating messages...')
-    async for log in bot.client.logs_from(message.channel, limit=100):
-        if log.author == message.author:
-            counter += 1
-
-    await tmp.edit('You have {} messages.'.format(counter))
-
 async def sleep(message):
     if not tester_check(message):
         return
@@ -78,7 +66,6 @@ async def deadlythread(message):
 
 commands.Add("test.diag", diagnostics, count=False)
 commands.Add("test.exception", exception, count=False)
-commands.Add("test.test", test, count=False)
 commands.Add("test.sleep", sleep, count=False)
 commands.Add("test.raritytest", cardraritytest, count=False)
 commands.Add("test.deadlythread", deadlythread, count=False)

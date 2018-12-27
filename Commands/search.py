@@ -71,11 +71,11 @@ async def get_search(message, getUrls, getImage):
 
         if getUrls:
             if getUrls and getImage: # Lookup
-                messageEmbed = discord.Embed(title="Lookup Result For '" + query + "'")
+                messageEmbed = discord.Embed(title="Lookup Result For '" + query + "'", color=bot.hex_color)
 
                 messageEmbed.add_field(name="Page URL", value="https://en.touhouwiki.net/wiki/" + searchResults[0], inline=False)
             else: # Regular Search
-                messageEmbed = discord.Embed(title="Search Results For '" + query + "'")
+                messageEmbed = discord.Embed(title="Search Results For '" + query + "'", color=bot.hex_color)
 
                 for i in range(0, len(searchResults)):
                     try:
@@ -96,7 +96,7 @@ async def get_search(message, getUrls, getImage):
                     await message.channel.send("I wasn't able to find any photos in my library on '" + query + "'.")
                     return
 
-                messageEmbed = discord.Embed(title=image_info.Name.replace("_", " ") + "'s Portrait")
+                messageEmbed = discord.Embed(title=image_info.Name.replace("_", " ") + "'s Portrait", color=bot.hex_color)
 
             if image_info:
                 messageEmbed.set_image(url=image_info.Url)
