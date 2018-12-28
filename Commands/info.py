@@ -67,6 +67,8 @@ def GetSpecialQuote():
     # Special Holiday Quotes! Hooray Again!
     if bot.season == "christmas":
         return "Happy Holidays! Get into the spirit with '" + bot.prefix + "image christmas'!"
+    if bot.season == "new year":
+        return "Happy New Year! Celebrate with '" + bot.prefix + "image fireworks'!"
     if bot.season == "halloween":
         return "Happy Halloween! Get spooked with '" + bot.prefix + "image halloween'!"
 
@@ -93,7 +95,7 @@ async def info(message):
     for command in commands.commands:
         if command.count:
             true_commands = true_commands + 1
-    
+
     await message.channel.send(aboutMessage % (GetSpecialQuote(), str(discord.__version__), round((time() - bot.startTime) / 60, 1), str(true_commands), str(len(bot.client.guilds)), str(len(bot.radio_players))))
     return
 

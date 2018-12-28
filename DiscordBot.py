@@ -47,7 +47,10 @@ bot.startTime = time()
 bot.cooldown_message = "Hey, slow down! I can only work so fast on my own you know!"
 
 if datetime.now().month == 12:
-    bot.season = "christmas"
+    if datetime.now().day <= 25:
+        bot.season = "christmas"
+    else:
+        bot.season = "new year"
 if datetime.now().month == 10:
     bot.season = "halloween"
 
