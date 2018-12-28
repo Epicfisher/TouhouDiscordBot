@@ -11,6 +11,8 @@ def get_ping_message():
         return "Jingle, jingle! Oh, uh, Pong!"
     if bot.season == "halloween":
         return "Who's there?! Oh, it's just you. Pong!"
+    if bot.season == "new year":
+        return "Pong, pong! Happy new year!"
 
     return "Pong!"
 
