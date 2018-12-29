@@ -252,8 +252,8 @@ async def on_message(message):
             return
         else:
             bot.runningCommandsArray.append(message.author.id)
-            await handle_command(message, lowercaseMessage)
-            bot.runningCommandsArray.remove(message.author.id)
+            if await handle_command(message, lowercaseMessage):
+                bot.runningCommandsArray.remove(message.author.id)
             print("Handled Command '" + message.content + "' Sent By '" + str(message.author) + "'\n")
 
 async def handle_command(message, lowercaseMessage):
@@ -264,11 +264,11 @@ async def handle_command(message, lowercaseMessage):
             if commands[i].name.endswith('%'):
                 if lowercaseMessage.startswith(commands[i].name[:-1]):
                     await commands[i].command(message)
-                    return
+                    return True
             else:
                 if lowercaseMessage == commands[i].name:
                     await commands[i].command(message)
-                    return
+                    return True
 
         #await message.channel.send("Sorry, but I'm not quite sure what you're asking me to do.")
     except Exception as e:
@@ -281,8 +281,12 @@ async def handle_command(message, lowercaseMessage):
                 print("User '" + str(message.author) + "' has no Running Command Instance. Please advise. Is this bad? Or ok?")
             pass
 
-        print("USER HAD AN ERROR! BIG BAD<\n'" + str(message.content) + "'\n" +  str(e) + "\n>")
-        await message.channel.send("Whoops! Something went wrong in my head while trying to figure that one out... Sorry!")
+        try:
+            print("USER HAD AN ERROR! BIG BAD<\n'" + str(message.content) + "'\n" +  str(e) + "\n>")
+            await message.channel.send("Whoops! Something went wrong in my head while trying to figure that one out... Sorry!")
+        except:
+            pass
+        return False
 
 print("""Now starting with:
 - discord.py Version: """ + str(discord.__version__) + """
