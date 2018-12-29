@@ -271,6 +271,7 @@ async def handle_command(message, lowercaseMessage):
                     return True
 
         #await message.channel.send("Sorry, but I'm not quite sure what you're asking me to do.")
+        return True
     except Exception as e:
         try:
             bot.runningCommandsArray.remove(message.author.id)
