@@ -22,6 +22,40 @@ async def diagnostics(message):
 
     await message.channel.send(diagMessage % (len(bot.runningCommandsArray) - 1))
 
+async def radio(message):
+    if not tester_check(message):
+        return
+
+    for i in range(0, len(bot.radio_players)):
+        player = bot.radio_players[i]
+        print("Player " + str(i) + ":\n---")
+
+        print(" vc: " + str(player.vc))
+        print(" Voice Channel: " + str(player.voice_channel))
+        print(" Index in Radios: " + str(player.index_in_radios))
+        print(" Initialised: " + str(player.initialised))
+        print(" Play Message: " + str(player.play_message))
+        print(" Stop After: " + str(player.stop_after))
+        print(" Queue Size: " + str(len(player.queue)))
+        print(" Use Queue: " + str(player.use_queue))
+        print(" Automatic Queue Disable: " + str(player.automatic_queue_disable))
+        print(" Preparing Queue: " + str(player.preparing_queue))
+        print(" Song: " + str(player.song))
+        print(" Next Song: " + str(player.next_song))
+        print(" Vote Skippers Size: " + str(len(player.vote_skippers)))
+        print(" Skip Cooldown: " + str(player.skip_cooldown))
+        print(" Saved Query: " + str(player.saved_query))
+        print(" Playing Loop: " + str(player.playing_loop))
+        print(" Volume: " + str(player.volume))
+        print(" Sleep: " + str(player.sleep))
+
+        print()
+
+        print(" Is Playing: " + str(player.vc.is_playing()))
+        print(" Is Paused: " + str(player.vc.is_paused()))
+
+        print("---")
+
 async def exception(message):
     if not tester_check(message):
         return
@@ -65,6 +99,7 @@ async def deadlythread(message):
 ###
 
 commands.Add("test.diag", diagnostics, count=False)
+commands.Add("test.radio", radio, count=False)
 commands.Add("test.exception", exception, count=False)
 commands.Add("test.sleep", sleep, count=False)
 commands.Add("test.raritytest", cardraritytest, count=False)
