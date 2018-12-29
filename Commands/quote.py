@@ -202,6 +202,9 @@ async def fix_quote(givenMessage):
     #givenMessage.Message = givenMessage.Message.replace("*", "\*") # lol I tried to escape the asterisks that already existed in the quote here because I thought discord was well-written and would handle it hahahaha what was I thinking
     givenMessage.Message = givenMessage.Message.replace("*", "") # Since we're going to be using italics in our Discord message, having any other asterisks in our quote would break the message. Unfortunately, as a result, we're going to have to get rid of every other asterisk.
 
+    if '|' in givenMessage.Message: # Some quotes on the site like to have comments or other additional notes included within their Quote Messages. We don't really *want* those, so we're going to remove them.
+        givenMessage.Message = givenMessage.Message[:givenMessage.Message.index('|')] # Remove them.
+
     return givenMessage
 
 async def quote(message):
