@@ -62,16 +62,16 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
                 while tag.endswith(' '):
                     tag = tag[0:-1]
 
-                character_translations_before = ['patchy', 'raymoo', 'flan']
-                character_translations_after = ['patchouli', 'reimu', 'flandre']
+                translations_before = ['patchy', 'raymoo', 'flan', 'gif']
+                translations_after = ['patchouli', 'reimu', 'flandre', 'animated_gif']
 
                 raw_tag = tag
                 if tag.startswith('-'):
                     raw_tag = raw_tag[1:]
 
-                for i in range(0, len(character_translations_before)):
-                    if raw_tag.lower() == character_translations_before[i]:
-                        new_tag = character_translations_after[i]
+                for i in range(0, len(translations_before)):
+                    if raw_tag.lower() == translations_before[i]:
+                        new_tag = translations_after[i]
                         if tag.startswith('-'):
                             new_tag = '-' + new_tag
 
