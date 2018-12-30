@@ -277,9 +277,15 @@ def nostdout():
 '''
 
 ##################################################MUSIC############################################################
-async def busy_me(message):
+async def busy_check(message):
     if message.guild.id in busy_servers:
+        print("Busy Server!")
         return False
+    return True
+
+async def busy_me(message):
+    #if not await busy_check(message):
+        #return False
     busy_servers.append(message.guild.id)
     return True
 
@@ -307,7 +313,7 @@ async def play_music(message):
     if output == False:
         return
 
-    if message.guild.id in busy_servers:
+    if not await busy_check(message):
         return
 
     command = message.content
