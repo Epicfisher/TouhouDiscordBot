@@ -62,16 +62,16 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
                 while tag.endswith(' '):
                     tag = tag[0:-1]
 
-                character_translations_before = ['patchy', 'raymoo', 'flan']
-                character_translations_after = ['patchouli', 'reimu', 'flandre']
+                translations_before = ['patchy', 'raymoo', 'flan', 'gif']
+                translations_after = ['patchouli', 'reimu', 'flandre', 'animated_gif']
 
                 raw_tag = tag
                 if tag.startswith('-'):
                     raw_tag = raw_tag[1:]
 
-                for i in range(0, len(character_translations_before)):
-                    if raw_tag.lower() == character_translations_before[i]:
-                        new_tag = character_translations_after[i]
+                for i in range(0, len(translations_before)):
+                    if raw_tag.lower() == translations_before[i]:
+                        new_tag = translations_after[i]
                         if tag.startswith('-'):
                             new_tag = '-' + new_tag
 
@@ -309,7 +309,7 @@ async def Check_Nsfwimage(message):
             print("Failed NSFW Image: Channel not NSFW!")
             bad_channel_quotes = ["I-I don't think this is the kind of channel for THAT.", "S-Shouldn't we do that kind of stuff i-in another channel?"]
 
-            await message.channel.send(bad_channel_quotes[randint(0, len(bad_channel_quotes) - 1)])
+            await message.channel.send(bad_channel_quotes[randint(0, len(bad_channel_quotes) - 1)] + "\n(That command only works in NSFW channels!)")
             return False
 
 async def image(message):
@@ -336,3 +336,4 @@ commands.Add("imagewith%", image)
 commands.Add("nsfwimagewith%", nsfwimage)
 commands.Add("image%", photo)
 commands.Add("nsfwimage%", nsfwphoto)
+commands.Add("nsfw%", nsfwphoto, count=False)
