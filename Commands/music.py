@@ -12,6 +12,8 @@ import urllib.parse
 import html
 import math
 
+busy_servers = []
+
 class Song:
     raw_english_title = ""
     raw_title = ""
@@ -275,6 +277,12 @@ def nostdout():
 '''
 
 ##################################################MUSIC############################################################
+async def busy_me(message):
+    if message.guild.id in busy_servers:
+        return False
+    busy_servers.append(message.guild.id)
+    return True
+
 async def connect_voice(voice_channel):
     #vc = await voice_channel.connect()
 
@@ -297,6 +305,9 @@ async def connect_voice(voice_channel):
 async def play_music(message):
     output = await handle_manage_music(message, True)
     if output == False:
+        return
+
+    if message.guild.id in busy_servers:
         return
 
     command = message.content
@@ -365,6 +376,7 @@ async def play_music(message):
     '''
 
     if voice_channel == None:
+        print("User not in Voice Channel!")
         await message.channel.send("Please join a Voice Channel you want me to play music in, and try this command again!")
         return
 
@@ -420,6 +432,9 @@ def check_argument_query(query):
     return query
 
 async def get_song(message, caller_user_id, download_song, query, doujin, pc98, old_song):
+    if not await busy_me(message):
+        return
+
     all = False
 
     #if not query == None:
@@ -1073,6 +1088,8 @@ async def get_song(message, caller_user_id, download_song, query, doujin, pc98, 
     song_output.url = url
     song_output.friendly_url = working_url
     song_output.caller_id = caller_user_id
+
+    busy_servers.remove(message.guild.id)
 
     return song_output
 
