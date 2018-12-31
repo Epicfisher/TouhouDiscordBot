@@ -17,7 +17,8 @@ from commands import commands # Access to commands array
 
 import Commands.ping
 import Commands.invite
-import Commands.test
+if not bot.owner_id == -1:
+    import Commands.test
 import Commands.help
 import Commands.info
 import Commands.suggest
