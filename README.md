@@ -42,6 +42,7 @@ You can store your Config Variables as files. Just ensure they are in the same d
 ```
 'prefix.txt' = Customize the Command Prefix ('k.' by Default)
 'closed-access-users.txt' = Allows for ONLY a list of User IDs to access the bot (Disabled by Default)
+'owner.txt' = Allows for Debug and Test Commands by the specified Owner ID (Disabled by Default)
 
 'dbl-token.txt' = Allows for discordbots.org API functionality (Disabled by Default)
 
@@ -63,6 +64,7 @@ Or, as an alternative, you can choose to store your Config Variables within Syst
 ```
 'PATCHYBOT-PREFIX' = Customize the Command Prefix ('k.' by Default)
 'PATCHYBOT-CLOSEDACCESSUSER' = Allows for only a single User ID to access the bot (Disabled by Default)
+'PATCHYBOT-OWNER' = Allows for Debug and Test Commands by the specified Owner ID (Disabled by Default)
 
 'PATCHYBOT-DBLTOKEN' = Allows for discordbots.org API functionality (Disabled by Default)
 
