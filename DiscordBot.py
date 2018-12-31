@@ -187,7 +187,7 @@ async def on_voice_state_update(member, before, after):
                         Commands.music.radio_player = None
 
                         for i in range(0, len(bot.radio_players)):
-                            if bot.radio_players[i].vc.guild.id == member.guild.id:
+                            if bot.radio_players[i].voice_channel.id == channel.id:
                                 Commands.music.radio_player = bot.radio_players[i]
 
                                 if Commands.music.radio_player == None:
