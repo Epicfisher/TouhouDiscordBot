@@ -18,7 +18,7 @@ max_threads = None
 
 thread_pool = None
 
-owner_id = 428574847300403202 # Special ID of the Bot's Owner. This is for special commands, such as temporary debug and test commands. See test.py
+owner_id = -1 # Special ID of the Bot's Owner. This is for special commands, such as temporary debug and test commands. See test.py. Disabled by default
 
 hex_color = 0x593695
 
@@ -66,6 +66,15 @@ except:
         prefix = os.environ['PATCHYBOT-PREFIX']
     except:
         print("INFO:\n\nNo custom Prefix specified in either a 'prefix.txt' file or 'PATCHYBOT-PREFIX' System Environment Variable.\nUsing default Prefix of '" + prefix + "'.\n")
+
+try:
+    with open('owner.txt', 'r') as myfile:
+        owner_id = int(myfile.read().replace('\n', ''))
+except:
+    try:
+        owner_id = os.environ['PATCHYBOT-OWNER']
+    except:
+        print("INFO:\n\nNo Owner ID specified in either a 'owner.txt' file or 'PATCHYBOT-OWNER' System Environment Variable.\nDisabling Test Commands...\n")
 
 try:
     with open('data-guild-id.txt', 'r') as myfile:
