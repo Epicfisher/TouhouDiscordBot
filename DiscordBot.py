@@ -229,6 +229,14 @@ async def on_message(message):
         is_command = True
         was_mention = True
 
+    if lowercaseMessage.endswith('::'):
+        lowercaseMessage = lowercaseMessage[:-2]
+        message.content = message.content[:-2]
+
+    if lowercaseMessage.endswith(' '):
+        lowercaseMessage = lowercaseMessage[:-1]
+        message.content = message.content[:-1]
+
     if is_command:
         if not closed_access_users == None:
             if not str(message.author.id) in closed_access_users:
