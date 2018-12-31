@@ -3,11 +3,20 @@ import commands
 ###
 
 import bot
+import os
 import asyncio
+import psutil
 
 diagMessage = """```asciidoc
 = Patchouli Knowledge Diagnosis Screen =
 
+===== Memory =====
+- Memory (B): %s
+- Memory (KB): %s
+- Memory (MB): %s
+- Memory Usage (Out of 512MB): %s%%
+
+===== Command Subsystem =====
 - Running %s other commands.
 ```"""
 
@@ -20,10 +29,16 @@ async def diagnostics(message):
     if not tester_check(message):
         return
 
-    await message.channel.send(diagMessage % (len(bot.runningCommandsArray) - 1))
+    process = psutil.Process(os.getpid())
+
+    await message.channel.send(diagMessage % (process.memory_info().rss, process.memory_info().rss / 1000, process.memory_info().rss / 1000000, ((process.memory_info().rss / 1000000) / 512) * 100, len(bot.runningCommandsArray) - 1))
 
 async def radio(message):
     if not tester_check(message):
+        return
+
+    if len(bot.radio_players) < 1:
+        print("No Radios")
         return
 
     for i in range(0, len(bot.radio_players)):
