@@ -87,24 +87,43 @@ class RadioPlayer:
 
         self.sleep = InterruptableSleep(asyncio.get_event_loop())
 
-    async def Initialise(self):
-        vc = await connect_voice(self.voice_channel) # Connect to the Voice Channel
+    async def Initialise(self, message):
+        #for member in self.voice_channel.guild.members:
+            #if member.id = id:
+                #target = m
+
+        voice_channel_perms = self.voice_channel.permissions_for(self.voice_channel.guild.me)
+
+        if not voice_channel_perms.connect:
+            await message.channel.send("I don't have permission to play in '" + str(self.voice_channel) + "'!")
+            return False
+
+        try:
+            vc = await connect_voice(self.voice_channel) # Connect to the Voice Channel
+        except:
+            self.voice_channel.disconnect()
+            await message.channel.send("Whoops! I couldn't join '" + str(self.voice_channel) + "'. Please try again!")
+            return False
 
         try:
             self.vc = vc
         except:
             await vc.disconnect()
-            vc = await connect_voice(self.voice_channel) # Reconnect to Voice Channel
+            try:
+                vc = await connect_voice(self.voice_channel) # Reconnect to Voice Channel
+            except:
+                await message.channel.send("Whoops! I couldn't join '" + str(self.voice_channel) + "'. Please try again!")
+                return False
 
             self.vc = vc
 
-        return
+        return True
 
     async def Play(self, message):
         #while self.playing_loop:
         if self.song == None: # Should first-run. If we don't have a song...
             async with message.channel.typing():
-                self.song = await get_song(message, None, False, self.saved_query, False, False, None) # Get a new Random song.
+                self.song = await handle_get_song(message, None, False, self.saved_query, False, False, None) # Get a new Random song.
                 if self.song == False: # If we couldn't find a song...
                     await self.Stop() # Bad custom request? Kill the radio.
                     return
@@ -119,9 +138,13 @@ class RadioPlayer:
                 #self.automatic_queue_disable = True
                 pass
 
-            await message.channel.send(self.play_message) # Announce ourselves! Ta-da!
-            await self.Initialise()
+            if not await self.Initialise(message):
+                print("Failed to Initialise; Returning now")
+                await self.Stop()
+                return
             self.initialised = True
+
+            await message.channel.send(self.play_message) # Announce ourselves! Ta-da!
 
         try:
             if len(self.vc.channel.members) < 2:
@@ -173,7 +196,7 @@ class RadioPlayer:
             if len(self.queue) < 1 and self.next_song == None:
                 self.preparing_queue = True
                 print("I'm not preparing the next song, and there isn't one! I must have skipped? Preparing next song due to lack of queue...")
-                self.next_song = await get_song(message, None, False, self.saved_query, False, False, self.song.title) # Prepare the next song a little early, so the playback seems continuous.
+                self.next_song = await handle_get_song(message, None, False, self.saved_query, False, False, self.song.title) # Prepare the next song a little early, so the playback seems continuous.
                 self.preparing_queue = False
 
         if len(self.queue) > 0: # Check to see if we've acqured a queued song. If so...
@@ -197,11 +220,18 @@ class RadioPlayer:
         self.playing_loop = False # Stop the Music while loop.
         await self.sleep.Stop() # Interrupt awaited sleeps.
         try:
-            self.vc.stop() # Stop audio playback.
+            self.vc.stop() # Stop audio playback
+        except:
+            pass
+
+        try:
             await self.vc.disconnect() # Disconnect from the Voice Channel.
         except:
             pass
-        bot.radio_players.pop(self.index_in_radios) # Remove the Radio Player instance entirely, since at this point it isn't even needed since the entire thing is just stopped
+        try:
+            bot.radio_players.pop(self.index_in_radios) # Remove the Radio Player instance entirely, since at this point it isn't even needed since the entire thing is just stopped
+        except:
+            pass
         #del bot.radio_players[index_in_radios]
         return
 
@@ -217,6 +247,7 @@ class RadioPlayer:
         if self.vc.is_playing():
             try:
                 await self.vc.stop() # Stop Playback First.
+                pass
             except:
                 pass
 
@@ -279,6 +310,7 @@ def nostdout():
 ##################################################MUSIC############################################################
 async def busy_check(message):
     if message.guild.id in busy_servers:
+        await message.channel.send("I'm already doing something!")
         print("Busy Server!")
         return False
     return True
@@ -437,10 +469,17 @@ def check_argument_query(query):
 
     return query
 
-async def get_song(message, caller_user_id, download_song, query, doujin, pc98, old_song):
+async def handle_get_song(message, caller_user_id, download_song, query, doujin, pc98, old_song):
     if not await busy_me(message):
         return
 
+    return_value = await get_song(message, caller_user_id, download_song, query, doujin, pc98, old_song)
+
+    busy_servers.remove(message.guild.id)
+
+    return return_value
+
+async def get_song(message, caller_user_id, download_song, query, doujin, pc98, old_song):
     all = False
 
     #if not query == None:
@@ -1092,8 +1131,6 @@ async def get_song(message, caller_user_id, download_song, query, doujin, pc98, 
     song_output.url = url
     song_output.friendly_url = working_url
     song_output.caller_id = caller_user_id
-
-    busy_servers.remove(message.guild.id)
 
     return song_output
 
