@@ -169,6 +169,7 @@ class RadioPlayer:
 
         await self.sleep.Sleep(self.song.duration / 2) # Wait for the length of the song in Seconds, divided by two.
         if not self.playing_loop:
+            await self.Stop()
             return
         #next_song_start_time = time.time()
         if not self.preparing_queue and not self.sleep.cancelling and len(self.queue) < 1:
@@ -215,6 +216,7 @@ class RadioPlayer:
         #self.Play(message)
 
     async def Stop(self):
+        print("Properly Killing Radio!")
         #global radio_players
 
         self.playing_loop = False # Stop the Music while loop.
