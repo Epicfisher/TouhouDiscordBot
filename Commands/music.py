@@ -63,6 +63,7 @@ class RadioPlayer:
         self.index_in_radios = None
 
         self.initialised = False
+        self.stopped = False
 
         self.play_message = ""
 
@@ -216,6 +217,10 @@ class RadioPlayer:
         #self.Play(message)
 
     async def Stop(self):
+        if self.stopped:
+            return
+
+        self.stopped = True
         print("Properly Killing Radio!")
         #global radio_players
 
@@ -249,7 +254,6 @@ class RadioPlayer:
         if self.vc.is_playing():
             try:
                 await self.vc.stop() # Stop Playback First.
-                pass
             except:
                 pass
 
