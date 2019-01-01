@@ -72,7 +72,7 @@ try:
         owner_id = int(myfile.read().replace('\n', ''))
 except:
     try:
-        owner_id = os.environ['PATCHYBOT-OWNER']
+        owner_id = int(os.environ['PATCHYBOT-OWNER'])
     except:
         print("INFO:\n\nNo Owner ID specified in either a 'owner.txt' file or 'PATCHYBOT-OWNER' System Environment Variable.\nDisabling Test Commands...\n")
 
