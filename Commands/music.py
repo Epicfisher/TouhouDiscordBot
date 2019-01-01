@@ -183,6 +183,7 @@ class RadioPlayer:
 
     async def NextSong(self, message):
         if not self.playing_loop:
+            await self.Stop()
             return
         if self.stop_after:
             await self.Stop()
@@ -198,7 +199,7 @@ class RadioPlayer:
             print("Already preparing the next song! Now waiting...")
             while self.preparing_queue: # Wait for the next song to prepare.
                 await asyncio.sleep(1)
-                
+
                 if not self.playing_loop:
                     await self.Stop()
                     return
