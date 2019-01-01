@@ -17,7 +17,8 @@ from commands import commands # Access to commands array
 
 import Commands.ping
 import Commands.invite
-import Commands.test
+if not bot.owner_id == -1:
+    import Commands.test
 import Commands.help
 import Commands.info
 import Commands.suggest
@@ -186,7 +187,7 @@ async def on_voice_state_update(member, before, after):
                         Commands.music.radio_player = None
 
                         for i in range(0, len(bot.radio_players)):
-                            if bot.radio_players[i].vc.guild.id == member.guild.id:
+                            if bot.radio_players[i].voice_channel.id == channel.id:
                                 Commands.music.radio_player = bot.radio_players[i]
 
                                 if Commands.music.radio_player == None:

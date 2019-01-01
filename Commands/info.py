@@ -3,6 +3,7 @@ import commands
 ###
 
 import bot
+import sys
 from datetime import datetime
 from time import time
 from random import randint
@@ -31,7 +32,7 @@ aboutMessage = """```asciidoc
 
 "%s"
 
-- Runs entirely in Python 3, with the use of discord.py %s.
+- Runs in Python %s, with the use of discord.py %s.
 - So far I have stayed up reading for %s minutes.
 - I currently understand %s commands.
 - I'm currently loaning my books to %s servers.
@@ -96,7 +97,7 @@ async def info(message):
         if command.count:
             true_commands = true_commands + 1
 
-    await message.channel.send(aboutMessage % (GetSpecialQuote(), str(discord.__version__), round((time() - bot.startTime) / 60, 1), str(true_commands), str(len(bot.client.guilds)), str(len(bot.radio_players))))
+    await message.channel.send(aboutMessage % (GetSpecialQuote(), sys.version[:sys.version.index('(') - 1], str(discord.__version__), round((time() - bot.startTime) / 60, 1), str(true_commands), str(len(bot.client.guilds)), str(len(bot.radio_players))))
     return
 
 ###
