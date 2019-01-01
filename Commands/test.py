@@ -49,7 +49,6 @@ async def radio(message):
         print(" Voice Channel: " + str(player.voice_channel))
         print(" Index in Radios: " + str(player.index_in_radios))
         print(" Initialised: " + str(player.initialised))
-        print(" Stopped: " + str(player.stopped))
         print(" Play Message: " + str(player.play_message))
         print(" Stop After: " + str(player.stop_after))
         print(" Queue Size: " + str(len(player.queue)))
