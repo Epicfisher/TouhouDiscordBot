@@ -255,6 +255,7 @@ class RadioPlayer:
         except:
             pass
         #del bot.radio_players[index_in_radios]
+
         return
 
     async def Pause(self):
@@ -347,8 +348,12 @@ async def connect_voice(voice_channel):
     vc = None
 
     if not voice_channel.guild.voice_client == None:
-        print("Forcing Kill of Old Radio VC")
-        await voice_channel.guild.voice_client.disconnect()
+        if voice_channel == voice_channel.guild.voice_client.channel:
+            print("Reusing old VC")
+            return voice_channel.guild.voice_client
+        else:
+            print("Forcing Kill of Old Radio VC")
+            await voice_channel.guild.voice_client.disconnect()
 
     try:
         vc = await voice_channel.connect()
