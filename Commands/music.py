@@ -63,7 +63,6 @@ class RadioPlayer:
         self.index_in_radios = None
 
         self.initialised = False
-        self.stopped = False
 
         self.play_message = ""
 
@@ -234,14 +233,13 @@ class RadioPlayer:
         #self.Play(message)
 
     async def Stop(self):
-        if self.stopped:
+        if not self.playing_loop:
             return
 
-        self.stopped = True
+        self.playing_loop = False # Stop the Music while loop.
         print("Properly Killing Radio!")
         #global radio_players
 
-        self.playing_loop = False # Stop the Music while loop.
         await self.sleep.Stop() # Interrupt awaited sleeps.
         try:
             self.vc.stop() # Stop audio playback
@@ -346,6 +344,11 @@ async def busy_me(message):
 
 async def connect_voice(voice_channel):
     #vc = await voice_channel.connect()
+    vc = None
+
+    if not voice_channel.guild.voice_client == None:
+        print("Forcing Kill of Old Radio VC")
+        await voice_channel.guild.voice_client.disconnect()
 
     try:
         vc = await voice_channel.connect()
@@ -354,7 +357,8 @@ async def connect_voice(voice_channel):
             await message.channel.send("I couldn't find your Voice Channel!")
             return
         else:
-            await voice_channel.disconnect()
+            #await voice_channel.disconnect()
+            #await self.vc.disconnect()
             await bot.client.disconnect()
             try:
                 vc = await voice_channel.connect()
