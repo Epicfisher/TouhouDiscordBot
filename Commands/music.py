@@ -190,16 +190,28 @@ class RadioPlayer:
         self.vote_skippers = [] # Clear any Vote Skippers, as this will now be a new song.
         print("Officially Finished Playing Song!")
 
+        if not self.playing_loop:
+            await self.Stop()
+            return
+
         if self.preparing_queue:
             print("Already preparing the next song! Now waiting...")
             while self.preparing_queue: # Wait for the next song to prepare.
                 await asyncio.sleep(1)
+                
+                if not self.playing_loop:
+                    await self.Stop()
+                    return
         else:
             if len(self.queue) < 1 and self.next_song == None:
                 self.preparing_queue = True
                 print("I'm not preparing the next song, and there isn't one! I must have skipped? Preparing next song due to lack of queue...")
                 self.next_song = await handle_get_song(message, None, False, self.saved_query, False, False, self.song.title) # Prepare the next song a little early, so the playback seems continuous.
                 self.preparing_queue = False
+
+        if not self.playing_loop:
+            await self.Stop()
+            return
 
         if len(self.queue) > 0: # Check to see if we've acqured a queued song. If so...
             print("Popping from next Queue Song!")
@@ -208,6 +220,10 @@ class RadioPlayer:
         self.sleep.cancelling = False # We're not cancelling anymore, so reset this so we can cancel again next loop.
         self.preparing_queue = False
         #await vc.disconnect()
+
+        if not self.playing_loop:
+            await self.Stop()
+            return
 
         self.song = self.next_song
         self.next_song = None
@@ -1029,7 +1045,7 @@ async def get_song(message, caller_user_id, download_song, query, doujin, pc98, 
                         song_consistent = song_consistent.replace('？', '?')
                         song_consistent = song_consistent.replace('(', '').replace(')', '').replace('[', '').replace(']', '')
 
-                        if not song_consistent in title_lower.replace('　', ' ').replace('(', '').replace(')', '').replace('[', '').replace(']', '') and not song_consistent in description_lower.replace('　', ' ').replace('(', '').replace(')', '').replace('[', '').replace(']', ''):
+                        if not song_consistent in title_lower.replace('　', ' ').replace('？', '?').replace('(', '').replace(')', '').replace('[', '').replace(']', '') and not song_consistent in description_lower.replace('　', ' ').replace('？', '?').replace('(', '').replace(')', '').replace('[', '').replace(']', ''):
                             print("That video title and description has no song name (" + song_consistent + ") in it! Must be a bad one. Let's ignore it.")
                             worked = False
 
