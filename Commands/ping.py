@@ -2,9 +2,8 @@ import commands
 
 ###
 
-from random import randint
-
 import bot
+from random import randint
 
 def get_ping_message():
     if bot.season == "christmas":

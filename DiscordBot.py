@@ -175,6 +175,24 @@ async def on_ready():
     print('------')
 
 ##################################################VOICE CHANNEL UPDATE DETECTION############################################################
+async def check_voice_channel(channel, i):
+    valid_members = 0
+    for member in channel.members:
+        if not member.bot:
+            valid_members = valid_members + 1
+
+    if valid_members < 1:
+        if bot.radio_players[i].voice_channel.id == channel.id:
+            #Commands.music.radio_player = None
+            Commands.music.radio_player = bot.radio_players[i]
+
+            if Commands.music.radio_player == None:
+                return False
+
+            await Commands.music.radio_player.Stop()
+        return False
+    return True
+
 @bot.client.event
 async def on_voice_state_update(member, before, after):
     if 'Commands.music' in sys.modules: # Handle disconnect if last person in Voice Channel left
@@ -183,18 +201,16 @@ async def on_voice_state_update(member, before, after):
         try:
             for channel in member.guild.voice_channels:
                 if channel.id == before.channel.id:
-                    if len(channel.members) < 2:
-                        Commands.music.radio_player = None
-
-                        for i in range(0, len(bot.radio_players)):
-                            if bot.radio_players[i].voice_channel.id == channel.id:
-                                Commands.music.radio_player = bot.radio_players[i]
-
-                                if Commands.music.radio_player == None:
-                                    return
-
-                                await Commands.music.radio_player.Stop()
+                    for i in range(0, len(bot.radio_players)):
+                        if bot.radio_players[i].voice_channel.guild.id == channel.guild.id:
+                            if not await check_voice_channel(channel, i):
                                 return
+
+                            if not after.channel.id == bot.radio_players[i].voice_channel.id and member.id == bot.client.user.id: # Have we been moved into a new Voice Channel?
+                                print("Updating Channel")
+                                bot.radio_players[i].voice_channel = after.channel
+                                if not await check_voice_channel(after.channel, i):
+                                    return
         except:
             return
 

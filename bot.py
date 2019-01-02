@@ -152,7 +152,7 @@ async def get(url):
             async with aiohttp.ClientSession(connector=await get_aio_connector()) as session:
                 async with session.get(url) as resp:
                     return await resp.text()
-        except Exception as e:
+        except aiohttp.ClientError as e:
             if use_ssl:
                 print("ERROR:\n\nFailed to download HTML with SSL enabled. Disabling SSL...\n")
                 use_ssl = False
