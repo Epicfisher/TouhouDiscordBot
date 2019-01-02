@@ -51,6 +51,7 @@ async def radio(message):
         print(" Initialised: " + str(player.initialised))
         print(" Play Message: " + str(player.play_message))
         print(" Stop After: " + str(player.stop_after))
+        print(" Get: " + str(player.get))
         print(" Queue Size: " + str(len(player.queue)))
         print(" Use Queue: " + str(player.use_queue))
         print(" Automatic Queue Disable: " + str(player.automatic_queue_disable))
