@@ -108,7 +108,7 @@ class DiscordBotsOrgAPI:
     async def update_stats(self):
         while True:
             await asyncio.sleep(1800) # Wait 30 minutes in seconds
-            
+
             #print('Attempting to post server count')
             try:
                 await self.dblpy.post_server_count()
