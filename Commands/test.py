@@ -3,12 +3,19 @@ import commands
 ###
 
 import bot
-import os
+import sys, os
+from youtube_dl import version as youtube_dl
 import asyncio
+import discord
 import psutil
 
 diagMessage = """```asciidoc
 = Patchouli Knowledge Diagnosis Screen =
+
+===== Versions =====
+- Discord Version: """ + sys.version[:sys.version.index('(') - 1] + """
+- discord.py Version: """ + str(discord.__version__) + """
+- youtube-dl Version: """ + str(youtube_dl.__version__) + """
 
 ===== Memory =====
 - Memory (B): %s

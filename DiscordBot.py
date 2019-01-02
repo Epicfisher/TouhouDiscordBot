@@ -107,6 +107,8 @@ class DiscordBotsOrgAPI:
 
     async def update_stats(self):
         while True:
+            await asyncio.sleep(1800) # Wait 30 minutes in seconds
+
             #print('Attempting to post server count')
             try:
                 await self.dblpy.post_server_count()
@@ -114,8 +116,6 @@ class DiscordBotsOrgAPI:
             except Exception as e:
                 #print('Failed to post server count\n{}: {}\n'.format(type(e).__name__, e))
                 print('Failed to post server count{\n' + str(e) + '\n}')
-
-            await asyncio.sleep(1800) # Wait 30 minutes in seconds
 
 def setup_discord_bots_org_api(bot):
     #bot.add_cog(DiscordBotsOrgAPI(bot))
@@ -315,6 +315,7 @@ async def handle_command(message, lowercaseMessage):
         return False
 
 print("""Now starting with:
+- Discord Version: """ + sys.version[:sys.version.index('(') - 1] + """
 - discord.py Version: """ + str(discord.__version__) + """
 - youtube-dl Version: """ + str(youtube_dl.__version__) + """
 """)
