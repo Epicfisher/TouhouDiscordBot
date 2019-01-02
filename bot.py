@@ -125,9 +125,9 @@ async def run_in_threadpool(function):
     loop = asyncio.get_event_loop()
     try:
         result = await loop.run_in_executor(thread_pool, function)
-    except e:
+    except Exception as e:
         running_threads = running_threads - 1
-        return e
+        raise e
 
     running_threads = running_threads - 1
     return result
