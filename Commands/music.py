@@ -7,7 +7,6 @@ import discord
 from random import randint
 import asyncio
 import time
-#from youtube_dl import YoutubeDL
 import youtube_dl
 import urllib.parse
 import html
