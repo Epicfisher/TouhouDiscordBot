@@ -60,8 +60,6 @@ class RadioPlayer:
         self.vc = None
         self.voice_channel = None
 
-        self.index_in_radios = None
-
         self.initialised = False
 
         self.play_message = ""
@@ -250,7 +248,8 @@ class RadioPlayer:
             pass
 
         try:
-            bot.radio_players.pop(self.index_in_radios) # Remove the Radio Player instance entirely, since at this point it isn't even needed since the entire thing is just stopped
+            #bot.radio_players.pop(self.index_in_radios) # Remove the Radio Player instance entirely, since at this point it isn't even needed since the entire thing is just stopped
+            bot.radio_players.remove(self)
         except:
             pass
 
@@ -1190,7 +1189,6 @@ async def play_music(message):
 
     radio_player = RadioPlayer()
     radio_player.voice_channel = voice_channel
-    radio_player.index_in_radios = len(bot.radio_players)
     radio_player.play_message = play_message
     radio_player.saved_query = saved_query
     bot.radio_players.append(radio_player)
