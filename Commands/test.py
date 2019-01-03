@@ -4,10 +4,10 @@ import commands
 
 import bot
 import sys, os
-from youtube_dl import version as youtube_dl
-import asyncio
 import gc
+import asyncio
 import discord
+from youtube_dl import version as youtube_dl
 import psutil
 
 diagMessage = """```asciidoc
