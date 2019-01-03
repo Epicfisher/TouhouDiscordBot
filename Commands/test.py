@@ -40,6 +40,18 @@ async def diagnostics(message):
 
     await message.channel.send(diagMessage % (process.memory_info().rss, process.memory_info().rss / 1000, process.memory_info().rss / 1000000, ((process.memory_info().rss / 1000000) / 512) * 100, len(bot.runningCommandsArray) - 1))
 
+async def evalfunc(message):
+    if not tester_check(message):
+        return
+
+    arguments = commands.GetArgumentsFromCommand(message.content)
+
+    if arguments == False:
+        await message.channel.send("No Eval Given.")
+        return
+
+    eval(arguments[0])
+
 async def radio(message):
     if not tester_check(message):
         return
@@ -121,6 +133,7 @@ async def deadlythread(message):
 ###
 
 commands.Add("test.diag", diagnostics, count=False)
+commands.Add("test.eval%", evalfunc, count=False)
 commands.Add("test.radio", radio, count=False)
 commands.Add("test.exception", exception, count=False)
 commands.Add("test.sleep", sleep, count=False)
