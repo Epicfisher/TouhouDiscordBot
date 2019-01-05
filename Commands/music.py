@@ -471,7 +471,7 @@ class GetSong:
         #'ignoreerrors': True,
 
         doujin_title_tags = ['arrange', 'arrangement', 'instrumental', 'rock', 'metal', 'orchestral', 'piano', 'synthesia', 'midi', 'house', 'vocal', 'subs']
-        bad_title_tags = ['demo', 'preview', 'intro', 'crossfade', 'speedpaint', 'osu', 'nightcore', 'night core']
+        bad_title_tags = ['demo', 'preview', 'intro', 'crossfade', 'speedpaint', 'osu', 'sound voltex', 'sdvx', 'nightcore', 'night core']
 
         original_games = await bot.get('https://epicfisher.github.io/TouhouWikiArrangeParser/root/')
         original_games = html.unescape(original_games)
