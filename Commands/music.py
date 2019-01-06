@@ -355,11 +355,15 @@ class GetSong:
 
         #coro = self.get_song(message, caller_user_id, download_song, query, doujin, pc98, old_song)
         #task = asyncio.ensure_future(coro)
-        task = self.loop.create_task(self.get_song(message, caller_user_id, download_song, query, doujin, pc98, old_song))
+        #task = self.loop.create_task(self.get_song(message, caller_user_id, download_song, query, doujin, pc98, old_song))
+        #self.tasks.add(task)
+
+        coro = self.get_song(message, caller_user_id, download_song, query, doujin, pc98, old_song)
+        task = asyncio.ensure_future(coro)
         self.tasks.add(task)
         try:
             return await task
-        except:
+        except asyncio.CancelledError:
             print("Cancelled!")
             return False
         finally:
@@ -1130,12 +1134,6 @@ async def play_music(message):
         await message.channel.send("Unfortunately, I don't work in Direct Messaging as of yet!\nIf you want me to play Music, invite me to a Server!")
         return
 
-    voice_channel_perms = voice_channel.permissions_for(voice_channel.guild.me)
-
-    if not voice_channel_perms.connect:
-        await message.channel.send("I don't have permission to play in '" + str(voice_channel) + "'!")
-        return False
-
     ''' # Uncomment me for saved voice channel support. I thought this might be useful at first, and it was one of the very first things I implemented, but on further thought this isn't really mentioned anywhere and might lead to some confusion or anger when it joins a voice channel that was unintended.
     saved_voice_channel = await search_data('music_channel-' + str(message.guild.id))
     if saved_voice_channel == False: # No saved Voice Channel.
@@ -1162,6 +1160,12 @@ async def play_music(message):
             #await message.channel.send("The Voice Channel '" + str(voice_channel) + "' is empty!")
             await message.channel.send("But there's nobody in '" + str(voice_channel) + "'. Who would I be playing music to?")
             return
+
+    voice_channel_perms = voice_channel.permissions_for(voice_channel.guild.me)
+
+    if not voice_channel_perms.connect:
+        await message.channel.send("I don't have permission to play in '" + str(voice_channel) + "'!")
+        return False
 
     for i in range(0, len(bot.radio_players)):
         #if bot.radio_players[i].vc.channel.id == voice_channel.id:
