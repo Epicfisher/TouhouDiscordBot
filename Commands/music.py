@@ -22,6 +22,7 @@ class Song:
     album = ""
     raw_album = ""
     english_raw_album = ""
+    circle = ""
     duration = 0
     #src = None
     volume = 0.5
@@ -161,7 +162,11 @@ class RadioPlayer:
 
         #while vc.is_playing():
 
-        await self.sleep.Sleep(self.song.duration / 2) # Wait for the length of the song in Seconds, divided by two.
+        if self.song.circle == "":
+            await self.sleep.Sleep(self.song.duration / 2) # Wait for the length of the song in Seconds, divided by two. Half of it's duration.
+        else:
+            await self.sleep.Sleep(self.song.duration / 4) # Wait for the length of the song in Seconds, divided by four. A Quarter of it's duration. This is because arranges can typically take far longer to retrieve, and so they need the extra time.
+
         if not self.playing_loop:
             await self.Stop()
             return
@@ -475,7 +480,7 @@ class GetSong:
         #'ignoreerrors': True,
 
         doujin_title_tags = ['arrange', 'arrangement', 'instrumental', 'rock', 'metal', 'orchestral', 'piano', 'synthesia', 'midi', 'house', 'vocal', 'subs']
-        bad_title_tags = ['demo', 'preview', 'intro', 'crossfade', 'speedpaint', 'osu', 'sound voltex', 'sdvx', 'nightcore', 'night core']
+        bad_title_tags = ['demo', 'preview', 'intro', 'crossfade', 'xfd', 'speedpaint', 'osu', 'sound voltex', 'sdvx', 'nightcore', 'night core']
 
         original_games = await bot.get('https://epicfisher.github.io/TouhouWikiArrangeParser/root/')
         original_games = html.unescape(original_games)
