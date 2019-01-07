@@ -1,5 +1,4 @@
 import sys, os
-from concurrent.futures import ThreadPoolExecutor
 import asyncio
 from datetime import datetime
 from time import time
@@ -56,8 +55,6 @@ if datetime.now().month == 10:
     bot.season = "halloween"
 
 bot.max_threads = 254 # Real max threads for free Heroku plans are 256, minus two since I assume the Bot is running on a Thread of it's own to begin with and one more just to feel safe.
-
-bot.thread_pool = ThreadPoolExecutor(max_workers=bot.max_threads)
 
 bot.allowLargeQuotes = False
 bot.postFullConversations = False

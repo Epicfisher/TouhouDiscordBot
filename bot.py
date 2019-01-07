@@ -16,8 +16,6 @@ prefix = 'k.'
 
 max_threads = None
 
-thread_pool = None
-
 owner_id = -1 # Special ID of the Bot's Owner. This is for special commands, such as temporary debug and test commands. See test.py. Disabled by default
 
 hex_color = 0x593695
@@ -120,17 +118,20 @@ async def run_in_threadpool(function):
     while running_threads >= max_threads:
         await asyncio.sleep(1)
 
-    running_threads = running_threads + 1
+    with ThreadPoolExecutor(max_workers=1) as thread_pool:
+        running_threads = running_threads + 1
 
-    loop = asyncio.get_event_loop()
-    try:
-        result = await loop.run_in_executor(thread_pool, function)
-    except Exception as e:
-        running_threads = running_threads - 1
-        raise e
+        loop = asyncio.get_event_loop()
+        result = loop.run_in_executor(thread_pool, function)
+        try:
+            result = await result
+        except Exception as e:
+            raise e
+        finally:
+            running_threads = running_threads - 1
+            thread_pool.shutdown(wait=True)
 
-    running_threads = running_threads - 1
-    return result
+        return result
 
 async def get_aio_connector():
     conn = aiohttp.TCPConnector(

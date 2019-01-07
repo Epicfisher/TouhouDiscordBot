@@ -22,6 +22,7 @@ class Song:
     album = ""
     raw_album = ""
     english_raw_album = ""
+    circle = ""
     duration = 0
     #src = None
     volume = 0.5
@@ -161,7 +162,11 @@ class RadioPlayer:
 
         #while vc.is_playing():
 
-        await self.sleep.Sleep(self.song.duration / 2) # Wait for the length of the song in Seconds, divided by two.
+        if self.song.circle == "":
+            await self.sleep.Sleep(self.song.duration / 2) # Wait for the length of the song in Seconds, divided by two. Half of it's duration.
+        else:
+            await self.sleep.Sleep(self.song.duration / 4) # Wait for the length of the song in Seconds, divided by four. A Quarter of it's duration. This is because arranges can typically take far longer to retrieve, and so they need the extra time.
+
         if not self.playing_loop:
             await self.Stop()
             return
@@ -475,7 +480,7 @@ class GetSong:
         #'ignoreerrors': True,
 
         doujin_title_tags = ['arrange', 'arrangement', 'instrumental', 'rock', 'metal', 'orchestral', 'piano', 'synthesia', 'midi', 'house', 'vocal', 'subs']
-        bad_title_tags = ['demo', 'preview', 'intro', 'crossfade', 'speedpaint', 'osu', 'sound voltex', 'sdvx', 'nightcore', 'night core']
+        bad_title_tags = ['demo', 'preview', 'intro', 'crossfade', 'xfd', 'speedpaint', 'osu', 'sound voltex', 'sdvx', 'nightcore', 'night core']
 
         original_games = await bot.get('https://epicfisher.github.io/TouhouWikiArrangeParser/root/')
         original_games = html.unescape(original_games)
@@ -816,9 +821,9 @@ class GetSong:
                 else:
                     search_query = '"' + song + '" "' + album + '" ' + additional_tags.replace('+', ' ') # For Japanese results?
 
-                    ydl = youtube_dl.YoutubeDL(options)
+                    #ydl = youtube_dl.YoutubeDL(options)
                     #except youtube_dl.utils.YoutubeDLError as e:
-                    with ydl:
+                    with youtube_dl.YoutubeDL(options) as ydl:
                         try:
                             video_results = await bot.run_in_threadpool(lambda: ydl.extract_info("ytsearch2:" + search_query, download=False))
                         except youtube_dl.utils.YoutubeDLError:
@@ -984,11 +989,11 @@ class GetSong:
 
         if url == None:
             #with nostdout():
-            ydl = youtube_dl.YoutubeDL(options)
-            with ydl:
+            #ydl = youtube_dl.YoutubeDL(options)
+            with youtube_dl.YoutubeDL(options) as ydl:
                 #loop = asyncio.get_event_loop()
                 #result = await loop.run_in_executor(thread_pool, lambda: ydl.extract_info(working_url, download=False))
-                result = bot.run_in_threadpool(lambda: ydl.extract_info(working_url, download=False))
+                result = await bot.run_in_threadpool(lambda: ydl.extract_info(working_url, download=False))
 
             #await message.channel.send("Now playing Music in '" + str(vc.channel.name) + "'!")
 
@@ -1571,6 +1576,7 @@ async def volume(message):
 ###
 
 commands.Add("playing", playing)
+commands.Add("nowplaying", playing, count=False)
 commands.Add("play%", play)
 commands.Add("queue%", queue)
 commands.Add("request%", queue, count=False)
