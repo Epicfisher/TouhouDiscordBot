@@ -129,6 +129,7 @@ async def run_in_threadpool(function):
             raise e
         finally:
             running_threads = running_threads - 1
+            thread_pool.shutdown(wait=True)
 
         return result
 
