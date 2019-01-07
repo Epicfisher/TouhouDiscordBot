@@ -821,9 +821,9 @@ class GetSong:
                 else:
                     search_query = '"' + song + '" "' + album + '" ' + additional_tags.replace('+', ' ') # For Japanese results?
 
-                    ydl = youtube_dl.YoutubeDL(options)
+                    #ydl = youtube_dl.YoutubeDL(options)
                     #except youtube_dl.utils.YoutubeDLError as e:
-                    with ydl:
+                    with youtube_dl.YoutubeDL(options) as ydl:
                         try:
                             video_results = await bot.run_in_threadpool(lambda: ydl.extract_info("ytsearch2:" + search_query, download=False))
                         except youtube_dl.utils.YoutubeDLError:
@@ -989,11 +989,11 @@ class GetSong:
 
         if url == None:
             #with nostdout():
-            ydl = youtube_dl.YoutubeDL(options)
-            with ydl:
+            #ydl = youtube_dl.YoutubeDL(options)
+            with youtube_dl.YoutubeDL(options) as ydl:
                 #loop = asyncio.get_event_loop()
                 #result = await loop.run_in_executor(thread_pool, lambda: ydl.extract_info(working_url, download=False))
-                result = bot.run_in_threadpool(lambda: ydl.extract_info(working_url, download=False))
+                result = await bot.run_in_threadpool(lambda: ydl.extract_info(working_url, download=False))
 
             #await message.channel.send("Now playing Music in '" + str(vc.channel.name) + "'!")
 
@@ -1576,6 +1576,7 @@ async def volume(message):
 ###
 
 commands.Add("playing", playing)
+commands.Add("nowplaying", playing, count=False)
 commands.Add("play%", play)
 commands.Add("queue%", queue)
 commands.Add("request%", queue, count=False)
