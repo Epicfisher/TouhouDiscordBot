@@ -312,7 +312,7 @@ async def handle_command(message, lowercaseMessage):
         return False
 
 print("""Now starting with:
-- Discord Version: """ + sys.version[:sys.version.index('(') - 1] + """
+- Python Version: """ + sys.version[:sys.version.index('(') - 1] + """
 - discord.py Version: """ + str(discord.__version__) + """
 - youtube-dl Version: """ + str(youtube_dl.__version__) + """
 """)
