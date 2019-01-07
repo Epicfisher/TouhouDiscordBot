@@ -4,6 +4,7 @@ import commands
 
 import bot
 import sys, os
+import threading
 import gc
 import asyncio
 import discord
@@ -23,6 +24,10 @@ diagMessage = """```asciidoc
 - Memory (KB): %s
 - Memory (MB): %s
 - Memory Usage (Out of 512MB): %s%%
+
+===== Threads =====
+- Threads: %s
+- Thread Tracker Variable: %s
 
 ===== Command Subsystem =====
 - Running %s other commands.
@@ -51,7 +56,7 @@ async def diagnostics(message):
 
     process = psutil.Process(os.getpid())
 
-    await message.channel.send(diagMessage % (process.memory_info().rss, process.memory_info().rss / 1000, process.memory_info().rss / 1000000, ((process.memory_info().rss / 1000000) / 512) * 100, len(bot.runningCommandsArray) - 1))
+    await message.channel.send(diagMessage % (process.memory_info().rss, process.memory_info().rss / 1000, process.memory_info().rss / 1000000, ((process.memory_info().rss / 1000000) / 512) * 100, threading.active_count(), bot.running_threads, len(bot.runningCommandsArray) - 1))
 
 async def memoryfree(message):
     if not tester_check(message):
