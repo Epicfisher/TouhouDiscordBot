@@ -138,14 +138,30 @@ def run_discord_bot(token):
         print("Failed to Load Opus! Music playback will not work!")
 
     print("Starting Bot...\n")
-    bot.client.run(token)
+    bot.client.run(token, reconnect=True)
+    #while True:
+    	#try:
+    		#bot.client.loop.run_until_complete(bot.client.start(token))
+    	#except BaseException as e:
+            #print("Failed to start! Retrying in 5 seconds...\n" + str(e))
+            #time.sleep(5)
+            #print("Retrying...\n")
+
+    #while True:
+        #try:
+            #bot.client.run(token)
+            #break
+        #except Exception as e:
+            #print("Failed to start! Retrying in 10 seconds...\n" + str(e))
+            #time.sleep(10)
+            #print("Retrying...\n")
 
 ##################################################START############################################################
-@bot.client.event
-async def on_ready():
+async def set_presence():
     #await bot.client.change_presence(status=discord.Status.online, activity=discord.Game(bot.prefix + "help for Help!"))
     await bot.client.change_presence(status=discord.Status.online, activity=discord.Streaming(name=bot.prefix + "help for Help!", url="https://www.twitch.tv/patchouli_knowledge_bot", type=1))
 
+async def initialise():
     global allow_commands
 
     global data_guild
@@ -164,9 +180,27 @@ async def on_ready():
     if not bot.suggestions_channel_id == None:
         bot.suggestions_channel = bot.suggestions_guild.get_channel(int(bot.suggestions_channel_id))
 
+    print("Caching Character Database...\n")
+    await Commands.image.ParseCharacters(Commands.image.character_names, Commands.image.character_links)
+
     allow_commands = True # Now we're truly ready to begin taking commands
 
+@bot.client.event
+async def on_ready():
+    await initialise()
+
+    await set_presence()
+
     print('Logged in as')
+    print(bot.client.user.name)
+    print(bot.client.user.id)
+    print('------')
+
+@bot.client.event
+async def on_resumed():
+    await set_presence()
+
+    print('Reconnected as')
     print(bot.client.user.name)
     print(bot.client.user.id)
     print('------')
@@ -200,7 +234,9 @@ async def on_voice_state_update(member, before, after):
                 if channel.id == before.channel.id:
                     for i in range(0, len(bot.radio_players)):
                         if bot.radio_players[i].voice_channel.guild.id == channel.guild.id:
+                            temp_saved_voicechannel = str(bot.radio_players[i].voice_channel)
                             if not await check_voice_channel(channel, i):
+                                print("Last User in VC '" + str(before.channel) + "' Left. Killed affecting VC '" + temp_saved_voicechannel + "',")
                                 return
 
                             if not after.channel.id == bot.radio_players[i].voice_channel.id and member.id == bot.client.user.id: # Have we been moved into a new Voice Channel?
