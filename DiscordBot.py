@@ -21,6 +21,7 @@ if not bot.owner_id == -1:
 import Commands.help
 import Commands.info
 import Commands.suggest
+import Commands.report
 import Commands.image
 import Commands.quote
 import Commands.search
@@ -164,12 +165,6 @@ async def set_presence():
 async def initialise():
     global allow_commands
 
-    global data_guild
-    global data_channel
-
-    global suggestions_guild
-    global suggestions_channel
-
     if not bot.data_guild_id == None:
         bot.data_guild = bot.client.get_guild(int(bot.data_guild_id))
     if not bot.data_channel_id == None:
@@ -179,6 +174,11 @@ async def initialise():
         bot.suggestions_guild = bot.client.get_guild(int(bot.suggestions_guild_id))
     if not bot.suggestions_channel_id == None:
         bot.suggestions_channel = bot.suggestions_guild.get_channel(int(bot.suggestions_channel_id))
+
+    if not bot.reports_guild_id == None:
+        bot.reports_guild = bot.client.get_guild(int(bot.reports_guild_id))
+    if not bot.reports_channel_id == None:
+        bot.reports_channel = bot.reports_guild.get_channel(int(bot.reports_channel_id))
 
     print("Caching Character Database...\n")
     await Commands.image.ParseCharacters(Commands.image.character_names, Commands.image.character_links)
