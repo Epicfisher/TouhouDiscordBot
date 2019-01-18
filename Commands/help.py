@@ -161,6 +161,7 @@ helpMessage = """```asciidoc
 """ + bot.prefix + """ping :: Responds 'Pong!' Can be used to check if I'm awake.
 
 """ + bot.prefix + """suggest""" + bot.argumentChar + """Idea""" + bot.argumentKillChar + """ :: Suggests an 'Idea' to my developers.
+""" + bot.prefix + """report""" + bot.argumentChar + """Bug""" + bot.argumentKillChar + """ :: Reports a 'Bug'. Please be VERY detailed!
 """ + bot.prefix + """invite :: Bring my knowledge with you using my Invite link!
 
 """ + createHelpHeader("Music Commands") + """
