@@ -129,6 +129,23 @@ PLEASE NOTE MUSIC PLAYBACK IS NOT 24/7 AND COULD RESTART
 """ + bot.prefix + """queue""" + bot.argumentChar + """ost/all""" + bot.argumentKillChar + """ :: Queues a Random Touhou Song.
 ```"""
 
+imageHelpMessage = """```asciidoc
+= Patchouli Knowledge Image Help =
+
+""" + createHelpHeader("Image Commands") + """
+""" + bot.prefix + """image :: Gets a random Touhou image from Gelbooru.
+""" + bot.prefix + """image""" + bot.argumentChar + """Cirno Frog""" + bot.argumentKillChar + """ :: Gets an image of 'Cirno' and a 'Frog'.
+""" + bot.prefix + """imagewith""" + bot.argumentChar + """Patchouli""" + bot.argumentKillChar + """ :: Gets an image with 'Patchouli'.
+
+""" + bot.prefix + """lewd :: Gets a Lewd Touhou image. NSFW Channel required.
+""" + bot.prefix + """lewd""" + bot.argumentChar + """Sakuya""" + bot.argumentKillChar + """ :: Gets a Lewd image of 'Sakuya'.
+""" + bot.prefix + """lewdwith""" + bot.argumentChar + """Alice""" + bot.argumentKillChar + """ :: Gets a Lewd image with 'Alice'.
+
+""" + bot.prefix + """nsfw :: Gets a NSFW Touhou image. NSFW Channel required.
+""" + bot.prefix + """nsfw""" + bot.argumentChar + """Reimu""" + bot.argumentKillChar + """ :: Gets an NSFW image of 'Reimu'.
+""" + bot.prefix + """nsfwwith""" + bot.argumentChar + """Marisa""" + bot.argumentKillChar + """ :: Gets an NSFW image with 'Marisa'.
+```"""
+
 '''
 """ + bot.prefix + """betahelp - Try out beta features and provide suggestions!
 ~Patchouli Knowledge Help~
@@ -150,13 +167,7 @@ helpMessage = """```asciidoc
 [BETA] """ + bot.prefix + """help""" + bot.argumentChar + """music""" + bot.argumentKillChar + """ :: View Music-specific commands.
 
 """ + createHelpHeader("Image Commands") + """
-""" + bot.prefix + """image :: Gets a random Touhou image from Gelbooru.
-""" + bot.prefix + """image""" + bot.argumentChar + """Cirno Frog""" + bot.argumentKillChar + """ :: Gets an image of 'Cirno' and a 'Frog'.
-""" + bot.prefix + """imagewith""" + bot.argumentChar + """Patchouli""" + bot.argumentKillChar + """ :: Gets an image with 'Patchouli'.
-
-""" + bot.prefix + """nsfwimage :: Gets a NSFW Touhou image. NSFW Channel required.
-""" + bot.prefix + """nsfwimage""" + bot.argumentChar + """Marisa""" + bot.argumentKillChar + """ :: Gets an NSFW image of 'Marisa'.
-""" + bot.prefix + """nsfwimagewith""" + bot.argumentChar + """Reimu""" + bot.argumentKillChar + """ :: Gets an NSFW image with 'Reimu'.
+""" + bot.prefix + """help""" + bot.argumentChar + """image""" + bot.argumentKillChar + """ :: View Image-specific commands.
 
 """ + createHelpHeader("Quote Commands") + """
 """ + bot.prefix + """quote :: Gets a quote from a random Touhou game.
@@ -164,8 +175,8 @@ helpMessage = """```asciidoc
 
 """ + createHelpHeader("Wiki Commands") + """
 """ + bot.prefix + """search""" + bot.argumentChar + """Reimu""" + bot.argumentKillChar + """ :: Searches for 'Reimu' pages on touhouwiki.net.
-""" + bot.prefix + """portrait""" + bot.argumentChar + """Reimu""" + bot.argumentKillChar + """ :: Searches for an official 'Reimu' portrait.
-""" + bot.prefix + """lookup""" + bot.argumentChar + """Reimu""" + bot.argumentKillChar + """ :: Searches for a 'Reimu' page and portrait.
+""" + bot.prefix + """portrait""" + bot.argumentChar + """Cirno""" + bot.argumentKillChar + """ :: Searches for an official 'Cirno' portrait.
+""" + bot.prefix + """lookup""" + bot.argumentChar + """Flandre""" + bot.argumentKillChar + """ :: Searches and highlights a 'Flandre' page.
 
 """ + createHelpHeader("Card Commands") + """
 [BETA] """ + bot.prefix + """card :: Gets a Trading Card. (No progress is saved)
@@ -205,6 +216,8 @@ async def help(message):
             await message.author.send(musicHelpMessage)
             if not isinstance(message.channel, DMChannel): # Are we not in a DM Channel?
                 await message.channel.send(message.author.name + ": There are a LOT of commands! Check your DMs!") # Tell the User to check them.
+        if arguments[0] == 'image' or arguments[0] == 'images':
+            await message.channel.send(imageHelpMessage)
     return
 
 '''
