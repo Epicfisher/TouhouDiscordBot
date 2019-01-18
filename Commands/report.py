@@ -5,6 +5,10 @@ import commands
 import bot
 
 async def report(message):
+    if bot.reports_channel == None or bot.reports_guild == None:
+        await message.channel.send("Our inbox for Reports are currently closed. Sorry!")
+        return
+
     arguments = commands.GetArgumentsFromCommand(message.content)
 
     if arguments == False:
