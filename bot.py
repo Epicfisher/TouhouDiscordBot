@@ -16,17 +16,16 @@ startTime = None
 
 prefix = 'k.'
 
+running_threads = 0
 max_threads = None
 
 owner_id = -1 # Special ID of the Bot's Owner. This is for special commands, such as temporary debug and test commands. See test.py. Disabled by default
 
 hex_color = 0x593695
 
-running_threads = 0
+cooldown_message = None # For when a user just wont stop spamming the library's poor customer reception. This is actually set in DiscordBot.py
 
-cooldown_message = None
-
-season = None
+season = None # Used for special messages on Christmas, Halloween etc.
 
 allowLargeQuotes = None
 postFullConversations = None
@@ -36,15 +35,18 @@ music_cooldowntime = 10 # Cooldown between new music retrievals. Value is in sec
 
 data_guild = None
 data_channel = None
-
 data_guild_id = None
 data_channel_id = None
 
 suggestions_guild = None
 suggestions_channel = None
-
 suggestions_guild_id = None
 suggestions_channel_id = None
+
+reports_guild = None
+reports_channel = None
+reports_guild_id = None
+reports_channel_id = None
 
 argumentChar = ' '
 argumentKillChar = ''
@@ -113,6 +115,25 @@ if not suggestions_guild_id == None:
             suggestions_channel_id = os.environ['PATCHYBOT-SUGGESTIONSCHANNELID']
         except:
             print ("WARNING:\n\nNo Suggestions Channel ID specified in either a 'suggestions-channel-id.txt' file or 'PATCHYBOT-SUGGESTIONSCHANNELID' System Environment Variable.\nDisabling Suggestions...\n")
+
+try:
+    with open('reports-guild-id.txt', 'r') as myfile:
+        reports_guild_id = myfile.read().replace('\n', '')
+except:
+    try:
+        reports_guild_id = os.environ['PATCHYBOT-REPORTSGUILDID']
+    except:
+        print ("WARNING:\n\nNo Reports Guild ID specified in either a 'reports-guild-id.txt' file or 'PATCHYBOT-REPORTSGUILDID' System Environment Variable.\nDisabling Reports...\n")
+
+if not reports_guild_id == None:
+    try:
+        with open('reports-channel-id.txt', 'r') as myfile:
+            reports_channel_id = myfile.read().replace('\n', '')
+    except:
+        try:
+            reports_channel_id = os.environ['PATCHYBOT-REPORTSCHANNELID']
+        except:
+            print ("WARNING:\n\nNo Reports Channel ID specified in either a 'reports-channel-id.txt' file or 'PATCHYBOT-REPORTSCHANNELID' System Environment Variable.\nDisabling Reports...\n")
 
 async def run_in_threadpool(function):
     global running_threads
