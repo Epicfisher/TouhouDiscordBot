@@ -32,11 +32,11 @@ aboutMessage = """```asciidoc
 
 "%s"
 
-= """ + bot.prefix + """help or @ me for Help! =
+- Use '""" + bot.prefix + """' or @ me to use my commands!
 
+- Runs in Python %s, with the use of discord.py %s.
 - So far I have stayed up reading for %s minutes.
 - I currently understand %s commands.
-
 - I'm currently loaning my books to %s servers.
 - I'm currently playing music for %s servers.
 
@@ -99,7 +99,7 @@ async def info(message):
         if command.count:
             true_commands = true_commands + 1
 
-    await message.channel.send(aboutMessage % (GetSpecialQuote(), round((time() - bot.startTime) / 60, 1), str(true_commands), str(len(bot.client.guilds)), str(len(bot.radio_players))))
+    await message.channel.send(aboutMessage % (GetSpecialQuote(), sys.version[:sys.version.index('(') - 1], str(discord.__version__), round((time() - bot.startTime) / 60, 1), str(true_commands), str(len(bot.client.guilds)), str(len(bot.radio_players))))
     return
 
 ###
