@@ -12,7 +12,36 @@ import urllib.parse
 import html
 import math
 
+options = {
+    'extractaudio':True,
+    'audioformat':'mp3',
+    'format': 'bestaudio/best', # Is Best really the best query here? Discord already compresses the actual HECK out of the audio streams anyway, so is this just wasting bandwidth and risking stream disconnection on our end?
+    #'format': 'worstaudio/best', # Although frankly this does sound terrible tbh
+    'noplaylist':True,
+    'nocheckcertificate': True,
+    'logtostderr': False,
+    'quiet': True,
+    'no_warnings': True,
+    'usenetrc': True,
+    'simulate': True,
+    'fixup': True,
+    'nocheckcertificate': True
+    #'skip_download': True
+    #'''
+    #'postprocessors': [{
+        #'key': 'FFmpegExtractAudio',
+        #'preferredcodec': 'mp3',
+        #'preferredquality': '192',
+    #}],
+    #'''
+}
+
+#'ignoreerrors': True,
+
 busy_servers = []
+
+use_raw_parser = False
+grab_stream_url_during_playtime = False
 
 class Song:
     raw_english_title = ""
@@ -123,9 +152,6 @@ class RadioPlayer:
                     await self.Stop() # Bad custom request? Kill the radio.
                     return
 
-        self.src = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.song.url))
-        self.src.volume = self.volume
-
         if self.initialised == False:
             if self.saved_query == None:
                 self.use_queue = True
@@ -140,6 +166,35 @@ class RadioPlayer:
             self.initialised = True
 
             await message.channel.send(self.play_message) # Announce ourselves! Ta-da!
+
+        if grab_stream_url_during_playtime:
+            print("Quickly Grabbing New Link...")
+            with youtube_dl.YoutubeDL(options) as ydl:
+                #quick_video_info = await bot.get("http://www.youtube.com/get_video_info?&video_id=buExjuF27_4&el=detailpage&ps=default&eurl=&gl=US&hl=en")
+                #token = quick_video_info[quick_video_info.index('t=') + 2:]
+                #token = token[token.index('%')]
+                #self.song.url = 'http://www.youtube.com/get_video?video_id=%s&t=%s&eurl=&el=detailpage&ps=default&gl=US&hl=en' % ('buExjuF27_4', token)
+                #print(quick_video_info)
+                #print(token)
+                #return False
+
+                #result = youtube_dl.extractor.youtube.InfoExtractor.extract(youtube_dl.extractor.youtube.InfoExtractor.extract, self.song.friendly_url)
+                #result = youtube_dl.extractor.YoutubeIE._real_extract(youtube_dl.extractor.YoutubeIE, self.song.friendly_url)
+
+                result = await bot.run_in_threadpool(lambda: ydl.extract_info(self.song.friendly_url + " -g", download=False))
+                pass
+
+            self.song.url = result['url']
+            #print(self.song.url)
+            print("Grabbed!")
+
+        #self.src = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.song.url))
+        #self.src = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.song.url, before_options="-reconnect 1 -reconnect_at_eof 1 -reconnect_streamed 1 -reconnect_delay_max 2 -timeout -1 -multiple_requests 1", options='-vn'))
+        #self.src = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.song.url, before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 -timeout -1 -listen_timeout -1 -re -thread_queue_size 512 -analyzeduration 15000000 -multiple_requests 1"))
+        self.src = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.song.url, before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5"))
+
+        #self.src = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.song.url, before_options="-reconnect 1 -reconnect_streamed 1"))
+        self.src.volume = self.volume
 
         try:
             if len(self.vc.channel.members) < 2:
@@ -456,28 +511,6 @@ class GetSong:
             query = None
 
             #query = check_argument_query(query)
-
-        options = {
-            'extractaudio':True,
-            'audioformat':'mp3',
-            'format': 'bestaudio/best',
-            'noplaylist':True,
-            'nocheckcertificate': True,
-            'logtostderr': False,
-            'quiet': True,
-            'no_warnings': True,
-            'usenetrc': True
-            #'skip_download': True,
-            #'''
-            #'postprocessors': [{
-                #'key': 'FFmpegExtractAudio',
-                #'preferredcodec': 'mp3',
-                #'preferredquality': '192',
-            #}],
-            #'''
-        }
-
-        #'ignoreerrors': True,
 
         doujin_title_tags = ['arrange', 'arrangement', 'instrumental', 'rock', 'metal', 'orchestral', 'piano', 'synthesia', 'midi', 'house', 'vocal', 'subs']
         bad_title_tags = ['demo', 'preview', 'intro', 'crossfade', 'xfd', 'speedpaint', 'osu', 'sound voltex', 'sdvx', 'nightcore', 'night core']
@@ -805,8 +838,6 @@ class GetSong:
                 working_url = None
                 working_duration_seconds = None
 
-                use_raw_parser = False
-
                 if use_raw_parser:
                     search_query = '"' + song.replace(' ', '+') + '"+"' + album.replace(' ', '+') + '"+' + additional_tags # For Japanese results?
 
@@ -826,6 +857,7 @@ class GetSong:
                     with youtube_dl.YoutubeDL(options) as ydl:
                         try:
                             video_results = await bot.run_in_threadpool(lambda: ydl.extract_info("ytsearch2:" + search_query, download=False))
+                            #video_results = await bot.run_in_threadpool(lambda: ydl.extract_info("ytsearch2:" + search_query + " --get-url", download=False))
                         except youtube_dl.utils.YoutubeDLError:
                             video_results = None
 
@@ -987,15 +1019,14 @@ class GetSong:
                     else:
                         get_song = True
 
-        if url == None:
-            #with nostdout():
-            #ydl = youtube_dl.YoutubeDL(options)
+        if url == None and not grab_stream_url_during_playtime:
+            ##with nostdout():
             with youtube_dl.YoutubeDL(options) as ydl:
-                #loop = asyncio.get_event_loop()
-                #result = await loop.run_in_executor(thread_pool, lambda: ydl.extract_info(working_url, download=False))
-                result = await bot.run_in_threadpool(lambda: ydl.extract_info(working_url, download=False))
+                ##loop = asyncio.get_event_loop()
+                ##result = await loop.run_in_executor(thread_pool, lambda: ydl.extract_info(working_url, download=False))
+                result = await bot.run_in_threadpool(lambda: ydl.extract_info(working_url + " -g", download=False))
 
-            #await message.channel.send("Now playing Music in '" + str(vc.channel.name) + "'!")
+            ##await message.channel.send("Now playing Music in '" + str(vc.channel.name) + "'!")
 
             url = result['url']
 
@@ -1185,7 +1216,8 @@ async def play_music(message):
 
     if len(bot.radio_players) >= 5 and not message.author.id == bot.owner_id: # Beta Testing Thingy
         print("Prevented Too Many Music Servers!")
-        await message.channel.send("<Hey! Sorry for the inconvenience, but this command is currently being tested in public closed-beta! Only the first *5 servers* who use this command are currently allowed to listen to Music. I'm currently in the process of testing whether or not my service provider would be able to handle multiple audio streams to dozens of servers at once, and so I'm starting small to benchmark it's performance. If you were dying to try this command, either try again later when (hopefully) a server stops playing music and a test slot opens (`k.info` can help you there), or wait for the full unrestricted release of this command. While you wait, why not try the new-and-improved `k.image` command? `k.help` for more! Sorry again, and thanks for being patient. -Epicfisher>")
+        await message.channel.send("You cant play Music right now. Please try again later!")
+        #await message.channel.send("<Hey! Sorry for the inconvenience, but this command is currently being tested in public closed-beta! Only the first *5 servers* who use this command are currently allowed to listen to Music. I'm currently in the process of testing whether or not my service provider would be able to handle multiple audio streams to dozens of servers at once, and so I'm starting small to benchmark it's performance. If you were dying to try this command, either try again later when (hopefully) a server stops playing music and a test slot opens (`k.info` can help you there), or wait for the full unrestricted release of this command. While you wait, why not try the new-and-improved `k.image` command? `k.help` for more! Sorry again, and thanks for being patient. -Epicfisher>")
         return
 
     play_message = ""
