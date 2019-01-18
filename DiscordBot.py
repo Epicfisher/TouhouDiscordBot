@@ -234,13 +234,12 @@ async def on_voice_state_update(member, before, after):
                 if channel.id == before.channel.id:
                     for i in range(0, len(bot.radio_players)):
                         if bot.radio_players[i].voice_channel.guild.id == channel.guild.id:
-                            temp_saved_voicechannel = str(bot.radio_players[i].voice_channel)
                             if not await check_voice_channel(channel, i):
-                                print("Last User in VC '" + str(before.channel) + "' Left. Killed affecting VC '" + temp_saved_voicechannel + "',")
+                                print("Last User in VC '" + str(before.channel) + "' Left. Killed VC of Radio " + str(i) + ".")
                                 return
 
                             if not after.channel.id == bot.radio_players[i].voice_channel.id and member.id == bot.client.user.id: # Have we been moved into a new Voice Channel?
-                                print("Updating Channel")
+                                print("Updating Channel for Radio VC " + str(i) + ".")
                                 bot.radio_players[i].voice_channel = after.channel
                                 if not await check_voice_channel(after.channel, i):
                                     return
