@@ -10,7 +10,7 @@ horizontal = 67
 def createHelpHeader(name):
     return "===== " + name + " ====="
 
-    # Currently unused to the courtesy of mobile users
+    # Currently unused to the courtesy of mobile users. Creates help headers which are exactly long enough to fit all text within
     '''
     dashes = horizontal - len(name)
     dashes_str1 = ""
@@ -32,52 +32,10 @@ betaHelpMessage = """```
   commands are all more than welcome, and I will try my best
   to read and consider every one I get. You can send me your
   thoughts and feedback through the '""" + bot.prefix + """suggest' Command,
-  should you have any. Thanks! ]
+  should you have any, and any bug reports through the
+  '""" + bot.prefix + """report' Command. Thanks! ]
 
-Beta command goes here
-```"""
-'''
-
-'''
-musicHelpMessage = """```
-~Patchouli Knowledge Music Help~
-
-~~~~~Music Operator Commands ('Manage Channels' Required)~~~~~
-""" + bot.prefix + """play - Plays Random Touhou 6+ Music in your Voice Channel.
-""" + bot.prefix + """play""" + bot.argumentChar + """pc98""" + bot.argumentKillChar + """ - Plays Random Touhou 1-5 Music.
-""" + bot.prefix + """play""" + bot.argumentChar + """all""" + bot.argumentKillChar + """ - Plays All Random Touhou Music.
-""" + bot.prefix + """play""" + bot.argumentChar + """6""" + bot.argumentKillChar + """ - Plays Random Touhou 6 Music.
-
-""" + bot.prefix + """play""" + bot.argumentChar + """arrange""" + bot.argumentKillChar + """ - Plays Random Touhou 6+ Arranges.
-""" + bot.prefix + """play""" + bot.argumentChar + """arrange/pc98""" + bot.argumentKillChar + """ - Plays Random Touhou 1-5 Arranges.
-""" + bot.prefix + """play""" + bot.argumentChar + """arrange/all""" + bot.argumentKillChar + """ - Plays All Random Touhou Arranges.
-""" + bot.prefix + """play""" + bot.argumentChar + """arrange/6""" + bot.argumentKillChar + """ - Plays Random Touhou 6 Arranges.
-
-""" + bot.prefix + """stop - Stops playing Music and leaves the Voice Channel.
-""" + bot.prefix + """stopafter - Stops Music after finishing current Song.
-""" + bot.prefix + """pause - Pauses or unpauses the currently playing Song.
-""" + bot.prefix + """skip - Skips the currently playing Song.
-
-""" + bot.prefix + """volume""" + bot.argumentChar + """0.5""" + bot.argumentKillChar + """ - Changes Volume to 0.5, out of a maximum of 1.0.
-""" + bot.prefix + """togglequeue - Enables or disables the Song Queue.
-
-~~~~~Music Commands~~~~~
-""" + bot.prefix + """playing - View the currently playing Song.
-
-""" + bot.prefix + """queue - View the current Song Queue.
-
-""" + bot.prefix + """queue""" + bot.argumentChar + """win""" + bot.argumentKillChar + """ :: Queues a Random Touhou 6+ Song or Arrange.
-""" + bot.prefix + """queue""" + bot.argumentChar + """pc98""" + bot.argumentKillChar + """ :: Queues a Random Touhou 1-5 Song or Arrange.
-""" + bot.prefix + """queue""" + bot.argumentChar + """6""" + bot.argumentKillChar + """ :: Queues a Random Touhou 6 Song or Arrange.
-
-""" + bot.prefix + """queue""" + bot.argumentChar + """6""" + bot.argumentKillChar + """ - Queues a random Touhou 6 song.
-""" + bot.prefix + """queue""" + bot.argumentChar + """arrange""" + bot.argumentKillChar + """ - Queues a random Arrange.
-""" + bot.prefix + """queue""" + bot.argumentChar + """arrange/6""" + bot.argumentKillChar + """ - Queues a random Touhou 6 Arrange.
-
-""" + bot.prefix + """queue""" + bot.argumentChar + """6""" + bot.argumentKillChar + """ :: Queues a random Touhou 6 song.
-""" + bot.prefix + """queue""" + bot.argumentChar + """pc98""" + bot.argumentKillChar + """ :: Queues a random PC98 song.
-""" + bot.prefix + """queue""" + bot.argumentChar + """arrange""" + bot.argumentKillChar + """ :: Queues a random Arrange.
-""" + bot.prefix + """queue""" + bot.argumentChar + """arrange/6""" + bot.argumentKillChar + """ :: Queues a random Touhou 6 Arrange.
+Beta commands goes here
 ```"""
 '''
 
@@ -183,6 +141,8 @@ helpMessage = """```asciidoc
 [BETA] """ + bot.prefix + """card :: Gets a Trading Card. (No progress is saved)
 ```"""
 
+# shhh just close your eyes for the following section
+
 # """ + bot.prefix + """daily - Receive your daily Card. Resets every 24 hours.
 # """ + bot.prefix + """cardsof""" + argumentChar + """UserID""" + argumentKillChar + """ - View another User's Card collection.
 
@@ -193,19 +153,7 @@ helpMessage = """```asciidoc
 #[BETA] """ + bot.prefix + """view""" + bot.argumentChar + """1""" + bot.argumentKillChar + """ - View your first Card in detail.
 #[BETA] """ + bot.prefix + """view""" + bot.argumentChar + """1""" + bot.argumentSeperator + """UserID""" + bot.argumentKillChar + """ - View another User's Card in detail.
 
-# """ + bot.prefix + """play - Select the Music Channel. Must have 'Manage Channels'.
-
-#""" + bot.prefix + """play - Play Music in your Channel. 'Manage Channels' Required.
-#""" + bot.prefix + """play""" + bot.argumentChar + """6""" + bot.argumentKillChar + """ - Play Touhou 6 Music. 'Manage Channels' Required.
-#""" + bot.prefix + """play""" + bot.argumentChar + """arrange""" + bot.argumentKillChar + """ - Play Arranges. 'Manage Channels' Required.
-#""" + bot.prefix + """play""" + bot.argumentChar + """arrange/6""" + bot.argumentKillChar + """ - Play Touhou 6 Arranges. 'Manage Channels' Required.
-#""" + bot.prefix + """stop - Stops playing Music. 'Manage Channels' Required.
-#""" + bot.prefix + """pause - Toggles paused state. 'Manage Channels' Required.
-#""" + bot.prefix + """skip - Skips the current Song. 'Manage Channels' Required.
-#""" + bot.prefix + """volume""" + bot.argumentChar + """0.5""" + bot.argumentKillChar + """ - Change Volume to 0.5. 'Manage Channels' Required.
-
-#[BETA] """ + bot.prefix + """arrange - Queue a random Arrange song.
-#[BETA] """ + bot.prefix + """arrange 6 - Queue a random Arrange from Touhou 6.
+# ok you can open your eyes again
 
 async def help(message):
     arguments = commands.GetArgumentsFromCommand(message.content)
