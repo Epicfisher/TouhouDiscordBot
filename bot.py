@@ -3,10 +3,12 @@ from concurrent.futures import ThreadPoolExecutor
 import asyncio
 import aiohttp
 import socket
+import html
 
 class ImageSearchResult:
     Url = ""
     Name = ""
+    Summary = ""
 
 client = None
 
@@ -179,7 +181,7 @@ async def get_file(url, filename):
     content = await get_raw(url)
     write_to_file(filename, content)
 
-async def get_image(search_results, quantity):
+async def get_image(search_results, quantity, image_required, get_summary):
     if not isinstance(search_results, list):
         search_results = [search_results]
         quantity = 1
@@ -202,11 +204,26 @@ async def get_image(search_results, quantity):
 
             results.Url = file
             results.Name = search_results[i]
-            return results # At this point, we should have our working image. Quit out of the for loop.
         except:
-            if i >= quantity:
-                return False
-            else:
-                print("No Photo for '" + search_results[i].replace("_", " ") + "'. Moving on...")
+            print("No Photo for '" + search_results[i] + "'. Moving on...")
+
+        if get_summary:
+            json = await get("https://en.touhouwiki.net/api.php?action=parse&page=" + search_results[i] + "&prop=properties&format=json")
+
+            try:
+                summary = json[json.index('"description"') + 14:]
+                summary = summary[summary.index(":") + 2:]
+                summary = summary[:summary.index('"')]
+
+                results.Summary = html.unescape(summary.encode().decode("unicode-escape"))
+            except:
+                print("No Summary for " + search_results[i] + ". Moving on...")
+                results.Summary = ""
+
+        if i  >= quantity:
+            return False
+
+        if not image_required or not results.Url == "":
+            return results
 
     return False
