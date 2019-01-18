@@ -32,14 +32,16 @@ aboutMessage = """```asciidoc
 
 "%s"
 
-- Runs in Python %s, with the use of discord.py %s.
+= """ + bot.prefix + """help or @ me for Help! =
+
 - So far I have stayed up reading for %s minutes.
 - I currently understand %s commands.
+
 - I'm currently loaning my books to %s servers.
 - I'm currently playing music for %s servers.
 
-- I'm open source! git.io/vpSEv
 - I have a community/support server! discord.gg/jnKMSSE
+- I'm open source! git.io/vpSEv
 
 - Made by @Epicfisher#6763
 ```"""
@@ -97,7 +99,7 @@ async def info(message):
         if command.count:
             true_commands = true_commands + 1
 
-    await message.channel.send(aboutMessage % (GetSpecialQuote(), sys.version[:sys.version.index('(') - 1], str(discord.__version__), round((time() - bot.startTime) / 60, 1), str(true_commands), str(len(bot.client.guilds)), str(len(bot.radio_players))))
+    await message.channel.send(aboutMessage % (GetSpecialQuote(), round((time() - bot.startTime) / 60, 1), str(true_commands), str(len(bot.client.guilds)), str(len(bot.radio_players))))
     return
 
 ###
