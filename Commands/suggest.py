@@ -5,6 +5,10 @@ import commands
 import bot
 
 async def suggest(message):
+    if bot.suggestions_channel == None or bot.suggestions_guild == None:
+        await message.channel.send("Our inbox for Suggestions are currently closed. Sorry!")
+        return
+
     arguments = commands.GetArgumentsFromCommand(message.content)
 
     if arguments == False:
