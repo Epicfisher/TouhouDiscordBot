@@ -1454,17 +1454,32 @@ async def pause_music(message):
     return
 
 async def skip_song(message):
-    output = await handle_manage_music(message, False)
+    output = await handle_manage_music(message, True)
     if output == False:
         return
 
     radio_player = await get_radio_player(message.guild.id)
     if not radio_player == None:
+        valid_members = 0
+        for member in radio_player.voice_channel.members:
+            if not member.bot:
+                valid_members = valid_members + 1
+
+        if valid_members == 1:
+            if not radio_player.skip_cooldown == None:
+                time_left = bot.music_cooldowntime - math.floor(time.time() - radio_player.skip_cooldown)
+                if time_left > 0:
+                    radio_player.vc.stop()
+                    time.sleep(time_left)
+            await radio_player.Skip()
+            return
+
+        output = await handle_manage_music(message, False)
+        if output == False:
+            return
+
         if not radio_player.skip_cooldown == None:
             time_left = bot.music_cooldowntime - math.floor(time.time() - radio_player.skip_cooldown)
-            #if not time_left <= 0:
-                #await message.channel.send("Please wait " + str(time_left) + " more Seconds to Skip!")
-                #return
             if time_left > 0:
                 radio_player.vc.stop()
                 time.sleep(time_left)
