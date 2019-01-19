@@ -6,6 +6,9 @@ import bot
 from random import randint
 import discord
 
+no_boys_tags = "-1boy+-2boys+-3boys+-4boys+-5boys+-6boys+-6%2Bboys"
+no_girls_tags = "-1girl+-2girls+-3girls+-4girls+-5girls+-6girls+-6%2Bgirls"
+
 character_names = []
 character_links = []
 
@@ -229,6 +232,11 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
                 if girls > 1:
                     girls_tag += 's'
 
+        if girls > 0 and boys < 1 and not negativeGenders:
+            girls_tag = girls_tag + "+" + no_boys_tags
+        if boys > 0 and girls < 1 and not negativeGenders:
+            boys_tag = boys_tag + "+" + no_girls_tags
+
         if not boys_tag == "":
             additional_tags += boys_tag + '+'
         if not girls_tag == "":
@@ -254,7 +262,7 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
             await message.channel.send("I couldn't find an image!")
             return
 
-        #print("Using tags: '" + tags + "'")
+        #print("Using total tags: '" + tags + "'")
 
         page_scope = 20000
         i = 1
