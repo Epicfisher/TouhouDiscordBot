@@ -44,6 +44,9 @@ musicHelpMessage = """```asciidoc
 
 PLEASE NOTE MUSIC PLAYBACK IS NOT 24/7 AND COULD RESTART
 
+(If you encounter any bugs/issues while playing Music,
+please use the '""" + bot.prefix + """report' command to let me know. Thanks!)
+
 """ + createHelpHeader("Music Operator Commands ('Manage Channels' Required)") + """
 """ + bot.prefix + """skip :: Skips the currently playing Song.
 """ + bot.prefix + """togglequeue :: Enables or disables the Song Queue.
