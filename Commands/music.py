@@ -40,7 +40,7 @@ options = {
 
 busy_servers = []
 
-use_raw_parser = False
+use_raw_parser = True
 grab_stream_url_during_playtime = False
 
 class Song:
@@ -99,9 +99,12 @@ class RadioPlayer:
         self.get = GetSong(asyncio.get_event_loop())
 
         self.queue = []
+        self.getting_queue = False
+        self.got_queue = False
         #self.use_queue = False # Queues only for None autoplays
         self.use_queue = True # Queues open all the time
         self.automatic_queue_disable = False
+
         self.preparing_queue = False
         self.song = None
         self.next_song = None
@@ -147,7 +150,7 @@ class RadioPlayer:
         #while self.playing_loop:
         if self.song == None: # Should first-run. If we don't have a song...
             async with message.channel.typing():
-                self.song = await self.get.busy_get_song(message, None, False, self.saved_query, False, False, None) # Get a new Random song.
+                self.song = await self.get.busy_get_song(message, None, False, self.saved_query, False, False, None, True) # Get a new Random song.
                 if self.song == False: # If we couldn't find a song...
                     await self.Stop() # Bad custom request? Kill the radio.
                     return
@@ -167,7 +170,7 @@ class RadioPlayer:
 
             await message.channel.send(self.play_message) # Announce ourselves! Ta-da!
 
-        if grab_stream_url_during_playtime:
+        if grab_stream_url_during_playtime or self.song.url == None:
             print("Quickly Grabbing New Link...")
             with youtube_dl.YoutubeDL(options) as ydl:
                 #quick_video_info = await bot.get("http://www.youtube.com/get_video_info?&video_id=buExjuF27_4&el=detailpage&ps=default&eurl=&gl=US&hl=en")
@@ -181,8 +184,13 @@ class RadioPlayer:
                 #result = youtube_dl.extractor.youtube.InfoExtractor.extract(youtube_dl.extractor.youtube.InfoExtractor.extract, self.song.friendly_url)
                 #result = youtube_dl.extractor.YoutubeIE._real_extract(youtube_dl.extractor.YoutubeIE, self.song.friendly_url)
 
-                result = await bot.run_in_threadpool(lambda: ydl.extract_info(self.song.friendly_url + " -g", download=False))
-                pass
+                for i in range(0, 1):
+                    try:
+                        result = await bot.run_in_threadpool(lambda: ydl.extract_info(self.song.friendly_url + " -g", download=False))
+                        break
+                    except youtube_dl.utils.YoutubeDLError:
+                        await asyncio.sleep(1)
+                #pass
 
             self.song.url = result['url']
             #print(self.song.url)
@@ -213,6 +221,7 @@ class RadioPlayer:
         self.skip_cooldown = time.time()
 
         loop = asyncio.get_event_loop()
+        print("Now Playing: '" + self.song.title + "' In '" + str(self.voice_channel) + "'\n")
         self.vc.play(self.src, after=lambda e: loop.create_task(self.NextSong(message)))
 
         #while vc.is_playing():
@@ -229,10 +238,38 @@ class RadioPlayer:
         if not self.preparing_queue and not self.sleep.cancelling and len(self.queue) < 1:
             self.preparing_queue = True
             print("Preparing next song early due to lack of queue...")
-            self.next_song = await self.get.handle_get_song(message, None, False, self.saved_query, False, False, self.song.title) # Prepare the next song a little early, so the playback seems continuous.
+            self.next_song = await self.get.handle_get_song(message, None, False, self.saved_query, False, False, self.song.title, True) # Prepare the next song a little early, so the playback seems continuous.
             self.preparing_queue = False
         #next_song_start_time = time.time() - next_song_start_time
         #await self.sleep.Sleep(self.song.duration / 2 - next_song_start_time) # Wait for the second length of the song in Seconds, divided by two and incremented by one just to be safe
+
+        if not self.song.circle == "":
+            await self.sleep.Sleep(self.song.duration / 4) # Wait the last quarter if we only waited 1/4, so we're at 1/2. This is to ensure the last-minute safe-grab we're about to do occurs at 3/4 of a song's duration.
+
+        await self.sleep.Sleep(self.song.duration / 4)
+
+        if not self.getting_queue:
+            if len(self.queue) > 0: # Check to see if we've acqured a queued song. If so...
+                self.getting_queue = True
+                print("Pre-Taking from next Queue Song!")
+                self.next_song = self.queue[0] # Our next song becomes the queued song.
+                #self.queue.pop(0) # Remove the queued song from the list so it isn't used again.
+
+                if not self.next_song == None and self.next_song.url == None:
+                    print("No Pre-YT Song URL! Grabbing that now...")
+                    with youtube_dl.YoutubeDL(options) as ydl:
+                        for i in range(0, 1):
+                            try:
+                                result = await bot.run_in_threadpool(lambda: ydl.extract_info(self.next_song.friendly_url + " -g", download=False))
+                                break
+                            except youtube_dl.utils.YoutubeDLError:
+                                await asyncio.sleep(1)
+
+                    self.next_song.url = result['url']
+                    print("Pre-Grabbed!")
+                    self.got_queue = True
+
+                self.getting_queue = False
 
     async def NextSong(self, message):
         if not self.playing_loop:
@@ -249,30 +286,64 @@ class RadioPlayer:
             return
 
         if self.preparing_queue:
-            print("Already preparing the next song! Now waiting...")
-            while self.preparing_queue: # Wait for the next song to prepare.
-                await asyncio.sleep(1)
+            if len(self.queue) > 0:
+                self.get.Stop() # If we have songs in the Queue and we're still trying to download a song, just give up, take what's already in the queue
+            else:
+                print("Already preparing the next song! Now waiting...")
+                while self.preparing_queue: # Wait for the next song to prepare.
+                    await asyncio.sleep(1)
 
-                if not self.playing_loop:
-                    await self.Stop()
-                    return
+                    if not self.playing_loop:
+                        await self.Stop()
+                        return
         else:
             if len(self.queue) < 1 and self.next_song == None:
                 self.preparing_queue = True
                 print("I'm not preparing the next song, and there isn't one! I must have skipped? Preparing next song due to lack of queue...")
-                self.next_song = await self.get.busy_get_song(message, None, False, self.saved_query, False, False, self.song.title)
+                self.next_song = await self.get.busy_get_song(message, None, False, self.saved_query, False, False, self.song.title, True)
                 self.preparing_queue = False
 
         if not self.playing_loop:
             await self.Stop()
             return
 
-        if len(self.queue) > 0: # Check to see if we've acqured a queued song. If so...
-            print("Popping from next Queue Song!")
-            self.next_song = self.queue[0] # Our next song becomes the queued song.
-            self.queue.pop(0) # Remove the queued song from the list so it isn't used again.
+        if not self.getting_queue and not self.got_queue:
+            #if self.next_song.url == None:
+            self.getting_queue = True
+            self.got_queue = True
+            if len(self.queue) > 0: # Check to see if we've acqured a queued song. If so...
+                print("Popping from next Queue Song!")
+                self.next_song = self.queue[0] # Our next song becomes the queued song.
+                self.queue.pop(0) # Remove the queued song from the list so it isn't used again.
+
+            if self.next_song.url == None:
+                print("No YT Song URL! Grabbing that now...")
+                with youtube_dl.YoutubeDL(options) as ydl:
+                    for i in range(0, 1):
+                        try:
+                            result = await bot.run_in_threadpool(lambda: ydl.extract_info(self.next_song.friendly_url + " -g", download=False))
+                            break
+                        except youtube_dl.utils.YoutubeDLError:
+                            await asyncio.sleep(1)
+
+                self.next_song.url = result['url']
+                print("Grabbed!")
+        else:
+            if not self.got_queue: # Are we still 'gotting' the next Queued Song's URL?
+                print("Already handling Queue Grab! Now waiting...")
+                while self.getting_queue: # Wait for the next song in queue to prepare.
+                    await asyncio.sleep(1)
+
+                    if not self.playing_loop:
+                        await self.Stop()
+                        return
+
+            self.queue.pop(0) # Remove the queued song from the list now so it isn't used again in the future.
+
         self.sleep.cancelling = False # We're not cancelling anymore, so reset this so we can cancel again next loop.
         self.preparing_queue = False
+        self.getting_queue = False
+        self.got_queue = False
         #await vc.disconnect()
 
         if not self.playing_loop:
@@ -399,17 +470,17 @@ class GetSong:
         self.loop = loop
         self.tasks = set()
 
-    async def busy_get_song(self, message, caller_user_id, download_song, query, doujin, pc98, old_song):
+    async def busy_get_song(self, message, caller_user_id, download_song, query, doujin, pc98, old_song, get_yt_url):
         if not await busy_me(message):
             return
 
-        return_value = await self.handle_get_song(message, caller_user_id, download_song, query, doujin, pc98, old_song)
+        return_value = await self.handle_get_song(message, caller_user_id, download_song, query, doujin, pc98, old_song, get_yt_url)
 
         busy_servers.remove(message.guild.id)
 
         return return_value
 
-    async def handle_get_song(self, message, caller_user_id, download_song, query, doujin, pc98, old_song):
+    async def handle_get_song(self, message, caller_user_id, download_song, query, doujin, pc98, old_song, get_yt_url):
         if self.cancelling:
             return False
 
@@ -418,7 +489,7 @@ class GetSong:
         #task = self.loop.create_task(self.get_song(message, caller_user_id, download_song, query, doujin, pc98, old_song))
         #self.tasks.add(task)
 
-        coro = self.get_song(message, caller_user_id, download_song, query, doujin, pc98, old_song)
+        coro = self.get_song(message, caller_user_id, download_song, query, doujin, pc98, old_song, get_yt_url)
         task = asyncio.ensure_future(coro)
         self.tasks.add(task)
         try:
@@ -438,7 +509,7 @@ class GetSong:
             print("Cancelling Task")
             task.cancel()
 
-    async def get_song(self, message, caller_user_id, download_song, query, doujin, pc98, old_song):
+    async def get_song(self, message, caller_user_id, download_song, query, doujin, pc98, old_song, get_yt_url):
         all = False
 
         #if not query == None:
@@ -490,7 +561,6 @@ class GetSong:
                 if int(query) < 6:
                     pc98 = True
                     #print("PC98 MODE")
-                    query = query[1:]
             if query.lower().startswith('pc98'):
                 pc98 = True
                 #print("PC98 MODE")
@@ -1020,15 +1090,23 @@ class GetSong:
                         get_song = True
 
         if url == None and not grab_stream_url_during_playtime:
-            ##with nostdout():
-            with youtube_dl.YoutubeDL(options) as ydl:
-                ##loop = asyncio.get_event_loop()
-                ##result = await loop.run_in_executor(thread_pool, lambda: ydl.extract_info(working_url, download=False))
-                result = await bot.run_in_threadpool(lambda: ydl.extract_info(working_url + " -g", download=False))
+            if get_yt_url:
+                ##with nostdout():
+                with youtube_dl.YoutubeDL(options) as ydl:
+                    ##loop = asyncio.get_event_loop()
+                    ##result = await loop.run_in_executor(thread_pool, lambda: ydl.extract_info(working_url, download=False))
+                    for i in range(0, 1):
+                        try:
+                            result = await bot.run_in_threadpool(lambda: ydl.extract_info(working_url + " -g", download=False))
+                            break
+                        except youtube_dl.utils.YoutubeDLError:
+                            await asyncio.sleep(1)
 
-            ##await message.channel.send("Now playing Music in '" + str(vc.channel.name) + "'!")
+                ##await message.channel.send("Now playing Music in '" + str(vc.channel.name) + "'!")
 
-            url = result['url']
+                url = result['url']
+            else:
+                print("Skipping Pre-Grab YT URL.")
 
         if download_song:
             try:
@@ -1270,7 +1348,20 @@ async def playing_song(message):
 
     english_title = radio_player.song.english_title
     circle = radio_player.song.circle
-    output = ""
+    #output = 'Currently Autoplaying: "' + radio_player.saved_query + '"\n\n'
+    #output = ""
+    total_minutes = str(int(radio_player.song.duration / 60))
+    total_seconds = str(int(radio_player.song.duration % 60))
+
+    if len(total_seconds) == 1:
+        total_seconds = "0" + total_seconds
+
+    minutes = str(int((time.time() - radio_player.skip_cooldown) / 60))
+    seconds = str(int((time.time() - radio_player.skip_cooldown) % 60))
+
+    if len(seconds) == 1:
+        seconds = "0" + seconds
+
     if english_title == "":
         if circle == "":
             output = "Now Playing: 「" + radio_player.song.title + "」\nFrom Album: '" + radio_player.song.english_raw_album + "'\n「" + radio_player.song.album + "」\n" + radio_player.song.friendly_url
@@ -1286,6 +1377,7 @@ async def playing_song(message):
     else:
         output = "Now Playing: '" + english_title + "'\n「" + radio_player.song.title + "」\nFrom Album: '" + radio_player.song.english_raw_album + "'\n「" + radio_player.song.album + "」\n" + radio_player.song.friendly_url
 
+    output += "\n[ " + minutes + ":" + seconds + " / " + total_minutes + ":" + total_seconds + " ]"
     await message.channel.send(output)
 
     return
@@ -1360,9 +1452,9 @@ async def handle_music_queue(message):
             query = arguments[0]
 
             if len(radio_player.queue) > 0:
-                song = await radio_player.get.handle_get_song(message, message.author.id, False, query, False, False, radio_player.queue[len(radio_player.queue) - 1].title)
+                song = await radio_player.get.handle_get_song(message, message.author.id, False, query, False, False, radio_player.queue[len(radio_player.queue) - 1].title, False)
             else:
-                song = await radio_player.get.handle_get_song(message, message.author.id, False, query, False, False, radio_player.song.title)
+                song = await radio_player.get.handle_get_song(message, message.author.id, False, query, False, False, radio_player.song.title, False)
             if song == False:
                 return
 
@@ -1624,9 +1716,11 @@ async def volume(message):
 
 commands.Add("playing", playing)
 commands.Add("nowplaying", playing, count=False)
-commands.Add("play%", play)
+commands.Add("np", playing, count=False)
 commands.Add("queue%", queue)
+commands.Add("playlist%", queue, count=False)
 commands.Add("request%", queue, count=False)
+commands.Add("play%", play)
 commands.Add("stop", stop)
 commands.Add("leave", stop, count=False)
 commands.Add("disconnect", stop, count=False)
@@ -1634,7 +1728,8 @@ commands.Add("stopafter", stopafter)
 commands.Add("pause", pause)
 commands.Add("unpause", pause, count=False)
 commands.Add("resume", pause, count=False)
-commands.Add("skip", skip)
-commands.Add("voteskip", voteskip)
+commands.Add("forceskip", skip)
+commands.Add("skip", voteskip)
+commands.Add("voteskip", voteskip, count=False)
 commands.Add("togglequeue", togglequeue)
 commands.Add("volume%", volume)
