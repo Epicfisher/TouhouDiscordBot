@@ -106,7 +106,7 @@ async def info(message):
         if command.count:
             true_commands = true_commands + 1
 
-    await message.channel.send(aboutMessage % (GetSpecialQuote(), sys.version[:sys.version.index('(') - 1], str(discord.__version__), round((time() - bot.startTime) / 60, 1), round(24 - ((time() - bot.startTime) / 60), 1), str(true_commands), str(len(bot.client.guilds)), str(len(bot.radio_players))))
+    await message.channel.send(aboutMessage % (GetSpecialQuote(), sys.version[:sys.version.index('(') - 1], str(discord.__version__), round((time() - bot.startTime) / 60, 1), round(24 - (((time() - bot.startTime) / 60) / 60), 1), str(true_commands), str(len(bot.client.guilds)), str(len(bot.radio_players))))
     return
 
 ###
