@@ -32,11 +32,12 @@ aboutMessage = """```asciidoc
 
 "%s"
 
-- Use '""" + bot.prefix + """' or @ me to use my commands!
+- Use '""" + bot.prefix + """' or @ me to use my Commands!
 
 - Runs in Python %s, with the use of discord.py %s.
 - So far I have stayed up reading for %s minutes.
 - I'll sleep and restart after another %s hours of reading.
+
 - I currently understand %s commands.
 - I'm currently loaning my books to %s servers.
 - I'm currently playing music for %s servers.
