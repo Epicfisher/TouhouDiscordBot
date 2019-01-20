@@ -44,11 +44,11 @@ musicHelpMessage = """```asciidoc
 
 PLEASE NOTE MUSIC PLAYBACK IS NOT 24/7 AND COULD RESTART
 
-(If you encounter any bugs/issues while playing Music,
-please use the '""" + bot.prefix + """report' command to let me know. Thanks!)
+(Please report any bugs found using
+the '""" + bot.prefix + """report' command. Thanks!)
 
 """ + createHelpHeader("Music Operator Commands ('Manage Channels' Required)") + """
-""" + bot.prefix + """skip :: Skips the currently playing Song.
+""" + bot.prefix + """forceskip :: Forcefully Skips the currently playing Song.
 """ + bot.prefix + """togglequeue :: Enables or disables the Song Queue.
 """ + bot.prefix + """volume""" + bot.argumentChar + """0.5""" + bot.argumentKillChar + """ :: Changes Volume to 0.5, out of a maximum of 1.0.
 
@@ -68,12 +68,13 @@ please use the '""" + bot.prefix + """report' command to let me know. Thanks!)
 """ + bot.prefix + """play""" + bot.argumentChar + """ost/pc98""" + bot.argumentKillChar + """ :: Autoplays Random Touhou 1-5 Music.
 """ + bot.prefix + """play""" + bot.argumentChar + """ost/all""" + bot.argumentKillChar + """ :: Autoplays All Random Touhou Music.
 
-""" + createHelpHeader("Music Control Commands") + """
+""" + createHelpHeader("Music Info Commands") + """
 """ + bot.prefix + """playing :: View the currently playing Song.
 
+""" + createHelpHeader("Music Control Commands") + """
 """ + bot.prefix + """stop :: Stops playing Music and leaves the Voice Channel.
 """ + bot.prefix + """stopafter :: Stops Music after finishing current Song.
-""" + bot.prefix + """voteskip :: Vote to Skip the currently playing Song.
+""" + bot.prefix + """skip :: Votes to Skip the currently playing Song.
 """ + bot.prefix + """pause :: Pauses or unpauses the currently playing Song.
 
 """ + createHelpHeader("Music Queue Commands") + """
