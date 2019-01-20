@@ -21,6 +21,7 @@ if not bot.owner_id == -1:
 import Commands.help
 import Commands.info
 import Commands.suggest
+import Commands.report
 import Commands.image
 import Commands.quote
 import Commands.search
@@ -138,21 +139,31 @@ def run_discord_bot(token):
         print("Failed to Load Opus! Music playback will not work!")
 
     print("Starting Bot...\n")
-    bot.client.run(token)
+    bot.client.run(token, reconnect=True)
+    #while True:
+    	#try:
+    		#bot.client.loop.run_until_complete(bot.client.start(token))
+    	#except BaseException as e:
+            #print("Failed to start! Retrying in 5 seconds...\n" + str(e))
+            #time.sleep(5)
+            #print("Retrying...\n")
+
+    #while True:
+        #try:
+            #bot.client.run(token)
+            #break
+        #except Exception as e:
+            #print("Failed to start! Retrying in 10 seconds...\n" + str(e))
+            #time.sleep(10)
+            #print("Retrying...\n")
 
 ##################################################START############################################################
-@bot.client.event
-async def on_ready():
+async def set_presence():
     #await bot.client.change_presence(status=discord.Status.online, activity=discord.Game(bot.prefix + "help for Help!"))
     await bot.client.change_presence(status=discord.Status.online, activity=discord.Streaming(name=bot.prefix + "help for Help!", url="https://www.twitch.tv/patchouli_knowledge_bot", type=1))
 
+async def initialise():
     global allow_commands
-
-    global data_guild
-    global data_channel
-
-    global suggestions_guild
-    global suggestions_channel
 
     if not bot.data_guild_id == None:
         bot.data_guild = bot.client.get_guild(int(bot.data_guild_id))
@@ -164,9 +175,32 @@ async def on_ready():
     if not bot.suggestions_channel_id == None:
         bot.suggestions_channel = bot.suggestions_guild.get_channel(int(bot.suggestions_channel_id))
 
+    if not bot.reports_guild_id == None:
+        bot.reports_guild = bot.client.get_guild(int(bot.reports_guild_id))
+    if not bot.reports_channel_id == None:
+        bot.reports_channel = bot.reports_guild.get_channel(int(bot.reports_channel_id))
+
+    print("Caching Character Database...\n")
+    await Commands.image.ParseCharacters(Commands.image.character_names, Commands.image.character_links)
+
     allow_commands = True # Now we're truly ready to begin taking commands
 
+@bot.client.event
+async def on_ready():
+    await initialise()
+
+    await set_presence()
+
     print('Logged in as')
+    print(bot.client.user.name)
+    print(bot.client.user.id)
+    print('------')
+
+@bot.client.event
+async def on_resumed():
+    await set_presence()
+
+    print('Reconnected as')
     print(bot.client.user.name)
     print(bot.client.user.id)
     print('------')
@@ -201,10 +235,11 @@ async def on_voice_state_update(member, before, after):
                     for i in range(0, len(bot.radio_players)):
                         if bot.radio_players[i].voice_channel.guild.id == channel.guild.id:
                             if not await check_voice_channel(channel, i):
+                                print("Last User in VC '" + str(before.channel) + "' Left. Killed VC of Radio " + str(i) + ".")
                                 return
 
                             if not after.channel.id == bot.radio_players[i].voice_channel.id and member.id == bot.client.user.id: # Have we been moved into a new Voice Channel?
-                                print("Updating Channel")
+                                print("Updating Channel for Radio VC " + str(i) + ".")
                                 bot.radio_players[i].voice_channel = after.channel
                                 if not await check_voice_channel(after.channel, i):
                                     return
@@ -312,7 +347,7 @@ async def handle_command(message, lowercaseMessage):
         return False
 
 print("""Now starting with:
-- Discord Version: """ + sys.version[:sys.version.index('(') - 1] + """
+- Python Version: """ + sys.version[:sys.version.index('(') - 1] + """
 - discord.py Version: """ + str(discord.__version__) + """
 - youtube-dl Version: """ + str(youtube_dl.__version__) + """
 """)

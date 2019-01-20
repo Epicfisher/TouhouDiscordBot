@@ -15,7 +15,7 @@ diagMessage = """```asciidoc
 = Patchouli Knowledge Diagnosis Screen =
 
 ===== Versions =====
-- Discord Version: """ + sys.version[:sys.version.index('(') - 1] + """
+- Python Version: """ + sys.version[:sys.version.index('(') - 1] + """
 - discord.py Version: """ + str(discord.__version__) + """
 - youtube-dl Version: """ + str(youtube_dl.__version__) + """
 

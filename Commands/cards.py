@@ -16,6 +16,7 @@ class TradingCard:
     power = ""
     rarity = ""
     rarity_message = ""
+    rarity_string = ""
     price = ""
 
 class GetCardOptions:
@@ -26,6 +27,7 @@ class GetCardOptions:
     get_power = False
     get_rarity = False
     get_rarity_message = False
+    get_rarity_string = False
     get_price = False
 
 ##################################################TRADING CARDS API############################################################
@@ -76,6 +78,9 @@ async def get_card_object(raw_name, card_options, unboxing, print_in_console):
         if card_options.get_rarity_message:
             card_options.get_rarity = True
             card_options.get_power = True
+        if card_options.get_rarity_string:
+            card_options.get_rarity = True
+            card_options.get_power = True
         if card_options.get_price:
             card_options.get_power = True
         if card_options.get_link:
@@ -114,7 +119,7 @@ async def get_card_object(raw_name, card_options, unboxing, print_in_console):
 
             if card_options.get_image:
                 character_image = "Touhoudex 2/" + raw_name
-                character_image = await bot.get_image(character_image, 1)
+                character_image = await bot.get_image(character_image, 1, True, False)
 
                 card.character_image = character_image
 
@@ -160,7 +165,8 @@ async def get_card_object(raw_name, card_options, unboxing, print_in_console):
                     if randint(1, 10) == 10:
                         if print_in_console:
                             print("Got lucky! Rarity check was previously '" + str(rarity_check) + "'")
-                        rarity_check = rarity_check + randint(1, 5)
+                        #rarity_check = rarity_check + randint(1, 5)
+                        rarity_check = rarity_check + 5
 
                     if rarity_check > 10:
                         rarity_check = 10
@@ -182,6 +188,19 @@ async def get_card_object(raw_name, card_options, unboxing, print_in_console):
                         rarity_message = rarity_message + ":black_circle:"
 
                 card.rarity_message = rarity_message
+
+            if card_options.get_rarity_string:
+                rarity_string = "Common"
+                #if card.rarity >= 4:
+                    #rarity_string = "Rare"
+                if card.rarity >= 1:
+                    rarity_string = "Rare"
+                if card.rarity >= 4:
+                    rarity_string = "Epic"
+                if card.rarity == 10:
+                    rarity_string = "LEGENDARY"
+
+                card.rarity_string = rarity_string
 
             if card_options.get_price:
                 #price = int((int(power)*int(power)*int(power)*int(power)/2)/100000000) * (rarity + 1)
@@ -232,6 +251,7 @@ async def get_card(message):
             card_options.get_power = True
             card_options.get_rarity = True
             card_options.get_rarity_message = True
+            card_options.get_rarity_string = True
             card_options.get_price = True
 
             card = None
@@ -258,23 +278,13 @@ async def get_card(message):
             return random_card
 
 async def view_card(card):
-    rarity_string = "Common"
-    #if card.rarity >= 4:
-        #rarity_string = "Rare"
-    if card.rarity >= 1:
-        rarity_string = "Rare"
-    if card.rarity >= 4:
-        rarity_string = "Epic"
-    if card.rarity == 10:
-        rarity_string = "LEGENDARY"
-
-    embed = discord.Embed(title="You found [ " + card.name + " ] < " + rarity_string + " >", color=bot.hex_color)
+    embed = discord.Embed(title="You found [ " + card.name + " ] < " + card.rarity_string + " >", color=bot.hex_color)
     embed.set_image(url=card.character_image.Url)
     embed.add_field(name="Power:", value=card.rarity_message, inline=False)
     #embed.add_field(name="Power:", value=power, inline=False)
     embed.add_field(name="Price:", value="¥" + str(card.price), inline=False)
     if len(card.link) > 0:
-        embed.add_field(name="Character Page URL:", value="https://en.touhouwiki.net/wiki/" + card.link, inline=False)
+        embed.add_field(name="Character's Page:", value="https://en.touhouwiki.net/wiki/" + card.link, inline=False)
 
     return embed
 
@@ -334,6 +344,7 @@ async def view_card_handler(message):
         card_options.get_power = True
         card_options.get_rarity = True
         card_options.get_rarity_message = True
+        card_options.get_rarity_string = True
         card_options.get_price = True
 
         card = await get_card_object(raw_names[int(cards_list[card_id_to_get])], card_options, False, False)
@@ -492,5 +503,5 @@ async def view(message):
 
 #commands.Add("daily", daily)
 commands.Add("card", daily)
-#commands.Add("cards", daily)
-#commands.Add("view", daily)
+#commands.Add("cards", cards)
+#commands.Add("view", view)

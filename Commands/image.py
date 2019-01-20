@@ -6,6 +6,28 @@ import bot
 from random import randint
 import discord
 
+no_boys_tags = "-1boy+-2boys+-3boys+-4boys+-5boys+-6boys+-6%2Bboys"
+no_girls_tags = "-1girl+-2girls+-3girls+-4girls+-5girls+-6girls+-6%2Bgirls"
+
+character_names = []
+character_links = []
+
+async def ParseCharacters(character_names, character_links):
+    raw_characters_html = await bot.get("http://touhou.wikia.com/wiki/Character_List") # API is too confusing for a simpleton like me so I guess I'll just parse the webpage HTML don't mind me
+    raw_characters_html = raw_characters_html[raw_characters_html.index('id="Character_List"'):raw_characters_html.index('id="Unnamed_Characters"')]
+
+    while True:
+        try:
+            raw_characters_html = raw_characters_html[raw_characters_html.index('href="') + 6:]
+            character_link = raw_characters_html[1:raw_characters_html.index('"')]
+            character_link = character_link[character_link.index('/') + 1:]
+
+            raw_characters_html = raw_characters_html[raw_characters_html.index('title="') + 7:]
+            character_names.append(raw_characters_html[:raw_characters_html.index('"')])
+            character_links.append(character_link)
+        except:
+            break
+
 async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
     image_seperator_char = ' '
     image_space_char = '_'
@@ -24,8 +46,8 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
 
         tags_array = additional_tags.split(image_seperator_char)
         if genders:
-            if len(tags_array) > 7:
-                await message.channel.send("How do you expect me to find that many people?")
+            if len(tags_array) > 6:
+                await message.channel.send("How do you expect me to find *that* many people?\n(Please only enter a maximum of up to 6 characters!)")
                 return
 
     boys = 0
@@ -33,24 +55,9 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
 
     async with message.channel.typing():
         if not arguments == False:
-            character_names = []
-            character_links = []
-
-            raw_characters_html = await bot.get("http://touhou.wikia.com/wiki/Character_List") # API is too confusing for a simpleton like me so I guess I'll just parse the webpage HTML don't mind me
-            raw_characters_html = raw_characters_html[raw_characters_html.index('id="Character_List"'):raw_characters_html.index('id="Unnamed_Characters"')]
-
-            parsing = True
-            while parsing:
-                try:
-                    raw_characters_html = raw_characters_html[raw_characters_html.index('href="') + 6:]
-                    character_link = raw_characters_html[1:raw_characters_html.index('"')]
-                    character_link = character_link[character_link.index('/') + 1:]
-
-                    raw_characters_html = raw_characters_html[raw_characters_html.index('title="') + 7:]
-                    character_names.append(raw_characters_html[:raw_characters_html.index('"')])
-                    character_links.append(character_link)
-                except:
-                    parsing = False
+            #character_names = []
+            #character_links = []
+            #ParseCharacters(character_names, character_links)
 
             #tags_array = list(set(tags_array)) # Removes all Duplicate elements from the Array
             valid_tags = len(tags_array)
@@ -225,6 +232,11 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
                 if girls > 1:
                     girls_tag += 's'
 
+        if girls > 0 and boys < 1 and not negativeGenders:
+            girls_tag = girls_tag + "+" + no_boys_tags
+        if boys > 0 and girls < 1 and not negativeGenders:
+            boys_tag = boys_tag + "+" + no_girls_tags
+
         if not boys_tag == "":
             additional_tags += boys_tag + '+'
         if not girls_tag == "":
@@ -250,7 +262,7 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
             await message.channel.send("I couldn't find an image!")
             return
 
-        #print("Using tags: '" + tags + "'")
+        #print("Using total tags: '" + tags + "'")
 
         page_scope = 20000
         i = 1
@@ -316,6 +328,11 @@ async def image(message):
     await PostImage(message, "safe", "touhou", "https://gelbooru.com/index.php", True, True)
     return
 
+async def lewdimage(message):
+    if await Check_Nsfwimage(message):
+        await PostImage(message, "questionable", "touhou", "https://gelbooru.com/index.php", True, True)
+    return
+
 async def nsfwimage(message):
     if await Check_Nsfwimage(message):
         await PostImage(message, "explicit", "touhou", "https://gelbooru.com/index.php", True, True)
@@ -323,6 +340,11 @@ async def nsfwimage(message):
 
 async def photo(message):
     await PostImage(message, "safe", "touhou", "https://gelbooru.com/index.php", True, False)
+    return
+
+async def lewdphoto(message):
+    if await Check_Nsfwimage(message):
+        await PostImage(message, "questionable", "touhou", "https://gelbooru.com/index.php", True, False)
     return
 
 async def nsfwphoto(message):
@@ -333,7 +355,12 @@ async def nsfwphoto(message):
 ###
 
 commands.Add("imagewith%", image)
-commands.Add("nsfwimagewith%", nsfwimage)
 commands.Add("image%", photo)
-commands.Add("nsfwimage%", nsfwphoto)
-commands.Add("nsfw%", nsfwphoto, count=False)
+commands.Add("lewdimagewith%", lewdimage, count=False)
+commands.Add("lewdimage%", lewdphoto, count=False)
+commands.Add("lewdwith%", lewdimage)
+commands.Add("lewd%", lewdphoto)
+commands.Add("nsfwimagewith%", nsfwimage, count=False)
+commands.Add("nsfwimage%", nsfwphoto, count=False)
+commands.Add("nsfwwith%", nsfwimage)
+commands.Add("nsfw%", nsfwphoto)

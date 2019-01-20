@@ -51,6 +51,9 @@ You can store your Config Variables as files. Just ensure they are in the same d
 
 'suggestions-guild-id.txt' = The Guild ID the Bot will output Suggestions to (Disabled by Default)
 'suggestions-channel-id.txt' = The Channel ID the Bot will output Suggestions to (Disabled by Default)
+
+'reports-guild-id.txt' = The Guild ID the Bot will output Bug Reports to (Disabled by Default)
+'reports-channel-id.txt' = The Channel ID the Bot will output Bug Reports to (Disabled by Default)
 ```
 
 #### System Environment Variables
@@ -73,6 +76,9 @@ Or, as an alternative, you can choose to store your Config Variables within Syst
 
 'PATCHYBOT-SUGGESTIONSGUILDID' = The Guild ID the Bot will output Suggestions to (Disabled by Default)
 'PATCHYBOT-SUGGESTIONSCHANNELID' = The Channel ID the Bot will output Suggestions to (Disabled by Default)
+
+'PATCHYBOT-REPORTSGUILDID' = The Guild ID the Bot will output Bug Reports to (Disabled by Default)
+'PATCHYBOT-REPORTSCHANNELID' = The Channel ID the Bot will output Bug Reports to (Disabled by Default)
 ```
 
 ## Usage
