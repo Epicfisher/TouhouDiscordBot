@@ -232,10 +232,11 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
                 if girls > 1:
                     girls_tag += 's'
 
-        if girls > 0 and boys < 1 and not negativeGenders:
-            girls_tag = girls_tag + "+" + no_boys_tags
-        if boys > 0 and girls < 1 and not negativeGenders:
-            boys_tag = boys_tag + "+" + no_girls_tags
+        if not negativeGenders and rating == 'safe': # Generally if you search for a Safe image you only want 1 boy or 1 girl. Questionable or Explicit results though could have a mix of the two, so we'll disable this for those
+            if girls > 0 and boys < 1:
+                girls_tag = girls_tag + "+" + no_boys_tags
+            if boys > 0 and girls < 1:
+                boys_tag = boys_tag + "+" + no_girls_tags
 
         if not boys_tag == "":
             additional_tags += boys_tag + '+'
