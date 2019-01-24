@@ -917,7 +917,7 @@ class GetSong:
 
                     if 'This page appears when Google automatically detects requests' in video_results:
                         print("Blocked by YouTube. Forcing Radio termination.")
-                        #await message.channel.send("An error occured!")
+                        await message.channel.send("An internal error occured. Please try again later!")
                         return False
                 else:
                     search_query = '"' + song + '" "' + album + '" ' + additional_tags.replace('+', ' ') # For Japanese results?
@@ -1075,6 +1075,25 @@ class GetSong:
                     if i >= 2: # After we've parsed through 2 songs...
                         keep_parsing = False # Stoppu
 
+                #if (not working_url == None) or (not grab_stream_url_during_playtime and url == None):
+                if not working_url == None and not grab_stream_url_during_playtime and url == None:
+                    if get_yt_url:
+                        ##with nostdout():
+                        with youtube_dl.YoutubeDL(options) as ydl:
+                            ##loop = asyncio.get_event_loop()
+                            ##result = await loop.run_in_executor(thread_pool, lambda: ydl.extract_info(working_url, download=False))
+                            try:
+                                result = await bot.run_in_threadpool(lambda: ydl.extract_info(working_url + " -g", download=False))
+                                url = result['url']
+                            except youtube_dl.utils.YoutubeDLError:
+                                print("Failed to Extract Info! Trying next Song...")
+                                working_url = None
+                                #get_song = True
+
+                    ##await message.channel.send("Now playing Music in '" + str(vc.channel.name) + "'!")
+                else:
+                    print("Skipping Pre-Grab YT URL.")
+
                 if working_url == None:
                     #await message.channel.send("I couldn't find a song!")
                     print("I couldn't find a YouTube song! Retrying...")
@@ -1088,25 +1107,6 @@ class GetSong:
                             keep_trying_arranges = True
                     else:
                         get_song = True
-
-        if url == None and not grab_stream_url_during_playtime:
-            if get_yt_url:
-                ##with nostdout():
-                with youtube_dl.YoutubeDL(options) as ydl:
-                    ##loop = asyncio.get_event_loop()
-                    ##result = await loop.run_in_executor(thread_pool, lambda: ydl.extract_info(working_url, download=False))
-                    for i in range(0, 1):
-                        try:
-                            result = await bot.run_in_threadpool(lambda: ydl.extract_info(working_url + " -g", download=False))
-                            break
-                        except youtube_dl.utils.YoutubeDLError:
-                            await asyncio.sleep(1)
-
-                ##await message.channel.send("Now playing Music in '" + str(vc.channel.name) + "'!")
-
-                url = result['url']
-            else:
-                print("Skipping Pre-Grab YT URL.")
 
         if download_song:
             try:
@@ -1289,7 +1289,7 @@ async def play_music(message):
             #if bot.radio_players[i].vc.guild.id == voice_channel.guild.id:
                 #await bot.radio_players[i].vc.disconnect() # We're playing in the same guild, just a different voice channel. If so, disconnect it from the old one, so we can play instead in a new channel, essentially moving it.
         if bot.radio_players[i].vc.guild.id == voice_channel.guild.id:
-            await message.channel.send("Hey, I'm already playing music in '" + str(bot.radio_players[i].vc.channel) + "'!")
+            await message.channel.send("Hey, I'm already playing music in '" + str(bot.radio_players[i].vc.channel) + "'!\n(If you would like me to stop, use '" + bot.prefix + "stop'! If you would like to queue a song, use '" + bot.prefix + "queue'!)")
             return
 
     if len(bot.radio_players) >= 5 and not message.author.id == bot.owner_id: # Beta Testing Thingy
