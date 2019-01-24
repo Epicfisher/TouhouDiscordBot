@@ -281,6 +281,8 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
                 source = source[:source.index('"')]
                 source = source.replace("\/", "/")
 
+                source = source.encode().decode("unicode-escape")
+
                 print("Posting Image: " + fileUrl)
                 if len(source) > 0:
                     print("Image Source: " + source)
