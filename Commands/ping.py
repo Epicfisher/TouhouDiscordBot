@@ -10,7 +10,7 @@ def get_ping_message():
     if randint(0, 99) == 0:
         return "...Wha? Oh, Pong!"
 
-    if int(24 - (((time() - bot.startTime) / 60) / 60)) < 1:
+    if int(24 - (((time() - bot.startTime) / 60) / 60)) <= 2:
         return "Yaawn... Oh! Pong!"
 
     if bot.season == "christmas":
