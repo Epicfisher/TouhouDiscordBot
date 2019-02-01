@@ -942,7 +942,7 @@ class GetSong:
                             video_result = video_results[url_start_index:]
                             video_result = "https://youtube.com" + video_result[:video_result.index('"')]
                             if '&amp' in video_result:
-                                i = i - 1
+                                #i = i - 1
                                 print("&amp in URL! Must be a playlist, therefore it's bad.")
                                 worked = False
                         else:
