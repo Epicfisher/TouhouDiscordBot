@@ -40,7 +40,7 @@ options = {
 
 busy_servers = []
 
-use_raw_parser = True
+use_raw_parser = False
 grab_stream_url_during_playtime = False
 
 class Song:
@@ -239,6 +239,9 @@ class RadioPlayer:
             self.preparing_queue = True
             print("Preparing next song early due to lack of queue...")
             self.next_song = await self.get.handle_get_song(message, None, False, self.saved_query, False, False, self.song.title, True) # Prepare the next song a little early, so the playback seems continuous.
+            if self.next_song == False:
+                await self.Stop()
+                return
             self.preparing_queue = False
         #next_song_start_time = time.time() - next_song_start_time
         #await self.sleep.Sleep(self.song.duration / 2 - next_song_start_time) # Wait for the second length of the song in Seconds, divided by two and incremented by one just to be safe
@@ -255,7 +258,7 @@ class RadioPlayer:
                 self.next_song = self.queue[0] # Our next song becomes the queued song.
                 #self.queue.pop(0) # Remove the queued song from the list so it isn't used again.
 
-                if not self.next_song == None and self.next_song.url == None:
+                if (not self.next_song == None and self.next_song.url == None) or not use_raw_parser:
                     print("No Pre-YT Song URL! Grabbing that now...")
                     with youtube_dl.YoutubeDL(options) as ydl:
                         for i in range(0, 1):
@@ -301,6 +304,9 @@ class RadioPlayer:
                 self.preparing_queue = True
                 print("I'm not preparing the next song, and there isn't one! I must have skipped? Preparing next song due to lack of queue...")
                 self.next_song = await self.get.busy_get_song(message, None, False, self.saved_query, False, False, self.song.title, True)
+                if self.next_song == False:
+                    await self.Stop()
+                    return
                 self.preparing_queue = False
 
         if not self.playing_loop:
@@ -316,7 +322,7 @@ class RadioPlayer:
                 self.next_song = self.queue[0] # Our next song becomes the queued song.
                 self.queue.pop(0) # Remove the queued song from the list so it isn't used again.
 
-            if self.next_song.url == None:
+            if self.next_song.url == None or not use_raw_parser:
                 print("No YT Song URL! Grabbing that now...")
                 with youtube_dl.YoutubeDL(options) as ydl:
                     for i in range(0, 1):
@@ -1120,7 +1126,7 @@ class GetSong:
                 print("Download Failed! Opting for a Direct Stream URL Instead!")
                 pass
         else:
-            print("Downloading Disabled; Opting for a Direct Stream URL Instead!")
+            #print("Downloading Disabled; Opting for a Direct Stream URL Instead!")
             pass
 
         #print(url)
