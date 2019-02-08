@@ -124,14 +124,14 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
                                 break
 
                 if len(character) > 0:
-                    for i in range(0, len(characters_before)):
-                        character  = character.lower().replace(characters_before[i], characters_after[i])
-
                     keep_testing = True
                     try_end_touhou_tag = True
                     got_character = False
                     while keep_testing:
                         keep_testing = False
+
+                        for i in range(0, len(characters_before)):
+                            character  = character.lower().replace(characters_before[i], characters_after[i])
 
                         html = await bot.get(APILink + "?page=dapi&s=post&q=index&limit=1&json=1&pid=10&tags=" + tags + "+" + character) # We're going to check if our new name has atleast 10 results
                         if not "file_url" in html: # If it doesn't...
