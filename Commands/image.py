@@ -59,6 +59,12 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
             #character_links = []
             #ParseCharacters(character_names, character_links)
 
+            translations_before = ['patchy', 'raymoo', 'flan', 'gif']
+            translations_after = ['patchouli', 'reimu', 'flandre', 'animated_gif']
+
+            characters_before = ['aunn']
+            characters_after = ['aun']
+
             #tags_array = list(set(tags_array)) # Removes all Duplicate elements from the Array
             valid_tags = len(tags_array)
             additional_tags = ""
@@ -68,9 +74,6 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
                     tag = tag[1:]
                 while tag.endswith(' '):
                     tag = tag[0:-1]
-
-                translations_before = ['patchy', 'raymoo', 'flan', 'gif']
-                translations_after = ['patchouli', 'reimu', 'flandre', 'animated_gif']
 
                 raw_tag = tag
                 if tag.startswith('-'):
@@ -121,6 +124,9 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
                                 break
 
                 if len(character) > 0:
+                    for i in range(0, len(characters_before)):
+                        character  = character.lower().replace(characters_before[i], characters_after[i])
+
                     keep_testing = True
                     try_end_touhou_tag = True
                     got_character = False
