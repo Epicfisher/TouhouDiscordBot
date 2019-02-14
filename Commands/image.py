@@ -9,6 +9,9 @@ import discord
 no_boys_tags = "-1boy+-2boys+-3boys+-4boys+-5boys+-6boys+-6%2Bboys"
 no_girls_tags = "-1girl+-2girls+-3girls+-4girls+-5girls+-6girls+-6%2Bgirls"
 
+characters_before = ['Aunn']
+characters_after = ['Aun']
+
 character_names = []
 character_links = []
 
@@ -23,7 +26,10 @@ async def ParseCharacters(character_names, character_links):
             character_link = character_link[character_link.index('/') + 1:]
 
             raw_characters_html = raw_characters_html[raw_characters_html.index('title="') + 7:]
-            character_names.append(raw_characters_html[:raw_characters_html.index('"')])
+            raw_character_name = raw_characters_html[:raw_characters_html.index('"')]
+            for i in range(0, len(characters_before)):
+                raw_character_name  = raw_character_name.replace(characters_before[i], characters_after[i])
+            character_names.append(raw_character_name)
             character_links.append(character_link)
         except:
             break
@@ -59,6 +65,9 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
             #character_links = []
             #ParseCharacters(character_names, character_links)
 
+            translations_before = ['patchy', 'raymoo', 'flan', 'gif']
+            translations_after = ['patchouli', 'reimu', 'flandre', 'animated_gif']
+
             #tags_array = list(set(tags_array)) # Removes all Duplicate elements from the Array
             valid_tags = len(tags_array)
             additional_tags = ""
@@ -68,9 +77,6 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
                     tag = tag[1:]
                 while tag.endswith(' '):
                     tag = tag[0:-1]
-
-                translations_before = ['patchy', 'raymoo', 'flan', 'gif']
-                translations_after = ['patchouli', 'reimu', 'flandre', 'animated_gif']
 
                 raw_tag = tag
                 if tag.startswith('-'):
@@ -90,6 +96,11 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
                 if tag.startswith("$") and tag.endswith("$"): # Disable Character Recognition
                     tag = tag[1:-1] # Hide the symbols
                 else: # We don't want to disable Character Recognition
+                    tag = tag.lower()
+
+                    for i in range(0, len(characters_before)):
+                        tag  = tag.replace(characters_before[i].lower(), characters_after[i].lower())
+
                     swap_names_back = False
                     found_character = False
                     #for character_name in character_names:
@@ -102,7 +113,7 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
                         character_array = character_name.split(" ")
                         if len(character_array) >= 2:
                             for character_word in character_array:
-                                tag_words = tag.lower().split(image_space_char)
+                                tag_words = tag.split(image_space_char)
                                 for tag_word in tag_words:
                                     if tag_word == character_word.lower() and not character_word.lower() == 'no' and not character_word.lower() == 'giant' and not character_word.lower() == 'three' and not character_word.lower() == 'mischievous':
                                         if len(character_array) > 2:
@@ -114,7 +125,7 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
                                         found_character = True
                                         break
                         else:
-                            if tag.lower() == character_name.lower():
+                            if tag == character_name.lower():
                                 character = character_name
 
                                 found_character = True
