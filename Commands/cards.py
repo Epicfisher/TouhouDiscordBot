@@ -270,15 +270,15 @@ async def get_card(message):
 
                 card = await get_card_object(raw_names[random_card], card_options, True, True)
 
-            embed = await view_card(card)
+            embed = await view_card(card, message.author.display_name)
 
             await message.channel.send(embed=embed)
             worked = True
 
             return random_card
 
-async def view_card(card):
-    embed = discord.Embed(title="You found [ " + card.name + " ] < " + card.rarity_string + " >", color=bot.hex_color)
+async def view_card(card, finder):
+    embed = discord.Embed(title=finder.capitalize() + " found [ " + card.name + " ] < " + card.rarity_string + " >", color=bot.hex_color)
     embed.set_image(url=card.character_image.Url)
     embed.add_field(name="Power:", value=card.rarity_message, inline=False)
     #embed.add_field(name="Power:", value=power, inline=False)
@@ -349,7 +349,7 @@ async def view_card_handler(message):
 
         card = await get_card_object(raw_names[int(cards_list[card_id_to_get])], card_options, False, False)
 
-        embed = await view_card(card)
+        embed = await view_card(card, message.author.display_name)
         embed.title = "Viewing " + possessive.lower() + " [ " + card.name + "]"
 
         await message.channel.send(embed=embed)
