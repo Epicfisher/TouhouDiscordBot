@@ -15,7 +15,13 @@ async def suggest(message):
         await message.channel.send("Either I'm perfect, or you forgot to type in a suggestion.")
         return
 
-    await bot.suggestions_channel.send("Suggestion Received from '" + str(message.author) + "':\n'" + arguments[0] + "'")
+    suggestion = ""
+    for i in range(0, len(arguments)):
+        suggestion = suggestion + arguments[i]
+        if i < len(arguments) - 1:
+            suggestion = suggestion + bot.argumentSeperator
+
+    await bot.suggestions_channel.send("Suggestion Received from '" + str(message.author) + "':\n'" + suggestion + "'")
     await message.channel.send("Thank you! I'll try my best to improve the library's services!")
     return
 
