@@ -65,8 +65,8 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
             #character_links = []
             #ParseCharacters(character_names, character_links)
 
-            translations_before = ['patchy', 'raymoo', 'flan', 'gif']
-            translations_after = ['patchouli', 'reimu', 'flandre', 'animated_gif']
+            translations_before = ['patchy', 'raymoo', 'flan', 'gif', 'dab']
+            translations_after = ['patchouli', 'reimu', 'flandre', 'animated_gif', 'dab_(dance)']
 
             #tags_array = list(set(tags_array)) # Removes all Duplicate elements from the Array
             valid_tags = len(tags_array)
@@ -333,7 +333,27 @@ async def Check_Nsfwimage(message):
             return True
         else:
             print("Failed NSFW Image: Channel not NSFW!")
-            bad_channel_quotes = ["I-I don't think this is the kind of channel for THAT.", "S-Shouldn't we do that kind of stuff i-in another channel?"]
+            bad_generic_channel_quotes = ["I-I don't think this is the kind of channel for THAT.", "S-Shouldn't we do that kind of stuff i-in another channel?"]
+
+            bad_reimu_channel_quotes = ["You know, if you love Reimu so much, I'm sure she wouldn't mind a donation.", "I'm sure she'd appreciate a donation more than you looking at her pictures."]
+            bad_patchy_channel_quotes = ["I-I hope you were referring to a *different* Patchouli.", "M-Me? Don't you have anybody else you'd rather stare at?"]
+            bad_remilia_channel_quotes = ["You should consider yourself lucky I'm not reporting that.", "*Sigh* I'll overlook this with the Mistress this once."]
+            bad_flandre_channel_quotes = ["You should consider yourself lucky she's still in the basement.", "You know, if she caught wind if you doing this, it wouldn't end well. For you."]
+            bad_koakuma_channel_quotes = ["This request will have to get through me first.", "Careful. She's a... Nervermind."]
+
+            bad_channel_quotes = bad_generic_channel_quotes
+
+            message_lower = message.content.lower()
+            if "reimu" in message_lower.split():
+                bad_channel_quotes = bad_reimu_channel_quotes
+            if "patchouli" in message_lower.split() or "patchy" in message_lower.split():
+                bad_channel_quotes = bad_patchy_channel_quotes
+            if "remilia" in message_lower.split():
+                bad_channel_quotes = bad_remilia_channel_quotes
+            if "flandre" in message_lower.split() or "flan" in message_lower.split():
+                bad_channel_quotes = bad_flandre_channel_quotes
+            if "koakuma" in message_lower.split():
+                bad_channel_quotes = bad_koakuma_channel_quotes
 
             await message.channel.send(bad_channel_quotes[randint(0, len(bad_channel_quotes) - 1)] + "\n(That command only works in NSFW channels!)")
             return False

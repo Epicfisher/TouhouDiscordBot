@@ -40,7 +40,6 @@ async def get_quote(message, quotesToGet):
         quotesToGet = randint(1, 3)
 
     async with message.channel.typing():
-
         print("Quote requested from game: " + gameNumberToUse)
 
         html = await bot.get("https://www.thpatch.net/wiki/Th" + gameNumberToUse)
