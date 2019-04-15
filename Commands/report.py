@@ -15,7 +15,13 @@ async def report(message):
         await message.channel.send("Either I'm perfect, or you forgot to type in a bug report.")
         return
 
-    await bot.reports_channel.send(":warning: Report Received from '" + str(message.author) + "':\n'" + arguments[0] + "'")
+    report = ""
+    for i in range(0, len(arguments)):
+        report = report + arguments[i]
+        if i < len(arguments) - 1:
+            report = report + bot.argumentSeperator
+
+    await bot.reports_channel.send(":warning: Report Received from '" + str(message.author) + "':\n'" + report + "'")
     await message.channel.send("Thank you! I'll try my best to improve the library's services!")
     return
 
