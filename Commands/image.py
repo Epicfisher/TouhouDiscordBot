@@ -344,15 +344,15 @@ async def Check_Nsfwimage(message):
             bad_channel_quotes = bad_generic_channel_quotes
 
             message_lower = message.content.lower()
-            if message_lower.endswith("reimu"):
+            if "reimu" in message_lower.split():
                 bad_channel_quotes = bad_reimu_channel_quotes
-            if message_lower.endswith("patchouli") or message_lower.endswith("patchy"):
+            if "patchouli" in message_lower.split() or "patchy" in message_lower.split():
                 bad_channel_quotes = bad_patchy_channel_quotes
-            if message_lower.endswith("remilia"):
+            if "remilia" in message_lower.split():
                 bad_channel_quotes = bad_remilia_channel_quotes
-            if message_lower.endswith("flandre") or message_lower.endswith("flan"):
+            if "flandre" in message_lower.split() or "flan" in message_lower.split():
                 bad_channel_quotes = bad_flandre_channel_quotes
-            if message_lower.endswith("koakuma"):
+            if "koakuma" in message_lower.split():
                 bad_channel_quotes = bad_koakuma_channel_quotes
 
             await message.channel.send(bad_channel_quotes[randint(0, len(bad_channel_quotes) - 1)] + "\n(That command only works in NSFW channels!)")
