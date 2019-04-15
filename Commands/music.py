@@ -317,12 +317,14 @@ class RadioPlayer:
             #if self.next_song.url == None:
             self.getting_queue = True
             self.got_queue = True
+            self.using_queue = False
             if len(self.queue) > 0: # Check to see if we've acqured a queued song. If so...
+                self.using_queue = True
                 print("Popping from next Queue Song!")
                 self.next_song = self.queue[0] # Our next song becomes the queued song.
                 self.queue.pop(0) # Remove the queued song from the list so it isn't used again.
 
-            if self.next_song.url == None or not use_raw_parser:
+            if self.next_song.url == None or (not use_raw_parser and self.using_queue):
                 print("No YT Song URL! Grabbing that now...")
                 with youtube_dl.YoutubeDL(options) as ydl:
                     for i in range(0, 1):
@@ -532,6 +534,16 @@ class GetSong:
 
         #print(query)
         if not query == None:
+            if query.lower().startswith('arrangements'):
+                doujin = True
+                random = False
+                #print("NO RANDOM. FORCED DOUJIN")
+                query = query[12:]
+            if query.lower().startswith('arrangement'):
+                doujin = True
+                random = False
+                #print("NO RANDOM. FORCED DOUJIN")
+                query = query[11:]
             if query.lower().startswith('arranges'):
                 doujin = True
                 random = False
@@ -589,7 +601,7 @@ class GetSong:
             #query = check_argument_query(query)
 
         doujin_title_tags = ['arrange', 'arrangement', 'instrumental', 'rock', 'metal', 'orchestral', 'piano', 'synthesia', 'midi', 'house', 'vocal', 'subs']
-        bad_title_tags = ['demo', 'preview', 'intro', 'crossfade', 'xfd', 'speedpaint', 'osu', 'sound voltex', 'sdvx', 'nightcore', 'night core']
+        bad_title_tags = ['demo', 'preview', 'intro', 'crossfade', 'xfd', 'speedpaint', 'osu', 'sound voltex', 'sdvx', 'stepmania', 'step mania', 'nightcore', 'night core']
 
         original_games = await bot.get('https://epicfisher.github.io/TouhouWikiArrangeParser/root/')
         original_games = html.unescape(original_games)
@@ -763,6 +775,8 @@ class GetSong:
                             if len(jap_titles) > 1: # If we only have one base song, uh, just play that regardless? I'm not implementing such a specific use-case scenario to return back to the base games. Literally nobody is going to care.
                                 if jap_titles[random_song] == old_song:
                                     print("Same song! '" + jap_titles[random_song] + "' | '" + old_song + "'")
+                                    jap_titles.pop(random_song)
+                                    titles.pop(random_song)
                                     get_unique_song = True
 
                 additional_tags = ""
@@ -864,6 +878,7 @@ class GetSong:
                                 print(arrange_titles[random_arrange] + " | " + old_song)
                                 if arrange_titles[random_arrange] == old_song:
                                     print("Same arrange! '" + arrange_titles[random_arrange] + "' | '" + old_song + "'")
+                                    arrange_titles.pop(random_arrange)
                                     get_unique_song = True
 
                     raw_song_jap = jap_titles[random_song]
@@ -915,7 +930,10 @@ class GetSong:
                 working_duration_seconds = None
 
                 if use_raw_parser:
-                    search_query = '"' + song.replace(' ', '+') + '"+"' + album.replace(' ', '+') + '"+' + additional_tags # For Japanese results?
+                    if doujin:
+                        search_query = '"' + song.replace(' ', '+') + '"+"' + album.replace(' ', '+') + '"+' + additional_tags # For Japanese results?
+                    else:
+                        search_query = '"' + song.replace(' ', '+') + '"+' + additional_tags # For Japanese results?
 
                     #video_results = await bot.get('https://www.youtube.com/results?search_query="原曲"+"' + song.replace(' ', '+') + '"+"' + album[:album.index('～ ')] + '"+coreytaiyo&page=1') # For Japanese results?
                     #video_results = await bot.get('https://www.youtube.com/results?search_query=東方"' + song.replace(' ', '+') + '"+"' + album.replace(' ', '+') + '"+' + additional_tags + '&page=1') # For Japanese results?
@@ -926,7 +944,11 @@ class GetSong:
                         await message.channel.send("An internal error occured. Please try again later!")
                         return False
                 else:
-                    search_query = '"' + song + '" "' + album + '" ' + additional_tags.replace('+', ' ') # For Japanese results?
+                    #search_query = '"' + song + '" "' + album + '" ' + additional_tags.replace('+', ' ') # For Japanese results?
+                    if doujin:
+                        search_query = '"' + song + '" "' + album + '" ' + additional_tags.replace('+', ' ') # For Japanese results?
+                    else:
+                        search_query = '"' + song + '" ' + additional_tags.replace('+', ' ')
 
                     #ydl = youtube_dl.YoutubeDL(options)
                     #except youtube_dl.utils.YoutubeDLError as e:
@@ -937,6 +959,7 @@ class GetSong:
                         except youtube_dl.utils.YoutubeDLError:
                             video_results = None
 
+                print("Search Query: " + search_query)
                 keep_parsing = True
                 i = 0
                 while keep_parsing and not video_results == None:
@@ -982,7 +1005,7 @@ class GetSong:
                                 duration = duration + ":" + duration_seconds
 
                             print("Looking at a song of duration '" + str(duration_minutes) + "' Minutes.")
-                            if duration_minutes > 8: # If the song is longer than 8 minutes...
+                            if duration_minutes > 9: # If the song is longer than 9 minutes...
                                 #i = i - 1 # We have one less
                                 print("That YouTube Song is too Long!")
                                 worked = False # Doesn't count as a working video
@@ -1036,22 +1059,25 @@ class GetSong:
                             song_consistent = song_consistent.replace('？', '?')
                             song_consistent = song_consistent.replace('(', '').replace(')', '').replace('[', '').replace(']', '')
 
-                            if not song_consistent in title_lower.replace('　', ' ').replace('？', '?').replace('(', '').replace(')', '').replace('[', '').replace(']', '') and not song_consistent in description_lower.replace('　', ' ').replace('？', '?').replace('(', '').replace(')', '').replace('[', '').replace(']', ''):
-                                print("That video title and description has no song name (" + song_consistent + ") in it! Must be a bad one. Let's ignore it.")
-                                worked = False
+                            if doujin:
+                                if not song_consistent in title_lower.replace('　', ' ').replace('？', '?').replace('(', '').replace(')', '').replace('[', '').replace(']', '') and not song_consistent in description_lower.replace('　', ' ').replace('？', '?').replace('(', '').replace(')', '').replace('[', '').replace(']', ''):
+                                    print("That video title and description has no song name (" + song_consistent + ") in it! Must be a bad one. Let's ignore it.")
+                                    worked = False
 
                         if worked:
                             if doujin:
-                                for title_tag in bad_title_tags:
-                                    if title_tag in title_lower:
-                                        print("That song had a bad title tag!")
-                                        #i = i - 1
-                                        worked = False
-                                        break
-                                    if title_tag in description_lower:
-                                        print("That song had a bad title tag in the description!")
-                                        worked = False
-                                        break
+                                for bad_title_tag in bad_title_tags:
+                                    for title_tags in title_lower.split():
+                                        if bad_title_tag in title_tags:
+                                            print("That song had a bad title tag!")
+                                            #i = i - 1
+                                            worked = False
+                                            break
+                                    for description_tags in description_lower.split():
+                                        if bad_title_tag in description_tags:
+                                            print("That song had a bad title tag in the description!")
+                                            worked = False
+                                            break
                             else:
                                 for title_tag in doujin_title_tags: # This might not be needed for the Japanese queries.
                                     if title_tag in title_lower:
@@ -1531,8 +1557,11 @@ async def stop_music_after(message):
 
     radio_player = await get_radio_player(message.guild.id)
     if not radio_player == None:
-        radio_player.stop_after = True
-        await message.channel.send("Stopping Music Playback after finishing current song!")
+        if radio_player.stop_after:
+            await message.channel.send("I'm already Stopping Music Playback after finishing the current Song!")
+        else:
+            radio_player.stop_after = True
+            await message.channel.send("Stopping Music Playback after finishing current song!")
         return
 
     await message.channel.send("I'm not playing any Music!")
