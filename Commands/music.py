@@ -1075,40 +1075,16 @@ class GetSong:
                         if worked:
                             if doujin:
                                 for bad_title_tag in bad_title_tags:
-                                    '''
-                                    if bad_title_tag in title_lower:
-                                        print("That song had a bad title tag!")
-                                        worked = False
-                                        break
-                                    if bad_title_tag in description_lower:
-                                        print("That song had a bad title tag in the description!")
-                                        worked = False
-                                        break
-                                    '''
-
                                     for title_tag in title_lower.split():
                                         if title_tag.startswith(bad_title_tag):
-                                            print("That song had a bad title tag!")
+                                            print("That song had a bad title tag! (" + bad_title_tag + ")")
                                             worked = False
                                             break
                                     for description_tag in description_lower.split():
                                         if description_tag.startswith(bad_title_tag):
-                                            print("That song had a bad title tag in the description!")
+                                            print("That song had a bad title tag in the description! (" + bad_title_tag + ")")
                                             worked = False
                                             break
-
-                                    '''
-                                    for title_tags in title_lower.split():
-                                        if bad_title_tag in title_tags:
-                                            print("That song had a bad title tag!")
-                                            worked = False
-                                            break
-                                    for description_tags in description_lower.split():
-                                        if bad_title_tag in description_tags:
-                                            print("That song had a bad title tag in the description!")
-                                            worked = False
-                                            break
-                                    '''
 
                                     if not worked:
                                         break
