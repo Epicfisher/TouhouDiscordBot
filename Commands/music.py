@@ -1210,8 +1210,10 @@ async def connect_voice(voice_channel):
 
     if not voice_channel.guild.voice_client == None:
         if voice_channel == voice_channel.guild.voice_client.channel:
-            print("Reusing old VC")
-            return voice_channel.guild.voice_client
+            #print("Reusing old VC")
+            #return voice_channel.guild.voice_client
+            print("Even Though it Already Exists, Forcing Kill of Old Radio VC")
+            await voice_channel.guild.voice_client.disconnect()
         else:
             print("Forcing Kill of Old Radio VC")
             await voice_channel.guild.voice_client.disconnect()
