@@ -15,6 +15,8 @@ characters_after = ['Aun']
 character_names = []
 character_links = []
 
+exclude_unless_wanted_tags = ['comic']
+
 async def ParseCharacters(character_names, character_links):
     raw_characters_html = await bot.get("http://touhou.wikia.com/wiki/Character_List") # API is too confusing for a simpleton like me so I guess I'll just parse the webpage HTML don't mind me
     raw_characters_html = raw_characters_html[raw_characters_html.index('id="Character_List"'):raw_characters_html.index('id="Unnamed_Characters"')]
@@ -40,12 +42,19 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
 
     tags = "rating:" + rating + "+" + tags # Format and add the Rating into the total Tags
 
+    bad_tags = ['guro']
+
+    bad_lewd_tags = ['creepy', 'style_parody']
+    bad_nsfw_tags = ['loli']
+
     bad_sfw_tags = ['nude', 'pov_feet', 'ass', 'anus', 'thighs', 'underboob', 'sideboob', 'breasts', 'hanging_breasts', 'nipples', 'erect_nipples', 'topless', 'panties', 'striped_panties', 'underwear', 'underwear_only', 'thong', 'thong_bikini', 'micro_bikini', 'bandaids_on_nipples' 'panty_shot', 'cameltoe', 'dress_lift', 'skirt_lift', 'upskirt', 'under_skirt', 'no_panties', 'no_bra', 'removing_panties', 'pussy_juice', 'sexually_suggestive', 'suggestive_fluid', 'vibrator', 'rape', 'sex', 'masturbation', 'fingering', 'implied_masturbation', 'futa', 'yuri', 'yaoi', 'vore', 'tentacles', 'cum', 'guro', 'blood', 'vomit', 'piss', 'pee', 'peeing', 'toilet', 'toilet_use']
 
     arguments = commands.GetArgumentsFromCommand(message.content)
 
     additional_tags = ""
     additional_tags_list_check = []
+
+    tags_array = []
 
     if not arguments == False:
         additional_tags = arguments[0]
@@ -65,8 +74,8 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
             #character_links = []
             #ParseCharacters(character_names, character_links)
 
-            translations_before = ['patchy', 'raymoo', 'flan', 'gif', 'dab']
-            translations_after = ['patchouli', 'reimu', 'flandre', 'animated_gif', 'dab_(dance)']
+            translations_before = ['patchy', 'raymoo', 'flan', 'gif', 'dab', 'pc98']
+            translations_after = ['patchouli', 'reimu', 'flandre', 'animated_gif', 'dab_(dance)', 'touhou_(pc-98)']
 
             #tags_array = list(set(tags_array)) # Removes all Duplicate elements from the Array
             valid_tags = len(tags_array)
@@ -182,6 +191,23 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
                     if raw_tag.startswith("rating"): # Disallow modification to the Rating tag
                         is_good_tag = False
 
+                    for bad_tag in bad_tags: # Disallow certain tags. Cycle through all bad tags
+                        if raw_tag == bad_tag: # Check for a match with the current tag
+                            is_good_tag = False
+                            break
+
+                    if rating == "questionable": # Disallow certain tags if we're in Questionable
+                        for bad_tag in bad_lewd_tags: # Cycle through all bad Lewd tags
+                            if raw_tag == bad_tag: # Check for a match with the current tag
+                                is_good_tag = False
+                                break
+
+                    if rating == "questionable" or rating == "explicit": # Disallow certain tags if we're NSFW
+                        for bad_tag in bad_nsfw_tags: # Cycle through all bad NSFW tags
+                            if raw_tag == bad_tag: # Check for a match with the current tag
+                                is_good_tag = False
+                                break
+
                     if rating == "safe": # Disallow certain tags if we're supposed to be SFW
                         for bad_tag in bad_sfw_tags: # Cycle through all bad SFW tags
                             if raw_tag == bad_tag: # Check for a match with the current tag
@@ -219,8 +245,6 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
                                         except:
                                             break
 
-                    i = i + 1
-
         boys_tag = ""
         if boys > 0:
             if negativeGenders:
@@ -253,6 +277,28 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
             additional_tags += boys_tag + '+'
         if not girls_tag == "":
             additional_tags +=  girls_tag + '+'
+
+        bad_tag = False
+
+        for i in range(0, len(exclude_unless_wanted_tags)):
+            for ii in range(0, len(tags_array)):
+                bad_tag = False
+                if exclude_unless_wanted_tags[i] == tags_array[ii].lower():
+                    bad_tag = True
+                    break
+            if not bad_tag:
+                additional_tags += '-' + exclude_unless_wanted_tags[i] + '+'
+
+        for bad_tag in bad_tags: # Add a filter for all bad tags so they aren't shown
+            additional_tags = additional_tags + '-' + bad_tag + '+'
+
+        if rating == "questionable":
+            for bad_tag in bad_lewd_tags: # Add a filter for all bad tags if we're in Questionable so they aren't shown
+                additional_tags = additional_tags + '-' + bad_tag + '+'
+
+        if rating == "questionable" or rating == "explicit":
+            for bad_tag in bad_nsfw_tags: # Add a filter for all bad tags if we're NSFW so they aren't shown
+                additional_tags = additional_tags + '-' + bad_tag + '+'
 
         if len(additional_tags) > 0:
             print("Using additional tags: '" + additional_tags[0:-1].replace(image_space_char, '_') + "'")
