@@ -1220,7 +1220,8 @@ async def connect_voice(voice_channel):
 
     try:
         vc = await voice_channel.connect()
-    except:
+    except Exception as e:
+        print("Could not Connect to Voice Channel! Exception:\n'" + str(e) + "'")
         if vc == None:
             #await message.channel.send("I couldn't find your Voice Channel!")
             return
@@ -1709,7 +1710,7 @@ async def change_volume(message):
                         pass
 
                     if arguments == False:
-                        await message.channel.send("The Volume is currently set to " + str(bot.radio_players[i].src.volume) + ".")
+                        await message.channel.send("The Volume is currently set to " + str(bot.radio_players[i].src.volume) + " out of a maximum of 1.0.")
                         return
                     await bot.radio_players[i].Volume(volume)
                     return
@@ -1765,6 +1766,7 @@ commands.Add("playing", playing)
 commands.Add("nowplaying", playing, count=False)
 commands.Add("np", playing, count=False)
 commands.Add("queue%", queue)
+commands.Add("queuelist%", queue, count=False)
 commands.Add("playlist%", queue, count=False)
 commands.Add("request%", queue, count=False)
 commands.Add("play%", play)
