@@ -9,13 +9,14 @@ import discord
 no_boys_tags = "-1boy+-2boys+-3boys+-4boys+-5boys+-6boys+-6%2Bboys"
 no_girls_tags = "-1girl+-2girls+-3girls+-4girls+-5girls+-6girls+-6%2Bgirls"
 
-characters_before = ['Aunn']
-characters_after = ['Aun']
+characters_before = ['Aunn', 'Shikieiki', 'Yamaxanadu']
+characters_after = ['Aun', 'Shiki', 'Eiki']
 
 character_names = []
 character_links = []
 
 exclude_unless_wanted_tags = ['comic']
+exclude_unless_wanted_lewd_tags = ['creepy']
 
 async def ParseCharacters(character_names, character_links):
     raw_characters_html = await bot.get("http://touhou.wikia.com/wiki/Character_List") # API is too confusing for a simpleton like me so I guess I'll just parse the webpage HTML don't mind me
@@ -43,8 +44,7 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
     tags = "rating:" + rating + "+" + tags # Format and add the Rating into the total Tags
 
     bad_tags = ['guro']
-
-    bad_lewd_tags = ['creepy', 'style_parody']
+    bad_lewd_tags = ['style_parody']
     bad_nsfw_tags = ['loli']
 
     bad_sfw_tags = ['nude', 'pov_feet', 'ass', 'anus', 'thighs', 'underboob', 'sideboob', 'breasts', 'hanging_breasts', 'nipples', 'erect_nipples', 'topless', 'panties', 'striped_panties', 'underwear', 'underwear_only', 'thong', 'thong_bikini', 'micro_bikini', 'bandaids_on_nipples' 'panty_shot', 'cameltoe', 'dress_lift', 'skirt_lift', 'upskirt', 'under_skirt', 'no_panties', 'no_bra', 'removing_panties', 'pussy_juice', 'sexually_suggestive', 'suggestive_fluid', 'vibrator', 'rape', 'sex', 'masturbation', 'fingering', 'implied_masturbation', 'futa', 'yuri', 'yaoi', 'vore', 'tentacles', 'cum', 'guro', 'blood', 'vomit', 'piss', 'pee', 'peeing', 'toilet', 'toilet_use']
@@ -288,6 +288,17 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
                     break
             if not bad_tag:
                 additional_tags += '-' + exclude_unless_wanted_tags[i] + '+'
+
+        bad_tag = False
+
+        for i in range(0, len(exclude_unless_wanted_lewd_tags)):
+            for ii in range(0, len(tags_array)):
+                bad_tag = False
+                if exclude_unless_wanted_lewd_tags[i] == tags_array[ii].lower():
+                    bad_tag = True
+                    break
+            if not bad_tag:
+                additional_tags += '-' + exclude_unless_wanted_lewd_tags[i] + '+'
 
         for bad_tag in bad_tags: # Add a filter for all bad tags so they aren't shown
             additional_tags = additional_tags + '-' + bad_tag + '+'
