@@ -342,7 +342,10 @@ async def handle_command(message, lowercaseMessage):
 
         try:
             print("USER HAD AN ERROR! BIG BAD<\n'" + str(message.content) + "'\n" +  str(e) + "\n>")
-            await message.channel.send("Whoops! Something went wrong in my head while trying to figure that one out... Sorry!")
+            if "Missing Permissions" in str(e): # lol this probably isn't the best but it works and I don't really care
+                await message.channel.send("Whoops! I'm missing a Permission to send that message!")
+            else:
+                await message.channel.send("Whoops! Something went wrong in my head while trying to figure that one out... Sorry!")
         except:
             pass
         return False
