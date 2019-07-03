@@ -45,7 +45,7 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
 
     bad_tags = ['guro']
     bad_lewd_tags = ['style_parody']
-    bad_nsfw_tags = ['loli']
+    bad_nsfw_tags = ['loli', 'shota']
 
     bad_sfw_tags = ['nude', 'pov_feet', 'ass', 'anus', 'thighs', 'underboob', 'sideboob', 'breasts', 'hanging_breasts', 'nipples', 'erect_nipples', 'topless', 'panties', 'striped_panties', 'underwear', 'underwear_only', 'thong', 'thong_bikini', 'micro_bikini', 'bandaids_on_nipples' 'panty_shot', 'cameltoe', 'dress_lift', 'skirt_lift', 'upskirt', 'under_skirt', 'no_panties', 'no_bra', 'removing_panties', 'pussy_juice', 'sexually_suggestive', 'suggestive_fluid', 'vibrator', 'rape', 'sex', 'masturbation', 'fingering', 'implied_masturbation', 'futa', 'yuri', 'yaoi', 'vore', 'tentacles', 'cum', 'guro', 'blood', 'vomit', 'piss', 'pee', 'peeing', 'toilet', 'toilet_use']
 
