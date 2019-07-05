@@ -15,8 +15,12 @@ characters_after = ['Aun', 'Shiki', 'Eiki']
 character_names = []
 character_links = []
 
+character_tags = []
+character_genders = []
+
 exclude_unless_wanted_tags = ['comic']
 exclude_unless_wanted_lewd_tags = ['creepy']
+exclude_unless_wanted_nsfw_tags = ['futa']
 
 async def ParseCharacters(character_names, character_links):
     raw_characters_html = await bot.get("http://touhou.wikia.com/wiki/Character_List") # API is too confusing for a simpleton like me so I guess I'll just parse the webpage HTML don't mind me
@@ -37,6 +41,10 @@ async def ParseCharacters(character_names, character_links):
         except:
             break
 
+    for i in range(0, len(character_names)):
+        character_tags.append(None)
+        character_genders.append(None)
+
 async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
     image_seperator_char = ' '
     image_space_char = '_'
@@ -47,7 +55,7 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
     bad_lewd_tags = ['style_parody']
     bad_nsfw_tags = ['loli', 'shota']
 
-    bad_sfw_tags = ['nude', 'pov_feet', 'ass', 'anus', 'thighs', 'underboob', 'sideboob', 'breasts', 'hanging_breasts', 'nipples', 'erect_nipples', 'topless', 'panties', 'striped_panties', 'underwear', 'underwear_only', 'thong', 'thong_bikini', 'micro_bikini', 'bandaids_on_nipples' 'panty_shot', 'cameltoe', 'dress_lift', 'skirt_lift', 'upskirt', 'under_skirt', 'no_panties', 'no_bra', 'removing_panties', 'pussy_juice', 'sexually_suggestive', 'suggestive_fluid', 'vibrator', 'rape', 'sex', 'masturbation', 'fingering', 'implied_masturbation', 'futa', 'yuri', 'yaoi', 'vore', 'tentacles', 'cum', 'guro', 'blood', 'vomit', 'piss', 'pee', 'peeing', 'toilet', 'toilet_use']
+    bad_sfw_tags = ['nude', 'pov_feet', 'ass', 'anus', 'thighs', 'underboob', 'sideboob', 'breasts', 'hanging_breasts', 'nipples', 'erect_nipples', 'topless', 'panties', 'striped_panties', 'underwear', 'underwear_only', 'thong', 'thong_bikini', 'micro_bikini', 'bandaids_on_nipples' 'panty_shot', 'cameltoe', 'dress_lift', 'skirt_lift', 'upskirt', 'under_skirt', 'no_panties', 'no_bra', 'removing_panties', 'pussy_juice', 'sexually_suggestive', 'suggestive_fluid', 'vibrator', 'rape', 'bdsm', 'sex', 'masturbation', 'fingering', 'implied_masturbation', 'futa', 'yuri', 'yaoi', 'vore', 'tentacles', 'cum', 'blood', 'vomit', 'piss', 'pee', 'peeing', 'toilet', 'toilet_use']
 
     arguments = commands.GetArgumentsFromCommand(message.content)
 
@@ -141,35 +149,40 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
                                 break
 
                 if len(character) > 0:
-                    keep_testing = True
-                    try_end_touhou_tag = True
-                    got_character = False
-                    while keep_testing:
-                        keep_testing = False
-
-                        html = await bot.get(APILink + "?page=dapi&s=post&q=index&limit=1&json=1&pid=10&tags=" + tags + "+" + character) # We're going to check if our new name has atleast 10 results
-                        if not "file_url" in html: # If it doesn't...
-                            #print("Trying " + character)
-                            if swap_names_back:
-                                if character.startswith(character_array[1]):
-                                    character = character_array[0] + "_" + character_array[1] # Swap the names around again back to it's original positions
-                                else:
-                                    character = character_array[1] + "_" + character_array[0] # Swap the names around again back to it's reversed positions
-                                swap_names_back = False
-                                keep_testing = True
-                                if not try_end_touhou_tag:
-                                    character = character + "_(touhou)"
-                            if not character.endswith("_(touhou)") and swap_names_back == False and keep_testing == False and try_end_touhou_tag:
-                                character = character + "_(touhou)"
-                                if len(character_array) == 2:
-                                    swap_names_back = True
-                                keep_testing = True
-                                try_end_touhou_tag = False
-                        else: # If we were able to find atleast 10 images of our character tag...
-                            #print("Working " + character)
+                    if character_tags[character_index] == None:
+                        keep_testing = True
+                        try_end_touhou_tag = True
+                        got_character = False
+                        while keep_testing:
                             keep_testing = False
-                            got_character = True
-                            tag = character
+
+                            html = await bot.get(APILink + "?page=dapi&s=post&q=index&limit=1&json=1&pid=10&tags=" + tags + "+" + character) # We're going to check if our new name has atleast 10 results
+                            if not "file_url" in html: # If it doesn't...
+                                #print("Trying " + character)
+                                if swap_names_back:
+                                    if character.startswith(character_array[1]):
+                                        character = character_array[0] + "_" + character_array[1] # Swap the names around again back to it's original positions
+                                    else:
+                                        character = character_array[1] + "_" + character_array[0] # Swap the names around again back to it's reversed positions
+                                    swap_names_back = False
+                                    keep_testing = True
+                                    if not try_end_touhou_tag:
+                                        character = character + "_(touhou)"
+                                if not character.endswith("_(touhou)") and swap_names_back == False and keep_testing == False and try_end_touhou_tag:
+                                    character = character + "_(touhou)"
+                                    if len(character_array) == 2:
+                                        swap_names_back = True
+                                    keep_testing = True
+                                    try_end_touhou_tag = False
+                            else: # If we were able to find atleast 10 images of our character tag...
+                                #print("Working " + character)
+                                character_tags[character_index] = character # Cache our Tag!
+                                keep_testing = False
+                                got_character = True
+                                tag = character
+                    else:
+                        got_character = True
+                        tag = character_tags[character_index]
 
                     if not got_character:
                         valid_tags = valid_tags - 1
@@ -222,24 +235,32 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
                             if genders:
                                 if not character == None and not character == '' and got_character:
                                     # Now that we have our unique working character 100%, let's get it's gender in preparation for adding it to the FINAL LIST
-                                    print("Getting Gender of '" + character + "' From '" + character_links[character_index] + "'")
-                                    #print("https://touhou.fandom.com/wiki/" + character_links[character_index])
-                                    gender = await bot.get("https://touhou.fandom.com/wiki/" + character_links[character_index])
-                                    gender = gender[gender.index('id="PageHeader"') + 15:]
-                                    gender = gender[:gender.index('</div>')]
-                                    try:
-                                        gender = gender[gender.index('class="page-header__categories-links">') + 38:]
-                                    except:
-                                        pass
-                                    gender = gender[gender.index('<'):]
+                                    if character_genders[character_index] == None:
+                                        print("Getting Gender of '" + character + "' From '" + character_links[character_index] + "'")
+                                        #print("https://touhou.fandom.com/wiki/" + character_links[character_index])
+                                        gender = await bot.get("https://touhou.fandom.com/wiki/" + character_links[character_index])
+                                        gender = gender[gender.index('id="PageHeader"') + 15:]
+                                        gender = gender[:gender.index('</div>')]
+                                        try:
+                                            gender = gender[gender.index('class="page-header__categories-links">') + 38:]
+                                        except:
+                                            pass
+                                        gender = gender[gender.index('<'):]
+                                    else:
+                                        print("Loading Cached Gender of '" + character + "' From '" + character_links[character_index] + "' As '" + character_genders[character_index][:-1] + "'")
+                                        gender_check = character_genders[character_index]
                                     while True:
                                         try:
-                                            gender = gender[gender.index('/Category:') + 10:]
-                                            gender_check = gender[:gender.index('"')]
+                                            if character_genders[character_index] == None:
+                                                gender = gender[gender.index('/Category:') + 10:]
+                                                gender_check = gender[:gender.index('"')]
+
                                             if gender_check == "Males":
+                                                character_genders[character_index] = "Males" # Cache our Gender!
                                                 boys += 1
                                                 break
                                             if gender_check == "Females":
+                                                character_genders[character_index] = "Females" # Cache our Gender!
                                                 girls += 1
                                                 break
                                         except:
@@ -289,16 +310,29 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
             if not bad_tag:
                 additional_tags += '-' + exclude_unless_wanted_tags[i] + '+'
 
-        bad_tag = False
+        if rating == "questionable":
+            bad_tag = False
 
-        for i in range(0, len(exclude_unless_wanted_lewd_tags)):
-            for ii in range(0, len(tags_array)):
-                bad_tag = False
-                if exclude_unless_wanted_lewd_tags[i] == tags_array[ii].lower():
-                    bad_tag = True
-                    break
-            if not bad_tag:
-                additional_tags += '-' + exclude_unless_wanted_lewd_tags[i] + '+'
+            for i in range(0, len(exclude_unless_wanted_lewd_tags)):
+                for ii in range(0, len(tags_array)):
+                    bad_tag = False
+                    if exclude_unless_wanted_lewd_tags[i] == tags_array[ii].lower():
+                        bad_tag = True
+                        break
+                if not bad_tag:
+                    additional_tags += '-' + exclude_unless_wanted_lewd_tags[i] + '+'
+
+        if rating == "questionable" or rating == "explicit":
+            bad_tag = False
+
+            for i in range(0, len(exclude_unless_wanted_nsfw_tags)):
+                for ii in range(0, len(tags_array)):
+                    bad_tag = False
+                    if exclude_unless_wanted_nsfw_tags[i] == tags_array[ii].lower():
+                        bad_tag = True
+                        break
+                if not bad_tag:
+                    additional_tags += '-' + exclude_unless_wanted_nsfw_tags[i] + '+'
 
         for bad_tag in bad_tags: # Add a filter for all bad tags so they aren't shown
             additional_tags = additional_tags + '-' + bad_tag + '+'
