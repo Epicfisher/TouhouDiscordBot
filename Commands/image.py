@@ -3,8 +3,9 @@ import commands
 ###
 
 import bot
-from random import randint
 import discord
+from random import randint
+import asyncio
 
 no_boys_tags = "-1boy+-2boys+-3boys+-4boys+-5boys+-6boys+-6%2Bboys"
 no_girls_tags = "-1girl+-2girls+-3girls+-4girls+-5girls+-6girls+-6%2Bgirls"
@@ -17,10 +18,6 @@ character_links = []
 
 character_tags = []
 character_genders = []
-
-exclude_unless_wanted_tags = ['comic']
-exclude_unless_wanted_lewd_tags = ['creepy']
-exclude_unless_wanted_nsfw_tags = ['futa']
 
 async def ParseCharacters(character_names, character_links):
     raw_characters_html = await bot.get("http://touhou.wikia.com/wiki/Character_List") # API is too confusing for a simpleton like me so I guess I'll just parse the webpage HTML don't mind me
@@ -51,11 +48,15 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
 
     tags = "rating:" + rating + "+" + tags # Format and add the Rating into the total Tags
 
+    exclude_unless_wanted_tags = ['comic', 'character_doll']
+    exclude_unless_wanted_lewd_tags = ['creepy']
+    exclude_unless_wanted_nsfw_tags = ['futa', 'giantess']
+
     bad_tags = ['guro']
     bad_lewd_tags = ['style_parody']
     bad_nsfw_tags = ['loli', 'shota']
 
-    bad_sfw_tags = ['nude', 'pov_feet', 'ass', 'anus', 'thighs', 'underboob', 'sideboob', 'breasts', 'hanging_breasts', 'nipples', 'erect_nipples', 'topless', 'panties', 'striped_panties', 'underwear', 'underwear_only', 'thong', 'thong_bikini', 'micro_bikini', 'bandaids_on_nipples' 'panty_shot', 'cameltoe', 'dress_lift', 'skirt_lift', 'upskirt', 'under_skirt', 'no_panties', 'no_bra', 'removing_panties', 'pussy_juice', 'sexually_suggestive', 'suggestive_fluid', 'vibrator', 'rape', 'bdsm', 'bound', 'sex', 'masturbation', 'fingering', 'implied_masturbation', 'futa', 'yuri', 'yaoi', 'vore', 'tentacles', 'cum', 'blood', 'vomit', 'piss', 'pee', 'peeing', 'toilet', 'toilet_use']
+    bad_sfw_tags = ['nude', 'pov_feet', 'ass', 'anus', 'thighs', 'underboob', 'sideboob', 'breasts', 'hanging_breasts', 'nipples', 'erect_nipples', 'topless', 'panties', 'striped_panties', 'underwear', 'underwear_only', 'thong', 'thong_bikini', 'micro_bikini', 'condom', 'bandaids_on_nipples' 'panty_shot', 'cameltoe', 'dress_lift', 'skirt_lift', 'upskirt', 'under_skirt', 'no_panties', 'no_bra', 'removing_panties', 'pussy_juice', 'sexually_suggestive', 'suggestive_fluid', 'vibrator', 'rape', 'bdsm', 'bound', 'sex', 'masturbation', 'fingering', 'implied_masturbation', 'futa', 'yuri', 'yaoi', 'vore', 'tentacles', 'cum', 'blood', 'suicide', 'vomit', 'piss', 'pee', 'peeing', 'toilet', 'toilet_use']
 
     arguments = commands.GetArgumentsFromCommand(message.content)
 
@@ -204,28 +205,36 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
                     if raw_tag.startswith("rating"): # Disallow modification to the Rating tag
                         is_good_tag = False
 
-                    for bad_tag in bad_tags: # Disallow certain tags. Cycle through all bad tags
-                        if raw_tag == bad_tag: # Check for a match with the current tag
-                            is_good_tag = False
-                            break
+                    if is_good_tag:
+                        for bad_tag in bad_tags: # Disallow certain tags. Cycle through all bad tags
+                            if raw_tag == bad_tag: # Check for a match with the current tag
+                                is_good_tag = False
+                                break
 
-                    if rating == "questionable": # Disallow certain tags if we're in Questionable
+                    if is_good_tag and rating == "questionable": # Disallow certain tags if we're in Questionable
                         for bad_tag in bad_lewd_tags: # Cycle through all bad Lewd tags
                             if raw_tag == bad_tag: # Check for a match with the current tag
                                 is_good_tag = False
                                 break
 
-                    if rating == "questionable" or rating == "explicit": # Disallow certain tags if we're NSFW
+                    if is_good_tag and (rating == "questionable" or rating == "explicit"): # Disallow certain tags if we're NSFW
                         for bad_tag in bad_nsfw_tags: # Cycle through all bad NSFW tags
                             if raw_tag == bad_tag: # Check for a match with the current tag
                                 is_good_tag = False
                                 break
 
-                    if rating == "safe": # Disallow certain tags if we're supposed to be SFW
+                    if is_good_tag and rating == "safe": # Disallow certain tags if we're supposed to be SFW
                         for bad_tag in bad_sfw_tags: # Cycle through all bad SFW tags
                             if raw_tag == bad_tag: # Check for a match with the current tag
                                 is_good_tag = False
                                 break
+
+                    if not is_good_tag:
+                        valid_tags -= 1
+                        if valid_tags <= 0:
+                            await asyncio.sleep(1) # Looks weird but if we send a message too quickly after starting to type it'll bug out the typing
+                            await message.channel.send("I couldn't find an image!")
+                            return
 
                     if is_good_tag:
                         if not tag in additional_tags_list_check:
