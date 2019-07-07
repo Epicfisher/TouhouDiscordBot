@@ -56,7 +56,7 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
     bad_lewd_tags = ['style_parody']
     bad_nsfw_tags = ['loli', 'shota']
 
-    bad_sfw_tags = ['nude', 'pov_feet', 'ass', 'anus', 'thighs', 'underboob', 'sideboob', 'breasts', 'hanging_breasts', 'nipples', 'erect_nipples', 'topless', 'panties', 'striped_panties', 'underwear', 'underwear_only', 'thong', 'thong_bikini', 'micro_bikini', 'condom', 'bandaids_on_nipples' 'panty_shot', 'cameltoe', 'dress_lift', 'skirt_lift', 'upskirt', 'under_skirt', 'no_panties', 'no_bra', 'removing_panties', 'pussy_juice', 'sexually_suggestive', 'suggestive_fluid', 'vibrator', 'rape', 'bdsm', 'bound', 'sex', 'masturbation', 'fingering', 'implied_masturbation', 'futa', 'yuri', 'yaoi', 'vore', 'tentacles', 'cum', 'blood', 'suicide', 'vomit', 'piss', 'pee', 'peeing', 'toilet', 'toilet_use']
+    bad_sfw_tags = ['nude', 'pov_feet', 'ass', 'anus', 'thighs', 'underboob', 'sideboob', 'breasts', 'hanging_breasts', 'holding_breasts', 'breast_grab', 'groping', 'nipples', 'erect_nipples', 'penis', 'bulge', 'topless', 'panties', 'striped_panties', 'underwear', 'underwear_only', 'thong', 'thong_bikini', 'micro_bikini', 'condom', 'bandaids_on_nipples' 'panty_shot', 'cameltoe', 'dress_lift', 'skirt_lift', 'upskirt', 'under_skirt', 'no_panties', 'no_bra', 'removing_panties', 'pussy_juice', 'sexually_suggestive', 'suggestive_fluid', 'vibrator', 'rape', 'bdsm', 'bound', 'sex', 'masturbation', 'fingering', 'implied_masturbation', 'futa', 'yuri', 'yaoi', 'vore', 'tentacles', 'cum', 'blood', 'suicide', 'vomit', 'piss', 'pee', 'peeing', 'toilet', 'toilet_use']
 
     arguments = commands.GetArgumentsFromCommand(message.content)
 
@@ -231,9 +231,16 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
 
                     if not is_good_tag:
                         valid_tags -= 1
-                        if valid_tags <= 0:
+                        if not rating == "safe":
+                            if valid_tags <= 0:
+                                await asyncio.sleep(1) # Looks weird but if we send a message too quickly after starting to type it'll bug out the typing
+                                await message.channel.send("I couldn't find an image!")
+                                return
+                        else:
                             await asyncio.sleep(1) # Looks weird but if we send a message too quickly after starting to type it'll bug out the typing
-                            await message.channel.send("I couldn't find an image!")
+                            nsfw_sfw_quotes = ["I-I don't know what you're looking for, but it miight be more suitable in a NSFW channel...", "D-Don't you think it might be more suitable to take that to a NSFW channel..?", "H-Hey, I think a NSFW channel might be more suitable for that sort of thing.", "T-That sort of stuff should probably be taken to a NSFW channel, don't you agree..?"]
+                            await message.channel.send(nsfw_sfw_quotes[randint(0, len(nsfw_sfw_quotes) - 1)])
+                            # + "\n(Use '" + bot.prefix + "image' in a NSFW channel to use NSFW tags!)")
                             return
 
                     if is_good_tag:
