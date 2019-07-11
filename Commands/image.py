@@ -52,11 +52,11 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
     exclude_unless_wanted_lewd_tags = ['creepy']
     exclude_unless_wanted_nsfw_tags = ['futa', 'giantess']
 
-    bad_tags = ['guro']
+    bad_tags = ['guro', 'deep_wound', 'rotting', 'corpse']
     bad_lewd_tags = ['style_parody']
     bad_nsfw_tags = ['loli', 'shota']
 
-    bad_sfw_tags = ['nude', 'pov_feet', 'ass', 'anus', 'thighs', 'underboob', 'sideboob', 'breasts', 'hanging_breasts', 'holding_breasts', 'breast_grab', 'groping', 'nipples', 'erect_nipples', 'futa', 'penis', 'bulge', 'topless', 'panties', 'striped_panties', 'underwear', 'underwear_only', 'thong', 'thong_bikini', 'micro_bikini', 'condom', 'bandaids_on_nipples' 'panty_shot', 'cameltoe', 'dress_lift', 'skirt_lift', 'upskirt', 'under_skirt', 'no_panties', 'bottomless', 'no_bra', 'convenient_censoring', 'convenient_leg', 'removing_panties', 'undressing', 'pussy_juice', 'sexually_suggestive', 'suggestive_fluid', 'vibrator', 'rape', 'girl_on_top', 'forced', 'bdsm', 'bound', 'sex', 'kiss', 'imminent_kiss', 'face-to-face', 'noses_touching', 'saliva', 'masturbation', 'fingering', 'implied_masturbation', 'vore', 'tentacles', 'cum', 'blood', 'suicide', 'vomit', 'piss', 'pee', 'peeing', 'toilet', 'toilet_use']
+    bad_sfw_tags = ['nude', 'pov_feet', 'ass', 'anus', 'thighs', 'underboob', 'sideboob', 'breasts', 'hanging_breasts', 'holding_breasts', 'breast_grab', 'groping', 'nipples', 'erect_nipples', 'futa', 'penis', 'bulge', 'topless', 'panties', 'striped_panties', 'underwear', 'underwear_only', 'thong', 'thong_bikini', 'micro_bikini', 'condom', 'bandaids_on_nipples' 'panty_shot', 'cameltoe', 'dress_lift', 'skirt_lift', 'upskirt', 'under_skirt', 'no_panties', 'bottomless', 'no_bra', 'convenient_censoring', 'convenient_leg', 'removing_panties', 'undressing', 'pussy_juice', 'egg_laying', 'sexually_suggestive', 'suggestive_fluid', 'vibrator', 'rape', 'girl_on_top', 'forced', 'bdsm', 'bound', 'bondage', 'slave', 'sex', 'kiss', 'imminent_kiss', 'face-to-face', 'noses_touching', 'saliva', 'masturbation', 'fingering', 'implied_masturbation', 'vore', 'tentacles', 'cum', 'blood', 'suicide', 'vomit', 'piss', 'pee', 'peeing', 'toilet', 'toilet_use']
 
     # 'yuri', 'yaoi',
 
@@ -135,7 +135,7 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
                             for character_word in character_array:
                                 tag_words = tag.split(image_space_char)
                                 for tag_word in tag_words:
-                                    if tag_word == character_word.lower() and not character_word.lower() == 'no' and not character_word.lower() == 'giant' and not character_word.lower() == 'three' and not character_word.lower() == 'mischievous':
+                                    if tag_word == character_word.lower() and not character_word.lower() == 'no' and not character_word.lower() == 'giant' and not character_word.lower() == 'three' and not character_word.lower() == 'mischievous' and not character_word.lower() == 'flower':
                                         if len(character_array) > 2:
                                             character = character_name.replace(" ", "_")
                                         else:
@@ -203,6 +203,7 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
                         raw_tag = raw_tag[1:]
 
                     is_good_tag = True
+                    is_bad_sfw_tag = False
 
                     if raw_tag.startswith("rating"): # Disallow modification to the Rating tag
                         is_good_tag = False
@@ -229,6 +230,7 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
                         for bad_tag in bad_sfw_tags: # Cycle through all bad SFW tags
                             if raw_tag == bad_tag: # Check for a match with the current tag
                                 is_good_tag = False
+                                is_bad_sfw_tag = True
                                 break
 
                     if not is_good_tag:
@@ -240,9 +242,12 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
                                 return
                         else:
                             await asyncio.sleep(1) # Looks weird but if we send a message too quickly after starting to type it'll bug out the typing
-                            nsfw_sfw_quotes = ["I-I don't know what you're looking for, but it miight be more suitable in a NSFW channel...", "D-Don't you think it might be more suitable to take that to a NSFW channel..?", "H-Hey, I think a NSFW channel might be more suitable for that sort of thing.", "T-That sort of stuff should probably be taken to a NSFW channel, don't you agree..?"]
-                            await message.channel.send(nsfw_sfw_quotes[randint(0, len(nsfw_sfw_quotes) - 1)])
-                            # + "\n(Use '" + bot.prefix + "image' in a NSFW channel to use NSFW tags!)")
+                            if is_bad_sfw_tag:
+                                nsfw_sfw_quotes = ["I-I don't know what you're looking for, but it miight be more suitable in a NSFW channel...", "D-Don't you think it might be more suitable to take that to a NSFW channel..?", "H-Hey, I think a NSFW channel might be more suitable for that sort of thing.", "T-That sort of stuff should probably be taken to a NSFW channel, don't you agree..?"]
+                                await message.channel.send(nsfw_sfw_quotes[randint(0, len(nsfw_sfw_quotes) - 1)])
+                                # + "\n(Use '" + bot.prefix + "image' in a NSFW channel to use NSFW tags!)")
+                            else:
+                                await message.channel.send("I couldn't find an image!")
                             return
 
                     if is_good_tag:
@@ -312,11 +317,6 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
             if boys > 0 and girls < 1:
                 boys_tag = boys_tag + "+" + no_girls_tags
 
-        if not boys_tag == "":
-            additional_tags += boys_tag + '+'
-        if not girls_tag == "":
-            additional_tags +=  girls_tag + '+'
-
         bad_tag = False
 
         for i in range(0, len(exclude_unless_wanted_tags)):
@@ -365,6 +365,11 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
 
         if len(additional_tags) > 0:
             print("Using additional tags: '" + additional_tags[0:-1].replace(image_space_char, '_') + "'")
+
+        if not boys_tag == "":
+            additional_tags += boys_tag + '+'
+        if not girls_tag == "":
+            additional_tags +=  girls_tag + '+'
 
         additional_tags += "score:>=0+" # Filter our results with negative ratings, could be pornography or something else bad
 

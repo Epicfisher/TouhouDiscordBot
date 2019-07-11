@@ -964,8 +964,11 @@ class GetSong:
                         try:
                             video_results = await bot.run_in_threadpool(lambda: ydl.extract_info("ytsearch2:" + search_query, download=False))
                             #video_results = await bot.run_in_threadpool(lambda: ydl.extract_info("ytsearch2:" + search_query + " --get-url", download=False))
-                        except youtube_dl.utils.YoutubeDLError:
+                        except youtube_dl.utils.YoutubeDLError as e:
                             video_results = None
+                            if 'Too Many Requests' in str(e):
+                                print("Blocked by YouTube. Forcing Radio termination.")
+                                return False
 
                 print("Search Query: " + search_query)
                 keep_parsing = True
@@ -1074,8 +1077,14 @@ class GetSong:
 
                         if worked:
                             if doujin:
+                                title_lower_sanitised = title_lower.replace("[", " ")
+                                title_lower_sanitised = title_lower_sanitised.replace("]", "")
+                                title_lower_sanitised = title_lower_sanitised.replace("(", " ")
+                                title_lower_sanitised = title_lower_sanitised.replace(")", "")
+                                title_lower_sanitised = title_lower_sanitised.replace("  ", " ")
+
                                 for bad_title_tag in bad_title_tags:
-                                    for title_tag in title_lower.split():
+                                    for title_tag in title_lower_sanitised.split():
                                         if title_tag.startswith(bad_title_tag):
                                             print("That song had a bad title tag! (" + bad_title_tag + ")")
                                             worked = False
@@ -1213,10 +1222,18 @@ async def connect_voice(voice_channel):
             #print("Reusing old VC")
             #return voice_channel.guild.voice_client
             print("Even Though it Already Exists, Forcing Kill of Old Radio VC")
-            await voice_channel.guild.voice_client.disconnect()
+            try:
+                await voice_channel.guild.voice_client.disconnect()
+            except:
+                print("Couldn't kill already-existing VC!")
+                pass
         else:
             print("Forcing Kill of Old Radio VC")
-            await voice_channel.guild.voice_client.disconnect()
+            try:
+                await voice_channel.guild.voice_client.disconnect()
+            except:
+                print("Couldn't kill already-existing VC!")
+                pass
 
     try:
         vc = await voice_channel.connect()
