@@ -10,8 +10,8 @@ import asyncio
 no_boys_tags = "-1boy+-2boys+-3boys+-4boys+-5boys+-6boys+-6%2Bboys"
 no_girls_tags = "-1girl+-2girls+-3girls+-4girls+-5girls+-6girls+-6%2Bgirls"
 
-characters_before = ['Aunn', 'Shikieiki', 'Yamaxanadu']
-characters_after = ['Aun', 'Shiki', 'Eiki']
+characters_before = ['Aunn', 'Shikieiki', 'Yamaxanadu', 'Ibara']
+characters_after = ['Aun', 'Shiki', 'Eiki', 'Ibaraki']
 
 character_names = []
 character_links = []
@@ -119,7 +119,10 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
                     tag = tag.lower()
 
                     for i in range(0, len(characters_before)):
-                        tag  = tag.replace(characters_before[i].lower(), characters_after[i].lower())
+                        if characters_before[i].lower() in tag:
+                            tag = characters_after[i].lower()
+
+                    #tag = tag.replace(characters_before[i].lower(), characters_after[i].lower())
 
                     swap_names_back = False
                     found_character = False
@@ -317,6 +320,9 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
             if boys > 0 and girls < 1:
                 boys_tag = boys_tag + "+" + no_girls_tags
 
+        #if boys == 1 or girls == 1:
+            #additional_tags += "solo+"
+
         bad_tag = False
 
         for i in range(0, len(exclude_unless_wanted_tags)):
@@ -352,6 +358,9 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
                 if not bad_tag:
                     additional_tags += '-' + exclude_unless_wanted_nsfw_tags[i] + '+'
 
+        if len(additional_tags) > 0:
+            print("Using additional tags: '" + additional_tags[0:-1].replace(image_space_char, '_') + "'")
+
         for bad_tag in bad_tags: # Add a filter for all bad tags so they aren't shown
             additional_tags = additional_tags + '-' + bad_tag + '+'
 
@@ -362,9 +371,6 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
         if rating == "questionable" or rating == "explicit":
             for bad_tag in bad_nsfw_tags: # Add a filter for all bad tags if we're NSFW so they aren't shown
                 additional_tags = additional_tags + '-' + bad_tag + '+'
-
-        if len(additional_tags) > 0:
-            print("Using additional tags: '" + additional_tags[0:-1].replace(image_space_char, '_') + "'")
 
         if not boys_tag == "":
             additional_tags += boys_tag + '+'
