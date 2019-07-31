@@ -42,7 +42,15 @@ async def ParseCharacters(character_names, character_links):
         character_tags.append(None)
         character_genders.append(None)
 
+async def CheckBooru(message, response):
+    if 'success="false"' in response:
+        print("Gelbooru Down!")
+        await message.channel.send("I couldn't connect to Gelbooru! Please try again later.")
+        return
+
 async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
+    checked_connection = False
+
     image_seperator_char = ' '
     image_space_char = '_'
 
@@ -164,6 +172,10 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
                             keep_testing = False
 
                             html = await bot.get(APILink + "?page=dapi&s=post&q=index&limit=1&json=1&pid=10&tags=" + tags + "+" + character) # We're going to check if our new name has atleast 10 results
+                            if not checked_connection:
+                                if not await CheckBooru(message, html):
+                                    return
+                                checked_connection = True
                             if not "file_url" in html: # If it doesn't...
                                 #print("Trying " + character)
                                 if swap_names_back:
@@ -390,7 +402,11 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
         while tags.endswith('+'):
             tags = tags[0:-1]  # Cut off the last '+'s
 
-        html = await bot.get(APILink + "?page=dapi&s=post&q=index&limit=1&json=1&pid=1&tags=" + tags)
+        html = await bot.get(APILink + "?page=dapi&s=post&q=index&limit=1&json=1&pid=1&tags=" + tags) # We're going to check if our query has atleast 1 result
+        if not checked_connection:
+            if not await CheckBooru(message, html):
+                return
+            checked_connection = True
         if not "file_url" in html:
             await message.channel.send("I couldn't find an image!")
             return
