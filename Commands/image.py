@@ -10,8 +10,8 @@ import asyncio
 no_boys_tags = "-1boy+-2boys+-3boys+-4boys+-5boys+-6boys+-6%2Bboys"
 no_girls_tags = "-1girl+-2girls+-3girls+-4girls+-5girls+-6girls+-6%2Bgirls"
 
-characters_before = ['Aunn', 'Shikieiki', 'Yamaxanadu', 'Ibara']
-characters_after = ['Aun', 'Shiki', 'Eiki', 'Ibaraki']
+characters_before = ['Aunn', 'Shikieiki', 'Yamaxanadu', 'Ibara', 'Joon', 'Akyu']
+characters_after = ['Aun', 'Shiki', 'Eiki', 'Ibaraki', "Jo'on", 'Akyuu']
 
 character_names = []
 character_links = []
@@ -138,7 +138,8 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
                             for character_word in character_array:
                                 tag_words = tag.split(image_space_char)
                                 for tag_word in tag_words:
-                                    if tag_word == character_word.lower() and not character_word.lower() == 'no' and not character_word.lower() == 'giant' and not character_word.lower() == 'three' and not character_word.lower() == 'mischievous' and not character_word.lower() == 'flower':
+                                    character_word_lower = character_word.lower()
+                                    if tag_word == character_word_lower and not character_word_lower == 'no' and not character_word_lower == 'giant' and not character_word_lower == 'three' and not character_word_lower == 'mischievous' and not character_word_lower == 'flower':
                                         if len(character_array) > 2:
                                             character = character_name.replace(" ", "_")
                                         else:
