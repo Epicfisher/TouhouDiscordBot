@@ -46,7 +46,8 @@ async def CheckBooru(message, response):
     if 'success="false"' in response:
         print("Gelbooru Down!")
         await message.channel.send("I couldn't connect to Gelbooru! Please try again later.")
-        return
+        return False
+    return True
 
 async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
     checked_connection = False
