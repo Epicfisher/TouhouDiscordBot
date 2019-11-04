@@ -403,14 +403,15 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
         while tags.endswith('+'):
             tags = tags[0:-1]  # Cut off the last '+'s
 
-        html = await bot.get(APILink + "?page=dapi&s=post&q=index&limit=1&json=1&pid=1&tags=" + tags) # We're going to check if our query has atleast 1 result
-        if not checked_connection:
-            if not await CheckBooru(message, html):
+        if len(tags_array) > 0: # If we have a query to check...
+            html = await bot.get(APILink + "?page=dapi&s=post&q=index&limit=1&json=1&pid=1&tags=" + tags) # We're going to check if our query has atleast 1 result
+            if not checked_connection:
+                if not await CheckBooru(message, html):
+                    return
+                checked_connection = True
+            if not "file_url" in html:
+                await message.channel.send("I couldn't find an image!")
                 return
-            checked_connection = True
-        if not "file_url" in html:
-            await message.channel.send("I couldn't find an image!")
-            return
 
         #print("Using total tags: '" + tags + "'")
 
@@ -420,6 +421,10 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
         worked = False
         while not worked:
             html = await bot.get(APILink + "?page=dapi&s=post&q=index&limit=1&json=1&pid=" + str(randint(0, page_scope)) + "&tags=" + tags)
+            if not checked_connection:
+                if not await CheckBooru(message, html):
+                    return
+                checked_connection = True
 
             try:
                 fileUrl = html[html.index('file_url":"') + 11 : - 3]

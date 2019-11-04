@@ -949,7 +949,8 @@ class GetSong:
 
                     if 'This page appears when Google automatically detects requests' in video_results:
                         print("Blocked by YouTube. Forcing Radio termination.")
-                        await message.channel.send("An internal error occured. Please try again later!")
+                        if old_song == None:
+                            await message.channel.send("Music playback is currently unavailable. Please try again later!")
                         return False
                 else:
                     #search_query = '"' + song + '" "' + album + '" ' + additional_tags.replace('+', ' ') # For Japanese results?
@@ -968,6 +969,8 @@ class GetSong:
                             video_results = None
                             if 'Too Many Requests' in str(e):
                                 print("Blocked by YouTube. Forcing Radio termination.")
+                                if old_song == None:
+                                    await message.channel.send("Music playback is currently unavailable. Please try again later!")
                                 return False
 
                 print("Search Query: " + search_query)
@@ -1712,7 +1715,7 @@ async def change_volume(message):
                         return
 
                     if volume > 1.0 and not force:
-                        await message.channel.send("But if I did that, that would wake up the mistress!\n(Force by adding 'force' to the end of your command. Might be loud. Don't say I didn't warn you)")
+                        await message.channel.send("But if I did that, that would wake up the mistress! The loudest it should ever be is 1.0!\n(Force by adding 'force' to the end of your command. Might be loud. Don't say I didn't warn you)")
                         return
 
                     if volume > 10000:
