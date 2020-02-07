@@ -142,7 +142,7 @@ async def get_card_object(raw_name, card_options, unboxing, print_in_console):
                     rarity_symbol = ":white_circle:"
                 else:
                     rarity = 0
-                    rarity_symbol = ":large_blue_circle:"
+                    rarity_symbol = ":blue_circle:"
                     while rarity_remaining >= 39:
                         rarity_remaining = rarity_remaining - 39
                         rarity = rarity + 1
