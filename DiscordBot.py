@@ -130,12 +130,12 @@ def setup_opus():
         for opus_lib in opus_libs:
             try:
                 discord.opus.load_opus(opus_lib)
-                print("Loaded External Opus Library!")
+                print("Loaded External Opus Library!\n")
                 break
             except OSError:
                 pass
     else:
-        print("Loaded System Opus Library!")
+        print("Loaded System Opus Library!\n")
 
     if not discord.opus.is_loaded():
         bot.log("INFO", "Failed to Load Opus.\nPCM Audio will be used instead.")
