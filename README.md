@@ -30,6 +30,22 @@ pip3 install -r requirements.txt
 python -m pip install -r requirements.txt
 ```
 
+### Install FFmpeg (Optional)
+FFmpeg is required if you want to enable music functionality
+#### Linux
+```
+Installation varies depending on distribution
+
+Ubuntu/Debian: sudo apt-get install ffmpeg
+Arch: sudo pacman -S ffmpeg
+Fedora: sudo dnf install ffmpeg
+```
+#### Windows
+```
+Download FFmpeg (https://ffmpeg.zeranoe.com/builds/)
+Extract the contents of the "bin" folder to a location in your PATH (Such as C:\Windows\System32\)
+```
+
 ### Config Variables
 #### Config Files
 You can store your Config Variables as files. Just ensure they are in the same directory as your ```DiscordBot.py``` file
