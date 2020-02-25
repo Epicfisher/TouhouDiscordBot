@@ -34,7 +34,7 @@ python -m pip install -r requirements.txt
 FFmpeg is required if you want to enable music functionality
 #### Linux
 ```
-Installation varies depending on distrubtion
+Installation varies depending on distribution
 
 Ubuntu/Debian: sudo apt-get install ffmpeg
 Arch: sudo pacman -S ffmpeg
