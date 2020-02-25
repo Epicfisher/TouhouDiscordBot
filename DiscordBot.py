@@ -138,7 +138,7 @@ def setup_opus():
         print("Loaded System Opus Library!")
 
     if not discord.opus.is_loaded():
-        bot.log("INFO", "Failed to Load Opus!\nPCM Audio will be used instead")
+        bot.log("INFO", "Failed to Load Opus.\nPCM Audio will be used instead.")
 
 def run_discord_bot(token):
     print("Starting Bot...\n")
@@ -359,5 +359,5 @@ print("""Now starting with:
 """)
 
 setup_discord_bots_org_api(bot.client) # Setup Discord Bots Org API
-#setup_opus() # Setup Opus Audio Codec
+setup_opus() # Setup Opus Audio Codec
 run_discord_bot(token) # Start the bot with the Token
