@@ -136,7 +136,7 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
                     swap_names_back = False
                     found_character = False
                     #for character_name in character_names:
-                    for i in range(0, len(character_names) - 1):
+                    for i in range(0, len(character_names)):
                         character_name = character_names[i]
 
                         if found_character:
