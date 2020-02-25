@@ -36,7 +36,7 @@ except:
     try:
         token = os.environ['PATCHYBOT-TOKEN']
     except:
-        print ("CRITICAL ERROR:\n\nNo Bot Token specified in either a 'token.txt' file or 'PATCHYBOT-TOKEN' System Environment Variable.\nBot cannot start.\n")
+        bot.log("CRITICAL ERROR", "No Bot Token specified in either a 'token.txt' file or 'PATCHYBOT-TOKEN' System Environment Variable.\nBot cannot start.")
 
         raise SystemExit(0)
 
@@ -71,19 +71,19 @@ bot.use_ssl = True
 try:
     with open('closed-access-users.txt', 'r') as myfile:
         closed_access_users = myfile.read().split('\n')
-        print("INFO:\n\nClosed Access Users were specified in a 'closed-access-users.txt' file.\nStarted bot in Closed Access Mode...\n")
+        bot.log("INFO", "Closed Access Users were specified in a 'closed-access-users.txt' file.\nStarted bot in Closed Access Mode...")
 except:
     try:
         closed_access_users = [os.environ['PATCHYBOT-CLOSEDACCESSUSER']]
-        print("INFO:\n\nA Closed Access User was specified in a 'PATCHYBOT-CLOSEDACCESSUSER' System Environment Variable.\nStarted bot in Closed Access Mode...\n")
+        bot.log("INFO", "A Closed Access User was specified in a 'PATCHYBOT-CLOSEDACCESSUSER' System Environment Variable.\nStarted bot in Closed Access Mode...")
     except:
-        print("INFO:\n\nNo Closed Access Users specified in either a 'closed-access-users.txt' file or 'PATCHYBOT-CLOSEDACCESSUSER' System Environment Variable.\nOpening Bot to the public...\n")
+        bot.log("INFO", "No Closed Access Users specified in either a 'closed-access-users.txt' file or 'PATCHYBOT-CLOSEDACCESSUSER' System Environment Variable.\nOpening Bot to the public...")
         pass
 
 ##################################################DISCORD BOTS API############################################################
 class DiscordBotsOrgAPI:
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self, _bot):
+        self.bot = _bot
 
         try:
             with open('dbl-token.txt', 'r') as myfile:
@@ -92,7 +92,7 @@ class DiscordBotsOrgAPI:
             try:
                 dbltoken = os.environ['PATCHYBOT-DBLTOKEN']
             except:
-                print ("WARNING:\n\nNo DBL Token specified in either a 'dbl-token.txt' file or 'PATCHYBOT-DBLTOKEN' System Environment Variable.\nDisabling discordbots.org API support...\n")
+                bot.log("WARNING", "No DBL Token specified in either a 'dbl-token.txt' file or 'PATCHYBOT-DBLTOKEN' System Environment Variable.\nDisabling discordbots.org API support...")
 
                 return
         self.token = dbltoken
@@ -122,8 +122,9 @@ def setup_discord_bots_org_api(bot):
     DiscordBotsOrgAPI(bot)
     #pass
 
-def run_discord_bot(token):
-    opus_libs = ['libopus-0.x86.dll', 'libopus-0.x64.dll', 'libopus-0.dll', 'libopus.so.0', 'libopus.0.dylib', 'opus']
+def setup_opus():
+    print("Configuring Opus...\n")
+    opus_libs = ['libopus-0.x86.dll', 'libopus-0.x64.dll', 'libopus-0.dll', 'libopus.so.0', 'libopus.so', 'libopus.0.dylib', 'opus', 'opus.exe']
 
     if not discord.opus.is_loaded():
         for opus_lib in opus_libs:
@@ -137,8 +138,9 @@ def run_discord_bot(token):
         print("Loaded System Opus Library!")
 
     if not discord.opus.is_loaded():
-        print("Failed to Load Opus! Music playback will not work!")
+        bot.log("INFO", "Failed to Load Opus.\nPCM Audio will be used instead.")
 
+def run_discord_bot(token):
     print("Starting Bot...\n")
     bot.client.run(token, reconnect=True)
     #while True:
@@ -357,4 +359,5 @@ print("""Now starting with:
 """)
 
 setup_discord_bots_org_api(bot.client) # Setup Discord Bots Org API
+setup_opus() # Setup Opus Audio Codec
 run_discord_bot(token) # Start the bot with the Token
