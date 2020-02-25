@@ -60,6 +60,9 @@ runningCommandsArray = []
 
 use_ssl = None
 
+def log(header, text):
+    print(header + ":\n" + text + "\n")
+
 try:
     with open('prefix.txt', 'r') as myfile:
         prefix = myfile.read().replace('\n', '')
@@ -67,7 +70,7 @@ except:
     try:
         prefix = os.environ['PATCHYBOT-PREFIX']
     except:
-        print("INFO:\n\nNo custom Prefix specified in either a 'prefix.txt' file or 'PATCHYBOT-PREFIX' System Environment Variable.\nUsing default Prefix of '" + prefix + "'.\n")
+        log("INFO", "No custom Prefix specified in either a 'prefix.txt' file or 'PATCHYBOT-PREFIX' System Environment Variable.\nUsing default Prefix of '" + prefix + "'.")
 
 try:
     with open('owner.txt', 'r') as myfile:
@@ -76,7 +79,7 @@ except:
     try:
         owner_id = int(os.environ['PATCHYBOT-OWNER'])
     except:
-        print("INFO:\n\nNo Owner ID specified in either a 'owner.txt' file or 'PATCHYBOT-OWNER' System Environment Variable.\nDisabling Test Commands...\n")
+        log("INFO", "No Owner ID specified in either a 'owner.txt' file or 'PATCHYBOT-OWNER' System Environment Variable.\nDisabling Test Commands...")
 
 try:
     with open('data-guild-id.txt', 'r') as myfile:
@@ -85,7 +88,7 @@ except:
     try:
         data_guild_id = os.environ['PATCHYBOT-DATAGUILDID']
     except:
-        print ("WARNING:\n\nNo Data Guild ID specified in either a 'data-guild-id.txt' file or 'PATCHYBOT-DATAGUILDID' System Environment Variable.\nDisabling Data Storage Support...\n")
+        log("WARNING", "No Data Guild ID specified in either a 'data-guild-id.txt' file or 'PATCHYBOT-DATAGUILDID' System Environment Variable.\nDisabling Data Storage Support...")
 
 if not data_guild_id == None:
     try:
@@ -95,7 +98,7 @@ if not data_guild_id == None:
         try:
             data_channel_id = os.environ['PATCHYBOT-DATACHANNELID']
         except:
-            print ("WARNING:\n\nNo Data Channel ID specified in either a 'data-channel-id.txt' file or 'PATCHYBOT-DATACHANNELID' System Environment Variable.\nDisabling Data Storage Support...\n")
+            log("WARNING", "No Data Channel ID specified in either a 'data-channel-id.txt' file or 'PATCHYBOT-DATACHANNELID' System Environment Variable.\nDisabling Data Storage Support...")
 
 try:
     with open('suggestions-guild-id.txt', 'r') as myfile:
@@ -104,7 +107,7 @@ except:
     try:
         suggestions_guild_id = os.environ['PATCHYBOT-SUGGESTIONSGUILDID']
     except:
-        print ("WARNING:\n\nNo Suggestions Guild ID specified in either a 'suggestions-guild-id.txt' file or 'PATCHYBOT-SUGGESTIONSGUILDID' System Environment Variable.\nDisabling Suggestions...\n")
+        log("WARNING", "No Suggestions Guild ID specified in either a 'suggestions-guild-id.txt' file or 'PATCHYBOT-SUGGESTIONSGUILDID' System Environment Variable.\nDisabling Suggestions...")
 
 if not suggestions_guild_id == None:
     try:
@@ -114,7 +117,7 @@ if not suggestions_guild_id == None:
         try:
             suggestions_channel_id = os.environ['PATCHYBOT-SUGGESTIONSCHANNELID']
         except:
-            print ("WARNING:\n\nNo Suggestions Channel ID specified in either a 'suggestions-channel-id.txt' file or 'PATCHYBOT-SUGGESTIONSCHANNELID' System Environment Variable.\nDisabling Suggestions...\n")
+            log("WARNING", "No Suggestions Channel ID specified in either a 'suggestions-channel-id.txt' file or 'PATCHYBOT-SUGGESTIONSCHANNELID' System Environment Variable.\nDisabling Suggestions...")
 
 try:
     with open('reports-guild-id.txt', 'r') as myfile:
@@ -123,7 +126,7 @@ except:
     try:
         reports_guild_id = os.environ['PATCHYBOT-REPORTSGUILDID']
     except:
-        print ("WARNING:\n\nNo Reports Guild ID specified in either a 'reports-guild-id.txt' file or 'PATCHYBOT-REPORTSGUILDID' System Environment Variable.\nDisabling Reports...\n")
+        log("WARNING", "No Reports Guild ID specified in either a 'reports-guild-id.txt' file or 'PATCHYBOT-REPORTSGUILDID' System Environment Variable.\nDisabling Reports...")
 
 if not reports_guild_id == None:
     try:
@@ -133,7 +136,7 @@ if not reports_guild_id == None:
         try:
             reports_channel_id = os.environ['PATCHYBOT-REPORTSCHANNELID']
         except:
-            print ("WARNING:\n\nNo Reports Channel ID specified in either a 'reports-channel-id.txt' file or 'PATCHYBOT-REPORTSCHANNELID' System Environment Variable.\nDisabling Reports...\n")
+            log("WARNING", "No Reports Channel ID specified in either a 'reports-channel-id.txt' file or 'PATCHYBOT-REPORTSCHANNELID' System Environment Variable.\nDisabling Reports...")
 
 async def run_in_threadpool(function):
     global running_threads
@@ -178,11 +181,11 @@ async def get(url):
                     return await resp.text()
         except aiohttp.ClientError as e:
             if use_ssl:
-                print("ERROR:\n\nFailed to download HTML with SSL enabled. Disabling SSL...\n")
+                log("ERROR", "Failed to download HTML with SSL enabled.\nDisabling SSL...")
                 use_ssl = False
                 retry = True
             else:
-                print ("ERROR:\n\nFailed to download HTML with SSL disabled.\n")
+                log("ERROR", "Failed to download HTML with SSL disabled.")
                 print(e)
                 return
 
