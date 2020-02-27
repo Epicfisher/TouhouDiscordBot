@@ -10,8 +10,8 @@ import asyncio
 no_boys_tags = "-1boy+-2boys+-3boys+-4boys+-5boys+-6boys+-6%2Bboys"
 no_girls_tags = "-1girl+-2girls+-3girls+-4girls+-5girls+-6girls+-6%2Bgirls"
 
-characters_before = ['Aunn', 'Shikieiki', 'Yamaxanadu', 'Ibara', 'Joon', 'Akyu']
-characters_after = ['Aun', 'Shiki', 'Eiki', 'Ibaraki', "Jo'on", 'Akyuu']
+characters_before = ['Aunn', 'Shikieiki', 'Yamaxanadu', 'Ibara', 'Joon', 'Akyu', 'Louise']
+characters_after = ['Aun', 'Shiki', 'Eiki', 'Ibaraki', "Jo'on", 'Akyuu', 'Luize']
 
 character_names = []
 character_links = []
@@ -65,7 +65,7 @@ async def PostImage(message, rating, tags, APILink, genders, negativeGenders):
     bad_lewd_tags = ['style_parody']
     bad_nsfw_tags = ['loli', 'shota']
 
-    bad_sfw_tags = ['nude', 'pov_feet', 'ass', 'anus', 'thighs', 'underboob', 'sideboob', 'breasts', 'hanging_breasts', 'holding_breasts', 'breast_grab', 'groping', 'nipples', 'erect_nipples', 'futa', 'penis', 'bulge', 'topless', 'panties', 'striped_panties', 'underwear', 'underwear_only', 'thong', 'thong_bikini', 'micro_bikini', 'condom', 'bandaids_on_nipples' 'panty_shot', 'cameltoe', 'dress_lift', 'skirt_lift', 'upskirt', 'under_skirt', 'no_panties', 'bottomless', 'no_bra', 'convenient_censoring', 'convenient_leg', 'removing_panties', 'undressing', 'pussy_juice', 'egg_laying', 'sexually_suggestive', 'suggestive_fluid', 'vibrator', 'rape', 'girl_on_top', 'forced', 'bdsm', 'bound', 'bondage', 'slave', 'sex', 'kiss', 'imminent_kiss', 'face-to-face', 'noses_touching', 'saliva', 'masturbation', 'fingering', 'implied_masturbation', 'vore', 'tentacles', 'cum', 'blood', 'suicide', 'vomit', 'piss', 'pee', 'peeing', 'toilet', 'toilet_use']
+    bad_sfw_tags = ['nude', 'pov_feet', 'ass', 'anus', 'thighs', 'underboob', 'sideboob', 'breasts', 'hanging_breasts', 'holding_breasts', 'breast_grab', 'groping', 'nipples', 'erect_nipples', 'futa', 'penis', 'bulge', 'topless', 'panties', 'striped_panties', 'underwear', 'underwear_only', 'thong', 'thong_bikini', 'micro_bikini', 'condom', 'bandaids_on_nipples', 'panty_shot', 'cameltoe', 'dress_lift', 'skirt_lift', 'upskirt', 'under_skirt', 'no_panties', 'bottomless', 'no_bra', 'convenient_censoring', 'convenient_leg', 'removing_panties', 'undressing', 'pussy_juice', 'egg_laying', 'sexually_suggestive', 'suggestive_fluid', 'vibrator', 'rape', 'girl_on_top', 'forced', 'bdsm', 'bound', 'bondage', 'slave', 'sex', 'kiss', 'imminent_kiss', 'face-to-face', 'noses_touching', 'saliva', 'masturbation', 'fingering', 'implied_masturbation', 'vore', 'tentacles', 'cum', 'blood', 'suicide', 'vomit', 'piss', 'pee', 'peeing', 'toilet', 'toilet_use']
 
     # 'yuri', 'yaoi',
 
