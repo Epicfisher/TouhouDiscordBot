@@ -220,6 +220,7 @@ async def get_image(search_results, quantity, image_required, get_summary):
                 json = json[json.index('infobox'):]
             except:
                 print("No Infobox! Image may be inaccurate")
+                json = json[json.index('class="thumb') + 12:]
             json = json[json.index('<a href="/wiki/File:') + 9:]
             json = json[:json.index("</a>")]
             file = json[json.index('File:'):json.index('"')]
