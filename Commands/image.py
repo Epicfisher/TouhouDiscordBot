@@ -10,8 +10,8 @@ import asyncio
 no_boys_tags = "-1boy+-2boys+-3boys+-4boys+-5boys+-6boys+-6%2Bboys"
 no_girls_tags = "-1girl+-2girls+-3girls+-4girls+-5girls+-6girls+-6%2Bgirls"
 
-characters_before = ['Aunn', 'Shikieiki', 'Yamaxanadu', 'Ibara', 'Joon', 'Akyu', 'Louise']
-characters_after = ['Aun', 'Shiki', 'Eiki', 'Ibaraki', "Jo'on", 'Akyuu', 'Luize']
+characters_before = ['Aunn', 'Shikieiki', 'Yamaxanadu', 'Ibara', 'Joon', 'Akyu', 'Louise', 'Maribel Han']
+characters_after = ['Aun', 'Shiki', 'Eiki', 'Ibaraki', "Jo'on", 'Akyuu', 'Luize', 'Maribel Hearn']
 
 character_names = []
 character_links = []
